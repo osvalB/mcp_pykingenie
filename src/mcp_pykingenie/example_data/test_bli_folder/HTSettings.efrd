@@ -1,0 +1,454 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ForteBioExtendedExperiment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1">
+  <DataSegment>
+    <Segment>
+      <Path>.</Path>
+    </Segment>
+  </DataSegment>
+  <WorkspaceId>c406dc47-202b-4a59-b7ee-c4070e8244ef</WorkspaceId>
+  <CommonSettings>
+    <ExperimentSettings>
+      <ExperimentPath>C:\OCTET USERS\osvaldo BURASTERO\9mar2023\5th  interaction with antibodie reg and imd - wt mut and wtDTT</ExperimentPath>
+      <CustomTraceColors />
+      <KineticReportPoints />
+      <FullTraceReportPoints />
+      <AssayInfo />
+    </ExperimentSettings>
+  </CommonSettings>
+  <GxPSignature>
+    <Signature>
+      <eSign>Unsigned</eSign>
+      <TimeStamp>0001-01-01T00:00:00</TimeStamp>
+    </Signature>
+    <Signature>
+      <eSign>Unsigned</eSign>
+      <TimeStamp>0001-01-01T00:00:00</TimeStamp>
+    </Signature>
+    <FileLocation>New Document</FileLocation>
+  </GxPSignature>
+  <PreprocessSettings>
+    <CorrectionSettings>
+      <RootSensorByLocation>false</RootSensorByLocation>
+      <SensorReference>
+        <Plate Index="0" Size="96">
+          <RefWells />
+          <RefLoadWells />
+          <RefDetectionWells />
+          <ExcludeWells />
+        </Plate>
+        <GroupRefByPlate>false</GroupRefByPlate>
+      </SensorReference>
+      <SampleReference>
+        <Plate Index="0" Size="96">
+          <RefWells>H6, H8, H10</RefWells>
+          <RefLoadWells />
+          <RefDetectionWells />
+          <RefGroup>
+            <RefWells>H5</RefWells>
+            <RelatedWells>A5, B5, C5, D5, E5, F5, G5</RelatedWells>
+          </RefGroup>
+          <RefGroup>
+            <RefWells>H6</RefWells>
+            <RelatedWells>A6, B6, C6, D6, E6, F6, G6</RelatedWells>
+          </RefGroup>
+          <RefGroup>
+            <RefWells>H7</RefWells>
+            <RelatedWells>A7, B7, C7, D7, E7, F7, G7</RelatedWells>
+          </RefGroup>
+          <RefGroup>
+            <RefWells>H8</RefWells>
+            <RelatedWells>A8, B8, C8, D8, E8, F8, G8</RelatedWells>
+          </RefGroup>
+          <RefGroup>
+            <RefWells>H9</RefWells>
+            <RelatedWells>A9, B9, C9, D9, E9, F9, G9</RelatedWells>
+          </RefGroup>
+          <RefGroup>
+            <RefWells>H10</RefWells>
+            <RelatedWells>A10, B10, C10, D10, E10, F10, G10</RelatedWells>
+          </RefGroup>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="4">
+            <ID>wt</ID>
+            <Description />
+            <Molar>1.3E-07</Molar>
+            <Concentration>0.00013</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="6">
+            <ID>mut</ID>
+            <Description />
+            <Molar>1.3E-07</Molar>
+            <Concentration>0.00013</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="8">
+            <ID>wt dtt 2.5 mM</ID>
+            <Description />
+            <Molar>1.3E-07</Molar>
+            <Concentration>0.00013</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="16">
+            <ID>wt</ID>
+            <Description />
+            <Molar>6.9200000000000011E-08</Molar>
+            <Concentration>6.92E-05</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="18">
+            <ID>mut</ID>
+            <Description />
+            <Molar>6.9200000000000011E-08</Molar>
+            <Concentration>6.92E-05</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="20">
+            <ID>wt dtt 2.5 mM</ID>
+            <Description />
+            <Molar>6.9200000000000011E-08</Molar>
+            <Concentration>6.92E-05</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="28">
+            <ID>wt</ID>
+            <Description />
+            <Molar>2.99E-08</Molar>
+            <Concentration>2.99E-05</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="30">
+            <ID>mut</ID>
+            <Description />
+            <Molar>2.99E-08</Molar>
+            <Concentration>2.99E-05</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="32">
+            <ID>wt dtt 2.5 mM</ID>
+            <Description />
+            <Molar>2.99E-08</Molar>
+            <Concentration>2.99E-05</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="40">
+            <ID>wt</ID>
+            <Description />
+            <Molar>1.3E-08</Molar>
+            <Concentration>1.3E-05</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="42">
+            <ID>mut</ID>
+            <Description />
+            <Molar>1.3E-08</Molar>
+            <Concentration>1.3E-05</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="44">
+            <ID>wt dtt 2.5 mM</ID>
+            <Description />
+            <Molar>1.3E-08</Molar>
+            <Concentration>1.3E-05</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="52">
+            <ID>wt</ID>
+            <Description />
+            <Molar>5.6E-09</Molar>
+            <Concentration>5.6E-06</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="54">
+            <ID>mut</ID>
+            <Description />
+            <Molar>5.6E-09</Molar>
+            <Concentration>5.6E-06</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="56">
+            <ID>wt dtt 2.5 mM</ID>
+            <Description />
+            <Molar>5.6E-09</Molar>
+            <Concentration>5.6E-06</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="64">
+            <ID>wt</ID>
+            <Description />
+            <Molar>2.4E-09</Molar>
+            <Concentration>2.4E-06</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="66">
+            <ID>mut</ID>
+            <Description />
+            <Molar>2.4E-09</Molar>
+            <Concentration>2.4E-06</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="68">
+            <ID>wt dtt 2.5 mM</ID>
+            <Description />
+            <Molar>2.4E-09</Molar>
+            <Concentration>2.4E-06</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="76">
+            <ID>wt</ID>
+            <Description />
+            <Molar>1E-09</Molar>
+            <Concentration>1E-06</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="78">
+            <ID>mut</ID>
+            <Description />
+            <Molar>1E-09</Molar>
+            <Concentration>1E-06</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="80">
+            <ID>wt dtt 2.5 mM</ID>
+            <Description />
+            <Molar>1E-09</Molar>
+            <Concentration>1E-06</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="88">
+            <ID>wt</ID>
+            <Description />
+            <Molar>0</Molar>
+            <Concentration>0</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="90">
+            <ID>mut</ID>
+            <Description />
+            <Molar>0</Molar>
+            <Concentration>0</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <EditedSampleInfo MolarUnit="nM" ConcentrationUnit="µg/ml" WellNumber="92">
+            <ID>wt dtt 2.5 mM</ID>
+            <Description />
+            <Molar>0</Molar>
+            <Concentration>0</Concentration>
+            <DillutionFactor>NaN</DillutionFactor>
+            <WellType>None</WellType>
+            <ReplicateGroup />
+          </EditedSampleInfo>
+          <ExcludeWells />
+        </Plate>
+        <Plate Index="1" Size="96">
+          <RefWells />
+          <RefLoadWells />
+          <RefDetectionWells />
+          <ExcludeWells />
+        </Plate>
+        <GroupRefByPlate>false</GroupRefByPlate>
+      </SampleReference>
+      <AlignmentSettings>
+        <AlignYCorrection>AverageBaseline</AlignYCorrection>
+        <AlignYStart>44.9999877929688</AlignYStart>
+        <AlignYEnd>49.9999877929688</AlignYEnd>
+        <InterstepCorrection>Dissociation</InterstepCorrection>
+        <InterstepCorrectionTime>0</InterstepCorrectionTime>
+        <SavitzkyGolayFilter>false</SavitzkyGolayFilter>
+      </AlignmentSettings>
+      <QuantSettings>
+        <AnalysisStep>0</AnalysisStep>
+        <FlipData>false</FlipData>
+        <IgnoreError>false</IgnoreError>
+        <AlignXStart>0</AlignXStart>
+        <AlignX>false</AlignX>
+      </QuantSettings>
+    </CorrectionSettings>
+  </PreprocessSettings>
+  <KineticSettings>
+    <GroupViewOptions>
+      <DataSource>AllData</DataSource>
+      <ShowCurveFits>true</ShowCurveFits>
+      <GroupByCols>
+        <int>11</int>
+        <int>-1</int>
+        <int>-1</int>
+      </GroupByCols>
+      <Legends>
+        <int>4</int>
+        <int>-1</int>
+      </Legends>
+      <AutoSizeOn>true</AutoSizeOn>
+      <AutoSizeWidthRatio>1.5</AutoSizeWidthRatio>
+      <FixedSizeWidth>400</FixedSizeWidth>
+      <FixedSizeHeight>300</FixedSizeHeight>
+      <ShowTitle>true</ShowTitle>
+      <IncludeColName>true</IncludeColName>
+      <IncludeLegendByInfo>false</IncludeLegendByInfo>
+      <XAxisScaleVisible>true</XAxisScaleVisible>
+      <XAxisLabelVisible>true</XAxisLabelVisible>
+      <YAxisScaleVisible>true</YAxisScaleVisible>
+      <YAxisLabelVisible>true</YAxisLabelVisible>
+      <ShowGridLines>true</ShowGridLines>
+      <ShowStepDividers>true</ShowStepDividers>
+      <ShowZebraStripes>false</ShowZebraStripes>
+      <ShowLegend>false</ShowLegend>
+      <ShowDistinctColors>false</ShowDistinctColors>
+      <IncludedTracesOnly>false</IncludedTracesOnly>
+      <AdditionalGraphs>None</AdditionalGraphs>
+      <GraphsPerRow>3</GraphsPerRow>
+    </GroupViewOptions>
+    <KineticFitParams AssayIndex="0">
+      <Version>1</Version>
+      <FitType>Global</FitType>
+      <StepsToAnalyze>Both</StepsToAnalyze>
+      <BindingModel>FastOne2One</BindingModel>
+      <FitDataIncrement>1</FitDataIncrement>
+      <DissocToPreAssocBaseline>false</DissocToPreAssocBaseline>
+      <PartialFit>false</PartialFit>
+      <FitGroupBy>SampleId</FitGroupBy>
+      <RmaxUnlink>Sensor</RmaxUnlink>
+      <AssocStartTime>0</AssocStartTime>
+      <AssocEndTime>300.00001831054686</AssocEndTime>
+      <DissocStartTime>0</DissocStartTime>
+      <DissocEndTime>359.99998779296874</DissocEndTime>
+      <DefAssocTime>300.00001831054686</DefAssocTime>
+      <DefDissocTime>359.99998779296874</DefDissocTime>
+      <AssocStartPt>0</AssocStartPt>
+      <AssocEndPt>1500</AssocEndPt>
+      <DissocStartPt>0</DissocStartPt>
+      <DissocEndPt>1800</DissocEndPt>
+      <ExportOptions>
+        <ReportOption>StackedView ResultTable IsoAffinity SteadyState</ReportOption>
+      </ExportOptions>
+      <DeltaT>0.2</DeltaT>
+      <ExcludedEpisode>
+        <int>0</int>
+        <int>1</int>
+        <int>2</int>
+        <int>3</int>
+        <int>4</int>
+        <int>5</int>
+        <int>9</int>
+        <int>10</int>
+        <int>11</int>
+        <int>12</int>
+        <int>13</int>
+        <int>14</int>
+        <int>18</int>
+        <int>19</int>
+        <int>20</int>
+        <int>21</int>
+        <int>22</int>
+        <int>23</int>
+        <int>27</int>
+        <int>28</int>
+        <int>29</int>
+        <int>30</int>
+        <int>31</int>
+        <int>32</int>
+        <int>36</int>
+        <int>37</int>
+        <int>38</int>
+        <int>39</int>
+        <int>40</int>
+        <int>41</int>
+        <int>45</int>
+        <int>46</int>
+        <int>47</int>
+        <int>48</int>
+        <int>49</int>
+        <int>50</int>
+        <int>54</int>
+        <int>55</int>
+        <int>56</int>
+        <int>57</int>
+        <int>58</int>
+        <int>59</int>
+      </ExcludedEpisode>
+      <SSResponse>false</SSResponse>
+      <SSResponseFrom>290.00001831054686</SSResponseFrom>
+      <SSResponseTo>295.00001831054686</SSResponseTo>
+      <CustomCycleColors />
+      <FitGraphOptions>
+        <GraphTitle Title="" Show="false" Fontsize="10" FontFamily="Arial" FontStyle="" ShowGridline="true" ShowZebraStripe="false" ShowLegend="false" />
+        <XAxis Label="Time (s)" ShowLabel="true" ShowTicMarks="true" ShowZero="false" ShowLogscale="false" />
+        <YAxis Label="nm" ShowLabel="true" ShowTicMarks="true" ShowZero="false" ShowLogscale="false" />
+        <Legend Show="false">
+          <FirstLegend Index="-1" Name="None" />
+          <SecondLegend Index="-1" Name="None" />
+        </Legend>
+        <ShowSteps>true</ShowSteps>
+      </FitGraphOptions>
+      <GroupGraphOptions>
+        <GraphTitle Title="" Show="false" Fontsize="10" FontFamily="Arial" FontStyle="" ShowGridline="true" ShowZebraStripe="false" ShowLegend="false" />
+        <XAxis Label="Time (s)" ShowLabel="true" ShowTicMarks="true" ShowZero="false" ShowLogscale="false" />
+        <YAxis Label="nm" ShowLabel="true" ShowTicMarks="true" ShowZero="false" ShowLogscale="false" />
+        <Legend Show="false">
+          <FirstLegend Index="-1" Name="None" />
+          <SecondLegend Index="-1" Name="None" />
+        </Legend>
+        <ShowSteps>true</ShowSteps>
+      </GroupGraphOptions>
+      <IndividualGraphOptions>
+        <GraphTitle Title="" Show="false" Fontsize="10" FontFamily="Arial" FontStyle="" ShowGridline="true" ShowZebraStripe="false" ShowLegend="false" />
+        <XAxis Label="Time (s)" ShowLabel="true" ShowTicMarks="true" ShowZero="false" ShowLogscale="false" />
+        <YAxis Label="nm" ShowLabel="true" ShowTicMarks="true" ShowZero="false" ShowLogscale="false" />
+        <Legend Show="false">
+          <FirstLegend Index="-1" Name="None" />
+          <SecondLegend Index="-1" Name="None" />
+        </Legend>
+        <ShowSteps>true</ShowSteps>
+      </IndividualGraphOptions>
+      <SavedColOrders>
+        <string />
+      </SavedColOrders>
+      <SuspendCalc>false</SuspendCalc>
+    </KineticFitParams>
+  </KineticSettings>
+</ForteBioExtendedExperiment>

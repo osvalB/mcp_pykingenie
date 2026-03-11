@@ -1,0 +1,942 @@
+2023/03/09 15:56:34	Instrument is busy
+2023/03/09 15:56:38	Instrument is finished
+2023/03/09 15:56:38	Ready
+2023/03/09 15:56:43	Experiment started
+2023/03/09 15:56:43	Starting new step
+2023/03/09 15:56:43	Plate 1 temperature = 25 C
+2023/03/09 15:56:43	Plate 2 temperature = 25 C
+2023/03/09 15:56:43	Waiting to pick up sensor location A1
+2023/03/09 15:56:43	Picking sensors location A1
+2023/03/09 15:56:51	Checking sensors location A1
+2023/03/09 15:56:52	Sensor 9: Integration Time = 2.09 ms
+2023/03/09 15:56:52	Sensor 10: Integration Time = 1.92 ms
+2023/03/09 15:56:52	Sensor 11: Integration Time = 2.12 ms
+2023/03/09 15:56:52	Sensor 12: Integration Time = 2.56 ms
+2023/03/09 15:56:52	Sensor 13: Integration Time = 1.78 ms
+2023/03/09 15:56:52	Sensor 14: Integration Time = 1.75 ms
+2023/03/09 15:56:52	Sensor 15: Integration Time = 2.24 ms
+2023/03/09 15:56:52	Sensor 16: Integration Time = 2.00 ms
+2023/03/09 15:56:55	Picking sensors completed location A1
+2023/03/09 15:56:56	Ready to move to sample location A1
+2023/03/09 15:56:56	Plate 1 temperature = 25 C
+2023/03/09 15:56:56	Plate 2 temperature = 25 C
+2023/03/09 15:56:56	Moving to sample location A1
+2023/03/09 15:57:01	Arrived at sample location A1
+2023/03/09 15:57:01	Waiting to start sample location A1
+2023/03/09 15:57:01	Processing sample location A1
+2023/03/09 15:57:26	Sample completed location A1
+2023/03/09 15:57:26	Waiting to start new step
+2023/03/09 15:57:27	Starting new step
+2023/03/09 15:57:27	Ready to move to sample location A2
+2023/03/09 15:57:27	Moving to sample location A2
+2023/03/09 15:57:32	Arrived at sample location A2
+2023/03/09 15:57:32	Waiting to start sample location A2
+2023/03/09 15:57:32	Processing sample location A2
+2023/03/09 15:57:56	Sample completed location A2
+2023/03/09 15:57:56	Waiting to start new step
+2023/03/09 15:57:57	Starting new step
+2023/03/09 15:57:57	Ready to move to sample location A1
+2023/03/09 15:57:58	Moving to sample location A1
+2023/03/09 15:58:02	Arrived at sample location A1
+2023/03/09 15:58:02	Waiting to start sample location A1
+2023/03/09 15:58:02	Processing sample location A1
+2023/03/09 15:58:27	Sample completed location A1
+2023/03/09 15:58:27	Waiting to start new step
+2023/03/09 15:58:28	Starting new step
+2023/03/09 15:58:28	Ready to move to sample location A2
+2023/03/09 15:58:28	Moving to sample location A2
+2023/03/09 15:58:33	Arrived at sample location A2
+2023/03/09 15:58:33	Waiting to start sample location A2
+2023/03/09 15:58:33	Processing sample location A2
+2023/03/09 15:58:57	Sample completed location A2
+2023/03/09 15:58:57	Waiting to start new step
+2023/03/09 15:58:58	Starting new step
+2023/03/09 15:58:58	Ready to move to sample location A1
+2023/03/09 15:58:58	Moving to sample location A1
+2023/03/09 15:59:03	Arrived at sample location A1
+2023/03/09 15:59:03	Waiting to start sample location A1
+2023/03/09 15:59:03	Processing sample location A1
+2023/03/09 15:59:28	Sample completed location A1
+2023/03/09 15:59:28	Waiting to start new step
+2023/03/09 15:59:29	Starting new step
+2023/03/09 15:59:29	Ready to move to sample location A2
+2023/03/09 15:59:29	Moving to sample location A2
+2023/03/09 15:59:34	Arrived at sample location A2
+2023/03/09 15:59:34	Waiting to start sample location A2
+2023/03/09 15:59:34	Processing sample location A2
+2023/03/09 15:59:58	Sample completed location A2
+2023/03/09 15:59:58	Waiting to start new step
+2023/03/09 15:59:58	Starting new step
+2023/03/09 15:59:58	Arrived at sample location A2
+2023/03/09 15:59:59	Waiting to start sample location A2
+2023/03/09 15:59:59	Processing sample location A2
+2023/03/09 16:01:29	Sample completed location A2
+2023/03/09 16:01:29	Waiting to start new step
+2023/03/09 16:01:30	Starting new step
+2023/03/09 16:01:30	Ready to move to sample location A3
+2023/03/09 16:01:30	Moving to sample location A3
+2023/03/09 16:01:35	Arrived at sample location A3
+2023/03/09 16:01:35	Waiting to start sample location A3
+2023/03/09 16:01:35	Processing sample location A3
+2023/03/09 16:02:25	Sample completed location A3
+2023/03/09 16:02:25	Waiting to start new step
+2023/03/09 16:02:26	Starting new step
+2023/03/09 16:02:26	Ready to move to sample location A4
+2023/03/09 16:02:26	Moving to sample location A4
+2023/03/09 16:02:31	Arrived at sample location A4
+2023/03/09 16:02:31	Waiting to start sample location A4
+2023/03/09 16:02:31	Processing sample location A4
+2023/03/09 16:04:01	Sample completed location A4
+2023/03/09 16:04:01	Waiting to start new step
+2023/03/09 16:04:01	Starting new step
+2023/03/09 16:04:01	Ready to move to sample location A3
+2023/03/09 16:04:02	Moving to sample location A3
+2023/03/09 16:04:07	Arrived at sample location A3
+2023/03/09 16:04:07	Waiting to start sample location A3
+2023/03/09 16:04:07	Processing sample location A3
+2023/03/09 16:04:57	Sample completed location A3
+2023/03/09 16:04:57	Waiting to start new step
+2023/03/09 16:04:57	Starting new step
+2023/03/09 16:04:57	Ready to move to sample location A6
+2023/03/09 16:04:58	Moving to sample location A6
+2023/03/09 16:05:03	Arrived at sample location A6
+2023/03/09 16:05:03	Waiting to start sample location A6
+2023/03/09 16:05:03	Processing sample location A6
+2023/03/09 16:05:53	Sample completed location A6
+2023/03/09 16:05:53	Waiting to start new step
+2023/03/09 16:05:54	Starting new step
+2023/03/09 16:05:54	Ready to move to sample location A5
+2023/03/09 16:05:54	Moving to sample location A5
+2023/03/09 16:05:59	Arrived at sample location A5
+2023/03/09 16:05:59	Waiting to start sample location A5
+2023/03/09 16:05:59	Processing sample location A5
+2023/03/09 16:10:59	Sample completed location A5
+2023/03/09 16:10:59	Waiting to start new step
+2023/03/09 16:11:00	Starting new step
+2023/03/09 16:11:00	Ready to move to sample location A6
+2023/03/09 16:11:00	Moving to sample location A6
+2023/03/09 16:11:05	Arrived at sample location A6
+2023/03/09 16:11:05	Waiting to start sample location A6
+2023/03/09 16:11:05	Processing sample location A6
+2023/03/09 16:17:05	Sample completed location A6
+2023/03/09 16:17:05	Waiting to start new step
+2023/03/09 16:17:06	Starting new step
+2023/03/09 16:17:06	Ready to move to sample location A1
+2023/03/09 16:17:06	Moving to sample location A1
+2023/03/09 16:17:12	Arrived at sample location A1
+2023/03/09 16:17:12	Waiting to start sample location A1
+2023/03/09 16:17:12	Processing sample location A1
+2023/03/09 16:17:37	Sample completed location A1
+2023/03/09 16:17:37	Waiting to start new step
+2023/03/09 16:17:38	Starting new step
+2023/03/09 16:17:38	Ready to move to sample location A2
+2023/03/09 16:17:38	Moving to sample location A2
+2023/03/09 16:17:43	Arrived at sample location A2
+2023/03/09 16:17:43	Waiting to start sample location A2
+2023/03/09 16:17:43	Processing sample location A2
+2023/03/09 16:18:07	Sample completed location A2
+2023/03/09 16:18:07	Waiting to start new step
+2023/03/09 16:18:07	Starting new step
+2023/03/09 16:18:07	Ready to move to sample location A1
+2023/03/09 16:18:08	Moving to sample location A1
+2023/03/09 16:18:13	Arrived at sample location A1
+2023/03/09 16:18:13	Waiting to start sample location A1
+2023/03/09 16:18:13	Processing sample location A1
+2023/03/09 16:18:38	Sample completed location A1
+2023/03/09 16:18:38	Waiting to start new step
+2023/03/09 16:18:38	Starting new step
+2023/03/09 16:18:39	Ready to move to sample location A2
+2023/03/09 16:18:39	Moving to sample location A2
+2023/03/09 16:18:44	Arrived at sample location A2
+2023/03/09 16:18:44	Waiting to start sample location A2
+2023/03/09 16:18:44	Processing sample location A2
+2023/03/09 16:19:08	Sample completed location A2
+2023/03/09 16:19:08	Waiting to start new step
+2023/03/09 16:19:08	Starting new step
+2023/03/09 16:19:08	Ready to move to sample location A1
+2023/03/09 16:19:09	Moving to sample location A1
+2023/03/09 16:19:14	Arrived at sample location A1
+2023/03/09 16:19:14	Waiting to start sample location A1
+2023/03/09 16:19:14	Processing sample location A1
+2023/03/09 16:19:38	Sample completed location A1
+2023/03/09 16:19:39	Waiting to start new step
+2023/03/09 16:19:39	Starting new step
+2023/03/09 16:19:39	Ready to move to sample location A2
+2023/03/09 16:19:39	Moving to sample location A2
+2023/03/09 16:19:45	Arrived at sample location A2
+2023/03/09 16:19:45	Waiting to start sample location A2
+2023/03/09 16:19:45	Processing sample location A2
+2023/03/09 16:20:08	Sample completed location A2
+2023/03/09 16:20:09	Waiting to start new step
+2023/03/09 16:20:09	Starting new step
+2023/03/09 16:20:09	Ready to move to sample location A3
+2023/03/09 16:20:09	Moving to sample location A3
+2023/03/09 16:20:14	Arrived at sample location A3
+2023/03/09 16:20:14	Waiting to start sample location A3
+2023/03/09 16:20:14	Processing sample location A3
+2023/03/09 16:21:04	Sample completed location A3
+2023/03/09 16:21:04	Waiting to start new step
+2023/03/09 16:21:05	Starting new step
+2023/03/09 16:21:05	Ready to move to sample location A4
+2023/03/09 16:21:05	Moving to sample location A4
+2023/03/09 16:21:10	Arrived at sample location A4
+2023/03/09 16:21:10	Waiting to start sample location A4
+2023/03/09 16:21:10	Processing sample location A4
+2023/03/09 16:22:40	Sample completed location A4
+2023/03/09 16:22:41	Waiting to start new step
+2023/03/09 16:22:41	Starting new step
+2023/03/09 16:22:41	Ready to move to sample location A3
+2023/03/09 16:22:42	Moving to sample location A3
+2023/03/09 16:22:46	Arrived at sample location A3
+2023/03/09 16:22:46	Waiting to start sample location A3
+2023/03/09 16:22:46	Processing sample location A3
+2023/03/09 16:23:36	Sample completed location A3
+2023/03/09 16:23:37	Waiting to start new step
+2023/03/09 16:23:37	Starting new step
+2023/03/09 16:23:37	Ready to move to sample location A8
+2023/03/09 16:23:37	Moving to sample location A8
+2023/03/09 16:23:43	Arrived at sample location A8
+2023/03/09 16:23:43	Waiting to start sample location A8
+2023/03/09 16:23:43	Processing sample location A8
+2023/03/09 16:24:33	Sample completed location A8
+2023/03/09 16:24:33	Waiting to start new step
+2023/03/09 16:24:33	Starting new step
+2023/03/09 16:24:34	Ready to move to sample location A7
+2023/03/09 16:24:34	Moving to sample location A7
+2023/03/09 16:24:39	Arrived at sample location A7
+2023/03/09 16:24:39	Waiting to start sample location A7
+2023/03/09 16:24:39	Processing sample location A7
+2023/03/09 16:29:39	Sample completed location A7
+2023/03/09 16:29:39	Waiting to start new step
+2023/03/09 16:29:39	Starting new step
+2023/03/09 16:29:39	Ready to move to sample location A8
+2023/03/09 16:29:40	Moving to sample location A8
+2023/03/09 16:29:45	Arrived at sample location A8
+2023/03/09 16:29:45	Waiting to start sample location A8
+2023/03/09 16:29:45	Processing sample location A8
+2023/03/09 16:35:45	Sample completed location A8
+2023/03/09 16:35:45	Waiting to start new step
+2023/03/09 16:35:45	Starting new step
+2023/03/09 16:35:45	Ready to move to sample location A1
+2023/03/09 16:35:46	Moving to sample location A1
+2023/03/09 16:35:52	Arrived at sample location A1
+2023/03/09 16:35:52	Waiting to start sample location A1
+2023/03/09 16:35:52	Processing sample location A1
+2023/03/09 16:36:17	Sample completed location A1
+2023/03/09 16:36:17	Waiting to start new step
+2023/03/09 16:36:17	Starting new step
+2023/03/09 16:36:17	Ready to move to sample location A2
+2023/03/09 16:36:18	Moving to sample location A2
+2023/03/09 16:36:23	Arrived at sample location A2
+2023/03/09 16:36:23	Waiting to start sample location A2
+2023/03/09 16:36:23	Processing sample location A2
+2023/03/09 16:36:47	Sample completed location A2
+2023/03/09 16:36:47	Waiting to start new step
+2023/03/09 16:36:47	Starting new step
+2023/03/09 16:36:47	Ready to move to sample location A1
+2023/03/09 16:36:48	Moving to sample location A1
+2023/03/09 16:36:53	Arrived at sample location A1
+2023/03/09 16:36:53	Waiting to start sample location A1
+2023/03/09 16:36:53	Processing sample location A1
+2023/03/09 16:37:18	Sample completed location A1
+2023/03/09 16:37:18	Waiting to start new step
+2023/03/09 16:37:18	Starting new step
+2023/03/09 16:37:18	Ready to move to sample location A2
+2023/03/09 16:37:18	Moving to sample location A2
+2023/03/09 16:37:23	Arrived at sample location A2
+2023/03/09 16:37:24	Waiting to start sample location A2
+2023/03/09 16:37:24	Processing sample location A2
+2023/03/09 16:37:47	Sample completed location A2
+2023/03/09 16:37:48	Waiting to start new step
+2023/03/09 16:37:48	Starting new step
+2023/03/09 16:37:48	Ready to move to sample location A1
+2023/03/09 16:37:48	Moving to sample location A1
+2023/03/09 16:37:53	Arrived at sample location A1
+2023/03/09 16:37:53	Waiting to start sample location A1
+2023/03/09 16:37:53	Processing sample location A1
+2023/03/09 16:38:18	Sample completed location A1
+2023/03/09 16:38:19	Waiting to start new step
+2023/03/09 16:38:19	Starting new step
+2023/03/09 16:38:19	Ready to move to sample location A2
+2023/03/09 16:38:20	Moving to sample location A2
+2023/03/09 16:38:24	Arrived at sample location A2
+2023/03/09 16:38:24	Waiting to start sample location A2
+2023/03/09 16:38:24	Processing sample location A2
+2023/03/09 16:38:48	Sample completed location A2
+2023/03/09 16:38:48	Waiting to start new step
+2023/03/09 16:38:49	Starting new step
+2023/03/09 16:38:49	Ready to move to sample location A3
+2023/03/09 16:38:49	Moving to sample location A3
+2023/03/09 16:38:54	Arrived at sample location A3
+2023/03/09 16:38:54	Waiting to start sample location A3
+2023/03/09 16:38:54	Processing sample location A3
+2023/03/09 16:39:44	Sample completed location A3
+2023/03/09 16:39:44	Waiting to start new step
+2023/03/09 16:39:45	Starting new step
+2023/03/09 16:39:45	Ready to move to sample location A4
+2023/03/09 16:39:45	Moving to sample location A4
+2023/03/09 16:39:50	Arrived at sample location A4
+2023/03/09 16:39:50	Waiting to start sample location A4
+2023/03/09 16:39:50	Processing sample location A4
+2023/03/09 16:41:20	Sample completed location A4
+2023/03/09 16:41:20	Waiting to start new step
+2023/03/09 16:41:20	Starting new step
+2023/03/09 16:41:21	Ready to move to sample location A3
+2023/03/09 16:41:21	Moving to sample location A3
+2023/03/09 16:41:26	Arrived at sample location A3
+2023/03/09 16:41:26	Waiting to start sample location A3
+2023/03/09 16:41:26	Processing sample location A3
+2023/03/09 16:42:16	Sample completed location A3
+2023/03/09 16:42:16	Waiting to start new step
+2023/03/09 16:42:16	Starting new step
+2023/03/09 16:42:16	Ready to move to sample location A10
+2023/03/09 16:42:17	Moving to sample location A10
+2023/03/09 16:42:23	Arrived at sample location A10
+2023/03/09 16:42:23	Waiting to start sample location A10
+2023/03/09 16:42:23	Processing sample location A10
+2023/03/09 16:45:23	Sample completed location A10
+2023/03/09 16:45:23	Waiting to start new step
+2023/03/09 16:45:23	Starting new step
+2023/03/09 16:45:24	Ready to move to sample location A9
+2023/03/09 16:45:24	Moving to sample location A9
+2023/03/09 16:45:29	Arrived at sample location A9
+2023/03/09 16:45:29	Waiting to start sample location A9
+2023/03/09 16:45:29	Processing sample location A9
+2023/03/09 16:50:29	Sample completed location A9
+2023/03/09 16:50:29	Waiting to start new step
+2023/03/09 16:50:29	Starting new step
+2023/03/09 16:50:29	Ready to move to sample location A10
+2023/03/09 16:50:30	Moving to sample location A10
+2023/03/09 16:50:35	Arrived at sample location A10
+2023/03/09 16:50:35	Waiting to start sample location A10
+2023/03/09 16:50:35	Processing sample location A10
+2023/03/09 16:56:35	Sample completed location A10
+2023/03/09 16:56:35	Waiting to start new step
+2023/03/09 16:56:35	Starting new step
+2023/03/09 16:56:35	Ready to move to sample location A1
+2023/03/09 16:56:35	Moving to sample location A1
+2023/03/09 16:56:42	Arrived at sample location A1
+2023/03/09 16:56:42	Waiting to start sample location A1
+2023/03/09 16:56:42	Processing sample location A1
+2023/03/09 16:57:07	Sample completed location A1
+2023/03/09 16:57:07	Waiting to start new step
+2023/03/09 16:57:07	Starting new step
+2023/03/09 16:57:08	Ready to move to sample location A2
+2023/03/09 16:57:08	Moving to sample location A2
+2023/03/09 16:57:13	Arrived at sample location A2
+2023/03/09 16:57:13	Waiting to start sample location A2
+2023/03/09 16:57:13	Processing sample location A2
+2023/03/09 16:57:37	Sample completed location A2
+2023/03/09 16:57:37	Waiting to start new step
+2023/03/09 16:57:37	Starting new step
+2023/03/09 16:57:38	Ready to move to sample location A1
+2023/03/09 16:57:38	Moving to sample location A1
+2023/03/09 16:57:43	Arrived at sample location A1
+2023/03/09 16:57:43	Waiting to start sample location A1
+2023/03/09 16:57:43	Processing sample location A1
+2023/03/09 16:58:08	Sample completed location A1
+2023/03/09 16:58:08	Waiting to start new step
+2023/03/09 16:58:08	Starting new step
+2023/03/09 16:58:08	Ready to move to sample location A2
+2023/03/09 16:58:08	Moving to sample location A2
+2023/03/09 16:58:14	Arrived at sample location A2
+2023/03/09 16:58:14	Waiting to start sample location A2
+2023/03/09 16:58:14	Processing sample location A2
+2023/03/09 16:58:37	Sample completed location A2
+2023/03/09 16:58:38	Waiting to start new step
+2023/03/09 16:58:38	Starting new step
+2023/03/09 16:58:38	Ready to move to sample location A1
+2023/03/09 16:58:39	Moving to sample location A1
+2023/03/09 16:58:43	Arrived at sample location A1
+2023/03/09 16:58:43	Waiting to start sample location A1
+2023/03/09 16:58:43	Processing sample location A1
+2023/03/09 16:59:08	Sample completed location A1
+2023/03/09 16:59:09	Waiting to start new step
+2023/03/09 16:59:09	Starting new step
+2023/03/09 16:59:09	Ready to move to sample location A2
+2023/03/09 16:59:09	Moving to sample location A2
+2023/03/09 16:59:14	Arrived at sample location A2
+2023/03/09 16:59:14	Waiting to start sample location A2
+2023/03/09 16:59:14	Processing sample location A2
+2023/03/09 16:59:38	Sample completed location A2
+2023/03/09 16:59:38	Waiting to start new step
+2023/03/09 16:59:39	Starting new step
+2023/03/09 16:59:39	Ready to move to sample location A3
+2023/03/09 16:59:39	Moving to sample location A3
+2023/03/09 16:59:44	Arrived at sample location A3
+2023/03/09 16:59:44	Waiting to start sample location A3
+2023/03/09 16:59:44	Processing sample location A3
+2023/03/09 17:00:34	Sample completed location A3
+2023/03/09 17:00:34	Waiting to start new step
+2023/03/09 17:00:35	Starting new step
+2023/03/09 17:00:35	Ready to move to sample location A4
+2023/03/09 17:00:35	Moving to sample location A4
+2023/03/09 17:00:40	Arrived at sample location A4
+2023/03/09 17:00:40	Waiting to start sample location A4
+2023/03/09 17:00:40	Processing sample location A4
+2023/03/09 17:03:40	Sample completed location A4
+2023/03/09 17:03:40	Waiting to start new step
+2023/03/09 17:03:41	Starting new step
+2023/03/09 17:03:41	Ready to move to sample location A3
+2023/03/09 17:03:41	Moving to sample location A3
+2023/03/09 17:03:46	Arrived at sample location A3
+2023/03/09 17:03:46	Waiting to start sample location A3
+2023/03/09 17:03:46	Processing sample location A3
+2023/03/09 17:04:36	Sample completed location A3
+2023/03/09 17:04:36	Waiting to start new step
+2023/03/09 17:04:37	Starting new step
+2023/03/09 17:04:37	Ready to move to sample location A6
+2023/03/09 17:04:37	Moving to sample location A6
+2023/03/09 17:04:42	Arrived at sample location A6
+2023/03/09 17:04:42	Waiting to start sample location A6
+2023/03/09 17:04:42	Processing sample location A6
+2023/03/09 17:05:32	Sample completed location A6
+2023/03/09 17:05:33	Waiting to start new step
+2023/03/09 17:05:33	Starting new step
+2023/03/09 17:05:33	Ready to move to sample location A5
+2023/03/09 17:05:33	Moving to sample location A5
+2023/03/09 17:05:38	Arrived at sample location A5
+2023/03/09 17:05:38	Waiting to start sample location A5
+2023/03/09 17:05:38	Processing sample location A5
+2023/03/09 17:10:38	Sample completed location A5
+2023/03/09 17:10:38	Waiting to start new step
+2023/03/09 17:10:39	Starting new step
+2023/03/09 17:10:39	Ready to move to sample location A6
+2023/03/09 17:10:39	Moving to sample location A6
+2023/03/09 17:10:44	Arrived at sample location A6
+2023/03/09 17:10:44	Waiting to start sample location A6
+2023/03/09 17:10:44	Processing sample location A6
+2023/03/09 17:16:44	Sample completed location A6
+2023/03/09 17:16:44	Waiting to start new step
+2023/03/09 17:16:45	Starting new step
+2023/03/09 17:16:45	Ready to move to sample location A1
+2023/03/09 17:16:45	Moving to sample location A1
+2023/03/09 17:16:51	Arrived at sample location A1
+2023/03/09 17:16:51	Waiting to start sample location A1
+2023/03/09 17:16:51	Processing sample location A1
+2023/03/09 17:17:16	Sample completed location A1
+2023/03/09 17:17:16	Waiting to start new step
+2023/03/09 17:17:16	Starting new step
+2023/03/09 17:17:16	Ready to move to sample location A2
+2023/03/09 17:17:17	Moving to sample location A2
+2023/03/09 17:17:22	Arrived at sample location A2
+2023/03/09 17:17:22	Waiting to start sample location A2
+2023/03/09 17:17:22	Processing sample location A2
+2023/03/09 17:17:45	Sample completed location A2
+2023/03/09 17:17:46	Waiting to start new step
+2023/03/09 17:17:46	Starting new step
+2023/03/09 17:17:46	Ready to move to sample location A1
+2023/03/09 17:17:46	Moving to sample location A1
+2023/03/09 17:17:51	Arrived at sample location A1
+2023/03/09 17:17:51	Waiting to start sample location A1
+2023/03/09 17:17:51	Processing sample location A1
+2023/03/09 17:18:16	Sample completed location A1
+2023/03/09 17:18:16	Waiting to start new step
+2023/03/09 17:18:17	Starting new step
+2023/03/09 17:18:17	Ready to move to sample location A2
+2023/03/09 17:18:17	Moving to sample location A2
+2023/03/09 17:18:22	Arrived at sample location A2
+2023/03/09 17:18:22	Waiting to start sample location A2
+2023/03/09 17:18:22	Processing sample location A2
+2023/03/09 17:18:46	Sample completed location A2
+2023/03/09 17:18:46	Waiting to start new step
+2023/03/09 17:18:47	Starting new step
+2023/03/09 17:18:47	Ready to move to sample location A1
+2023/03/09 17:18:47	Moving to sample location A1
+2023/03/09 17:18:52	Arrived at sample location A1
+2023/03/09 17:18:52	Waiting to start sample location A1
+2023/03/09 17:18:52	Processing sample location A1
+2023/03/09 17:19:17	Sample completed location A1
+2023/03/09 17:19:17	Waiting to start new step
+2023/03/09 17:19:18	Starting new step
+2023/03/09 17:19:18	Ready to move to sample location A2
+2023/03/09 17:19:18	Moving to sample location A2
+2023/03/09 17:19:23	Arrived at sample location A2
+2023/03/09 17:19:23	Waiting to start sample location A2
+2023/03/09 17:19:23	Processing sample location A2
+2023/03/09 17:19:47	Sample completed location A2
+2023/03/09 17:19:47	Waiting to start new step
+2023/03/09 17:19:47	Starting new step
+2023/03/09 17:19:48	Ready to move to sample location A3
+2023/03/09 17:19:48	Moving to sample location A3
+2023/03/09 17:19:53	Arrived at sample location A3
+2023/03/09 17:19:53	Waiting to start sample location A3
+2023/03/09 17:19:53	Processing sample location A3
+2023/03/09 17:20:43	Sample completed location A3
+2023/03/09 17:20:43	Waiting to start new step
+2023/03/09 17:20:43	Starting new step
+2023/03/09 17:20:43	Ready to move to sample location A4
+2023/03/09 17:20:44	Moving to sample location A4
+2023/03/09 17:20:49	Arrived at sample location A4
+2023/03/09 17:20:49	Waiting to start sample location A4
+2023/03/09 17:20:49	Processing sample location A4
+2023/03/09 17:23:49	Sample completed location A4
+2023/03/09 17:23:49	Waiting to start new step
+2023/03/09 17:23:49	Starting new step
+2023/03/09 17:23:49	Ready to move to sample location A3
+2023/03/09 17:23:50	Moving to sample location A3
+2023/03/09 17:23:55	Arrived at sample location A3
+2023/03/09 17:23:55	Waiting to start sample location A3
+2023/03/09 17:23:55	Processing sample location A3
+2023/03/09 17:24:45	Sample completed location A3
+2023/03/09 17:24:45	Waiting to start new step
+2023/03/09 17:24:45	Starting new step
+2023/03/09 17:24:46	Ready to move to sample location A8
+2023/03/09 17:24:46	Moving to sample location A8
+2023/03/09 17:24:52	Arrived at sample location A8
+2023/03/09 17:24:52	Waiting to start sample location A8
+2023/03/09 17:24:52	Processing sample location A8
+2023/03/09 17:25:41	Sample completed location A8
+2023/03/09 17:25:42	Waiting to start new step
+2023/03/09 17:25:42	Starting new step
+2023/03/09 17:25:42	Ready to move to sample location A7
+2023/03/09 17:25:42	Moving to sample location A7
+2023/03/09 17:25:47	Arrived at sample location A7
+2023/03/09 17:25:47	Waiting to start sample location A7
+2023/03/09 17:25:47	Processing sample location A7
+2023/03/09 17:30:47	Sample completed location A7
+2023/03/09 17:30:47	Waiting to start new step
+2023/03/09 17:30:48	Starting new step
+2023/03/09 17:30:48	Ready to move to sample location A8
+2023/03/09 17:30:48	Moving to sample location A8
+2023/03/09 17:30:53	Arrived at sample location A8
+2023/03/09 17:30:53	Waiting to start sample location A8
+2023/03/09 17:30:53	Processing sample location A8
+2023/03/09 17:36:53	Sample completed location A8
+2023/03/09 17:36:53	Waiting to start new step
+2023/03/09 17:36:54	Starting new step
+2023/03/09 17:36:54	Ready to move to sample location A1
+2023/03/09 17:36:54	Moving to sample location A1
+2023/03/09 17:37:00	Arrived at sample location A1
+2023/03/09 17:37:00	Waiting to start sample location A1
+2023/03/09 17:37:00	Processing sample location A1
+2023/03/09 17:37:25	Sample completed location A1
+2023/03/09 17:37:25	Waiting to start new step
+2023/03/09 17:37:26	Starting new step
+2023/03/09 17:37:26	Ready to move to sample location A2
+2023/03/09 17:37:26	Moving to sample location A2
+2023/03/09 17:37:31	Arrived at sample location A2
+2023/03/09 17:37:31	Waiting to start sample location A2
+2023/03/09 17:37:31	Processing sample location A2
+2023/03/09 17:37:55	Sample completed location A2
+2023/03/09 17:37:55	Waiting to start new step
+2023/03/09 17:37:55	Starting new step
+2023/03/09 17:37:56	Ready to move to sample location A1
+2023/03/09 17:37:56	Moving to sample location A1
+2023/03/09 17:38:01	Arrived at sample location A1
+2023/03/09 17:38:01	Waiting to start sample location A1
+2023/03/09 17:38:01	Processing sample location A1
+2023/03/09 17:38:26	Sample completed location A1
+2023/03/09 17:38:26	Waiting to start new step
+2023/03/09 17:38:26	Starting new step
+2023/03/09 17:38:26	Ready to move to sample location A2
+2023/03/09 17:38:27	Moving to sample location A2
+2023/03/09 17:38:31	Arrived at sample location A2
+2023/03/09 17:38:32	Waiting to start sample location A2
+2023/03/09 17:38:32	Processing sample location A2
+2023/03/09 17:38:56	Sample completed location A2
+2023/03/09 17:38:56	Waiting to start new step
+2023/03/09 17:38:56	Starting new step
+2023/03/09 17:38:56	Ready to move to sample location A1
+2023/03/09 17:38:57	Moving to sample location A1
+2023/03/09 17:39:02	Arrived at sample location A1
+2023/03/09 17:39:02	Waiting to start sample location A1
+2023/03/09 17:39:02	Processing sample location A1
+2023/03/09 17:39:26	Sample completed location A1
+2023/03/09 17:39:27	Waiting to start new step
+2023/03/09 17:39:27	Starting new step
+2023/03/09 17:39:27	Ready to move to sample location A2
+2023/03/09 17:39:27	Moving to sample location A2
+2023/03/09 17:39:33	Arrived at sample location A2
+2023/03/09 17:39:33	Waiting to start sample location A2
+2023/03/09 17:39:33	Processing sample location A2
+2023/03/09 17:39:56	Sample completed location A2
+2023/03/09 17:39:57	Waiting to start new step
+2023/03/09 17:39:57	Starting new step
+2023/03/09 17:39:57	Ready to move to sample location A3
+2023/03/09 17:39:57	Moving to sample location A3
+2023/03/09 17:40:02	Arrived at sample location A3
+2023/03/09 17:40:02	Waiting to start sample location A3
+2023/03/09 17:40:02	Processing sample location A3
+2023/03/09 17:40:52	Sample completed location A3
+2023/03/09 17:40:52	Waiting to start new step
+2023/03/09 17:40:53	Starting new step
+2023/03/09 17:40:53	Ready to move to sample location A4
+2023/03/09 17:40:53	Moving to sample location A4
+2023/03/09 17:40:58	Arrived at sample location A4
+2023/03/09 17:40:58	Waiting to start sample location A4
+2023/03/09 17:40:58	Processing sample location A4
+2023/03/09 17:43:58	Sample completed location A4
+2023/03/09 17:43:59	Waiting to start new step
+2023/03/09 17:43:59	Starting new step
+2023/03/09 17:43:59	Ready to move to sample location A3
+2023/03/09 17:44:00	Moving to sample location A3
+2023/03/09 17:44:04	Arrived at sample location A3
+2023/03/09 17:44:04	Waiting to start sample location A3
+2023/03/09 17:44:05	Processing sample location A3
+2023/03/09 17:44:54	Sample completed location A3
+2023/03/09 17:44:54	Waiting to start new step
+2023/03/09 17:44:55	Starting new step
+2023/03/09 17:44:55	Ready to move to sample location A10
+2023/03/09 17:44:55	Moving to sample location A10
+2023/03/09 17:45:01	Arrived at sample location A10
+2023/03/09 17:45:01	Waiting to start sample location A10
+2023/03/09 17:45:01	Processing sample location A10
+2023/03/09 17:48:01	Sample completed location A10
+2023/03/09 17:48:01	Waiting to start new step
+2023/03/09 17:48:02	Starting new step
+2023/03/09 17:48:02	Ready to move to sample location A9
+2023/03/09 17:48:02	Moving to sample location A9
+2023/03/09 17:48:07	Arrived at sample location A9
+2023/03/09 17:48:07	Waiting to start sample location A9
+2023/03/09 17:48:07	Processing sample location A9
+2023/03/09 17:53:07	Sample completed location A9
+2023/03/09 17:53:07	Waiting to start new step
+2023/03/09 17:53:08	Starting new step
+2023/03/09 17:53:08	Ready to move to sample location A10
+2023/03/09 17:53:08	Moving to sample location A10
+2023/03/09 17:53:13	Arrived at sample location A10
+2023/03/09 17:53:13	Waiting to start sample location A10
+2023/03/09 17:53:13	Processing sample location A10
+2023/03/09 17:59:13	Sample completed location A10
+2023/03/09 17:59:13	Waiting to start new step
+2023/03/09 17:59:13	Starting new step
+2023/03/09 17:59:14	Ready to move to sample location A1
+2023/03/09 17:59:14	Moving to sample location A1
+2023/03/09 17:59:20	Arrived at sample location A1
+2023/03/09 17:59:20	Waiting to start sample location A1
+2023/03/09 17:59:21	Processing sample location A1
+2023/03/09 17:59:45	Sample completed location A1
+2023/03/09 17:59:46	Waiting to start new step
+2023/03/09 17:59:46	Starting new step
+2023/03/09 17:59:46	Ready to move to sample location A2
+2023/03/09 17:59:47	Moving to sample location A2
+2023/03/09 17:59:52	Arrived at sample location A2
+2023/03/09 17:59:52	Waiting to start sample location A2
+2023/03/09 17:59:52	Processing sample location A2
+2023/03/09 18:00:15	Sample completed location A2
+2023/03/09 18:00:16	Waiting to start new step
+2023/03/09 18:00:16	Starting new step
+2023/03/09 18:00:16	Ready to move to sample location A1
+2023/03/09 18:00:16	Moving to sample location A1
+2023/03/09 18:00:21	Arrived at sample location A1
+2023/03/09 18:00:21	Waiting to start sample location A1
+2023/03/09 18:00:21	Processing sample location A1
+2023/03/09 18:00:46	Sample completed location A1
+2023/03/09 18:00:46	Waiting to start new step
+2023/03/09 18:00:47	Starting new step
+2023/03/09 18:00:47	Ready to move to sample location A2
+2023/03/09 18:00:47	Moving to sample location A2
+2023/03/09 18:00:52	Arrived at sample location A2
+2023/03/09 18:00:52	Waiting to start sample location A2
+2023/03/09 18:00:52	Processing sample location A2
+2023/03/09 18:01:16	Sample completed location A2
+2023/03/09 18:01:16	Waiting to start new step
+2023/03/09 18:01:17	Starting new step
+2023/03/09 18:01:17	Ready to move to sample location A1
+2023/03/09 18:01:17	Moving to sample location A1
+2023/03/09 18:01:22	Arrived at sample location A1
+2023/03/09 18:01:22	Waiting to start sample location A1
+2023/03/09 18:01:22	Processing sample location A1
+2023/03/09 18:01:47	Sample completed location A1
+2023/03/09 18:01:47	Waiting to start new step
+2023/03/09 18:01:48	Starting new step
+2023/03/09 18:01:48	Ready to move to sample location A2
+2023/03/09 18:01:48	Moving to sample location A2
+2023/03/09 18:01:53	Arrived at sample location A2
+2023/03/09 18:01:53	Waiting to start sample location A2
+2023/03/09 18:01:53	Processing sample location A2
+2023/03/09 18:02:17	Sample completed location A2
+2023/03/09 18:02:17	Waiting to start new step
+2023/03/09 18:02:17	Starting new step
+2023/03/09 18:02:18	Ready to move to sample location A11
+2023/03/09 18:02:18	Moving to sample location A11
+2023/03/09 18:02:24	Arrived at sample location A11
+2023/03/09 18:02:24	Waiting to start sample location A11
+2023/03/09 18:02:24	Processing sample location A11
+2023/03/09 18:03:14	Sample completed location A11
+2023/03/09 18:03:14	Waiting to start new step
+2023/03/09 18:03:15	Starting new step
+2023/03/09 18:03:15	Ready to move to sample location A12
+2023/03/09 18:03:15	Moving to sample location A12
+2023/03/09 18:03:20	Arrived at sample location A12
+2023/03/09 18:03:20	Waiting to start sample location A12
+2023/03/09 18:03:20	Processing sample location A12
+2023/03/09 18:04:20	Sample completed location A12
+2023/03/09 18:04:20	Waiting to start new step
+2023/03/09 18:04:21	Starting new step
+2023/03/09 18:04:21	Ready to move to sample location A11
+2023/03/09 18:04:21	Moving to sample location A11
+2023/03/09 18:04:26	Arrived at sample location A11
+2023/03/09 18:04:26	Waiting to start sample location A11
+2023/03/09 18:04:26	Processing sample location A11
+2023/03/09 18:05:16	Sample completed location A11
+2023/03/09 18:05:16	Waiting to start new step
+2023/03/09 18:05:17	Starting new step
+2023/03/09 18:05:17	Ready to move to sample location A6
+2023/03/09 18:05:17	Moving to sample location A6
+2023/03/09 18:05:23	Arrived at sample location A6
+2023/03/09 18:05:23	Waiting to start sample location A6
+2023/03/09 18:05:23	Processing sample location A6
+2023/03/09 18:06:13	Sample completed location A6
+2023/03/09 18:06:13	Waiting to start new step
+2023/03/09 18:06:13	Starting new step
+2023/03/09 18:06:14	Ready to move to sample location A5
+2023/03/09 18:06:14	Moving to sample location A5
+2023/03/09 18:06:19	Arrived at sample location A5
+2023/03/09 18:06:19	Waiting to start sample location A5
+2023/03/09 18:06:19	Processing sample location A5
+2023/03/09 18:11:19	Sample completed location A5
+2023/03/09 18:11:19	Waiting to start new step
+2023/03/09 18:11:19	Starting new step
+2023/03/09 18:11:19	Ready to move to sample location A6
+2023/03/09 18:11:19	Moving to sample location A6
+2023/03/09 18:11:25	Arrived at sample location A6
+2023/03/09 18:11:25	Waiting to start sample location A6
+2023/03/09 18:11:25	Processing sample location A6
+2023/03/09 18:17:24	Sample completed location A6
+2023/03/09 18:17:25	Waiting to start new step
+2023/03/09 18:17:25	Starting new step
+2023/03/09 18:17:25	Ready to move to sample location A1
+2023/03/09 18:17:26	Moving to sample location A1
+2023/03/09 18:17:31	Arrived at sample location A1
+2023/03/09 18:17:31	Waiting to start sample location A1
+2023/03/09 18:17:31	Processing sample location A1
+2023/03/09 18:17:56	Sample completed location A1
+2023/03/09 18:17:56	Waiting to start new step
+2023/03/09 18:17:57	Starting new step
+2023/03/09 18:17:57	Ready to move to sample location A2
+2023/03/09 18:17:57	Moving to sample location A2
+2023/03/09 18:18:02	Arrived at sample location A2
+2023/03/09 18:18:02	Waiting to start sample location A2
+2023/03/09 18:18:02	Processing sample location A2
+2023/03/09 18:18:26	Sample completed location A2
+2023/03/09 18:18:26	Waiting to start new step
+2023/03/09 18:18:27	Starting new step
+2023/03/09 18:18:27	Ready to move to sample location A1
+2023/03/09 18:18:27	Moving to sample location A1
+2023/03/09 18:18:32	Arrived at sample location A1
+2023/03/09 18:18:32	Waiting to start sample location A1
+2023/03/09 18:18:32	Processing sample location A1
+2023/03/09 18:18:57	Sample completed location A1
+2023/03/09 18:18:57	Waiting to start new step
+2023/03/09 18:18:58	Starting new step
+2023/03/09 18:18:58	Ready to move to sample location A2
+2023/03/09 18:18:58	Moving to sample location A2
+2023/03/09 18:19:03	Arrived at sample location A2
+2023/03/09 18:19:03	Waiting to start sample location A2
+2023/03/09 18:19:03	Processing sample location A2
+2023/03/09 18:19:27	Sample completed location A2
+2023/03/09 18:19:27	Waiting to start new step
+2023/03/09 18:19:27	Starting new step
+2023/03/09 18:19:28	Ready to move to sample location A1
+2023/03/09 18:19:28	Moving to sample location A1
+2023/03/09 18:19:33	Arrived at sample location A1
+2023/03/09 18:19:33	Waiting to start sample location A1
+2023/03/09 18:19:33	Processing sample location A1
+2023/03/09 18:19:58	Sample completed location A1
+2023/03/09 18:19:58	Waiting to start new step
+2023/03/09 18:19:58	Starting new step
+2023/03/09 18:19:58	Ready to move to sample location A2
+2023/03/09 18:19:59	Moving to sample location A2
+2023/03/09 18:20:04	Arrived at sample location A2
+2023/03/09 18:20:04	Waiting to start sample location A2
+2023/03/09 18:20:04	Processing sample location A2
+2023/03/09 18:20:28	Sample completed location A2
+2023/03/09 18:20:28	Waiting to start new step
+2023/03/09 18:20:28	Starting new step
+2023/03/09 18:20:28	Ready to move to sample location A11
+2023/03/09 18:20:28	Moving to sample location A11
+2023/03/09 18:20:35	Arrived at sample location A11
+2023/03/09 18:20:35	Waiting to start sample location A11
+2023/03/09 18:20:35	Processing sample location A11
+2023/03/09 18:21:25	Sample completed location A11
+2023/03/09 18:21:25	Waiting to start new step
+2023/03/09 18:21:25	Starting new step
+2023/03/09 18:21:26	Ready to move to sample location A12
+2023/03/09 18:21:26	Moving to sample location A12
+2023/03/09 18:21:31	Arrived at sample location A12
+2023/03/09 18:21:31	Waiting to start sample location A12
+2023/03/09 18:21:31	Processing sample location A12
+2023/03/09 18:22:31	Sample completed location A12
+2023/03/09 18:22:31	Waiting to start new step
+2023/03/09 18:22:31	Starting new step
+2023/03/09 18:22:31	Ready to move to sample location A11
+2023/03/09 18:22:32	Moving to sample location A11
+2023/03/09 18:22:37	Arrived at sample location A11
+2023/03/09 18:22:37	Waiting to start sample location A11
+2023/03/09 18:22:37	Processing sample location A11
+2023/03/09 18:23:27	Sample completed location A11
+2023/03/09 18:23:27	Waiting to start new step
+2023/03/09 18:23:27	Starting new step
+2023/03/09 18:23:27	Ready to move to sample location A8
+2023/03/09 18:23:28	Moving to sample location A8
+2023/03/09 18:23:33	Arrived at sample location A8
+2023/03/09 18:23:33	Waiting to start sample location A8
+2023/03/09 18:23:33	Processing sample location A8
+2023/03/09 18:24:23	Sample completed location A8
+2023/03/09 18:24:23	Waiting to start new step
+2023/03/09 18:24:24	Starting new step
+2023/03/09 18:24:24	Ready to move to sample location A7
+2023/03/09 18:24:24	Moving to sample location A7
+2023/03/09 18:24:29	Arrived at sample location A7
+2023/03/09 18:24:29	Waiting to start sample location A7
+2023/03/09 18:24:29	Processing sample location A7
+2023/03/09 18:29:29	Sample completed location A7
+2023/03/09 18:29:29	Waiting to start new step
+2023/03/09 18:29:29	Starting new step
+2023/03/09 18:29:30	Ready to move to sample location A8
+2023/03/09 18:29:30	Moving to sample location A8
+2023/03/09 18:29:35	Arrived at sample location A8
+2023/03/09 18:29:35	Waiting to start sample location A8
+2023/03/09 18:29:35	Processing sample location A8
+2023/03/09 18:35:35	Sample completed location A8
+2023/03/09 18:35:35	Waiting to start new step
+2023/03/09 18:35:35	Starting new step
+2023/03/09 18:35:35	Ready to move to sample location A1
+2023/03/09 18:35:36	Moving to sample location A1
+2023/03/09 18:35:42	Arrived at sample location A1
+2023/03/09 18:35:42	Waiting to start sample location A1
+2023/03/09 18:35:42	Processing sample location A1
+2023/03/09 18:36:07	Sample completed location A1
+2023/03/09 18:36:07	Waiting to start new step
+2023/03/09 18:36:07	Starting new step
+2023/03/09 18:36:07	Ready to move to sample location A2
+2023/03/09 18:36:07	Moving to sample location A2
+2023/03/09 18:36:12	Arrived at sample location A2
+2023/03/09 18:36:13	Waiting to start sample location A2
+2023/03/09 18:36:13	Processing sample location A2
+2023/03/09 18:36:36	Sample completed location A2
+2023/03/09 18:36:37	Waiting to start new step
+2023/03/09 18:36:37	Starting new step
+2023/03/09 18:36:37	Ready to move to sample location A1
+2023/03/09 18:36:38	Moving to sample location A1
+2023/03/09 18:36:42	Arrived at sample location A1
+2023/03/09 18:36:42	Waiting to start sample location A1
+2023/03/09 18:36:42	Processing sample location A1
+2023/03/09 18:37:07	Sample completed location A1
+2023/03/09 18:37:08	Waiting to start new step
+2023/03/09 18:37:08	Starting new step
+2023/03/09 18:37:08	Ready to move to sample location A2
+2023/03/09 18:37:08	Moving to sample location A2
+2023/03/09 18:37:13	Arrived at sample location A2
+2023/03/09 18:37:13	Waiting to start sample location A2
+2023/03/09 18:37:13	Processing sample location A2
+2023/03/09 18:37:37	Sample completed location A2
+2023/03/09 18:37:37	Waiting to start new step
+2023/03/09 18:37:38	Starting new step
+2023/03/09 18:37:38	Ready to move to sample location A1
+2023/03/09 18:37:38	Moving to sample location A1
+2023/03/09 18:37:43	Arrived at sample location A1
+2023/03/09 18:37:43	Waiting to start sample location A1
+2023/03/09 18:37:43	Processing sample location A1
+2023/03/09 18:38:08	Sample completed location A1
+2023/03/09 18:38:08	Waiting to start new step
+2023/03/09 18:38:09	Starting new step
+2023/03/09 18:38:09	Ready to move to sample location A2
+2023/03/09 18:38:09	Moving to sample location A2
+2023/03/09 18:38:14	Arrived at sample location A2
+2023/03/09 18:38:14	Waiting to start sample location A2
+2023/03/09 18:38:14	Processing sample location A2
+2023/03/09 18:38:38	Sample completed location A2
+2023/03/09 18:38:38	Waiting to start new step
+2023/03/09 18:38:38	Starting new step
+2023/03/09 18:38:39	Ready to move to sample location A11
+2023/03/09 18:38:39	Moving to sample location A11
+2023/03/09 18:38:45	Arrived at sample location A11
+2023/03/09 18:38:45	Waiting to start sample location A11
+2023/03/09 18:38:45	Processing sample location A11
+2023/03/09 18:39:35	Sample completed location A11
+2023/03/09 18:39:35	Waiting to start new step
+2023/03/09 18:39:36	Starting new step
+2023/03/09 18:39:36	Ready to move to sample location A12
+2023/03/09 18:39:36	Moving to sample location A12
+2023/03/09 18:39:41	Arrived at sample location A12
+2023/03/09 18:39:41	Waiting to start sample location A12
+2023/03/09 18:39:41	Processing sample location A12
+2023/03/09 18:40:41	Sample completed location A12
+2023/03/09 18:40:41	Waiting to start new step
+2023/03/09 18:40:42	Starting new step
+2023/03/09 18:40:42	Ready to move to sample location A11
+2023/03/09 18:40:42	Moving to sample location A11
+2023/03/09 18:40:47	Arrived at sample location A11
+2023/03/09 18:40:47	Waiting to start sample location A11
+2023/03/09 18:40:47	Processing sample location A11
+2023/03/09 18:41:37	Sample completed location A11
+2023/03/09 18:41:37	Waiting to start new step
+2023/03/09 18:41:38	Starting new step
+2023/03/09 18:41:38	Ready to move to sample location A10
+2023/03/09 18:41:38	Moving to sample location A10
+2023/03/09 18:41:43	Arrived at sample location A10
+2023/03/09 18:41:43	Waiting to start sample location A10
+2023/03/09 18:41:43	Processing sample location A10
+2023/03/09 18:44:43	Sample completed location A10
+2023/03/09 18:44:43	Waiting to start new step
+2023/03/09 18:44:44	Starting new step
+2023/03/09 18:44:44	Ready to move to sample location A9
+2023/03/09 18:44:44	Moving to sample location A9
+2023/03/09 18:44:49	Arrived at sample location A9
+2023/03/09 18:44:49	Waiting to start sample location A9
+2023/03/09 18:44:49	Processing sample location A9
+2023/03/09 18:49:49	Sample completed location A9
+2023/03/09 18:49:49	Waiting to start new step
+2023/03/09 18:49:49	Starting new step
+2023/03/09 18:49:50	Ready to move to sample location A10
+2023/03/09 18:49:50	Moving to sample location A10
+2023/03/09 18:49:55	Arrived at sample location A10
+2023/03/09 18:49:55	Waiting to start sample location A10
+2023/03/09 18:49:55	Processing sample location A10
+2023/03/09 18:55:55	Sample completed location A10
+2023/03/09 18:55:55	Waiting to start new step
+2023/03/09 18:55:55	Starting new step
+2023/03/09 18:55:56	Ready to move to sample location A1
+2023/03/09 18:55:56	Moving to sample location A1
+2023/03/09 18:56:02	Arrived at sample location A1
+2023/03/09 18:56:02	Waiting to start sample location A1
+2023/03/09 18:56:03	Processing sample location A1
+2023/03/09 18:56:27	Sample completed location A1
+2023/03/09 18:56:28	Waiting to start new step
+2023/03/09 18:56:28	Starting new step
+2023/03/09 18:56:28	Ready to move to sample location A2
+2023/03/09 18:56:28	Moving to sample location A2
+2023/03/09 18:56:33	Arrived at sample location A2
+2023/03/09 18:56:33	Waiting to start sample location A2
+2023/03/09 18:56:33	Processing sample location A2
+2023/03/09 18:56:57	Sample completed location A2
+2023/03/09 18:56:57	Waiting to start new step
+2023/03/09 18:56:58	Starting new step
+2023/03/09 18:56:58	Ready to move to sample location A1
+2023/03/09 18:56:58	Moving to sample location A1
+2023/03/09 18:57:03	Arrived at sample location A1
+2023/03/09 18:57:03	Waiting to start sample location A1
+2023/03/09 18:57:03	Processing sample location A1
+2023/03/09 18:57:28	Sample completed location A1
+2023/03/09 18:57:28	Waiting to start new step
+2023/03/09 18:57:29	Starting new step
+2023/03/09 18:57:29	Ready to move to sample location A2
+2023/03/09 18:57:29	Moving to sample location A2
+2023/03/09 18:57:34	Arrived at sample location A2
+2023/03/09 18:57:34	Waiting to start sample location A2
+2023/03/09 18:57:34	Processing sample location A2
+2023/03/09 18:57:58	Sample completed location A2
+2023/03/09 18:57:58	Waiting to start new step
+2023/03/09 18:57:59	Starting new step
+2023/03/09 18:57:59	Ready to move to sample location A1
+2023/03/09 18:57:59	Moving to sample location A1
+2023/03/09 18:58:04	Arrived at sample location A1
+2023/03/09 18:58:04	Waiting to start sample location A1
+2023/03/09 18:58:04	Processing sample location A1
+2023/03/09 18:58:29	Sample completed location A1
+2023/03/09 18:58:29	Waiting to start new step
+2023/03/09 18:58:29	Starting new step
+2023/03/09 18:58:29	Ready to move to sample location A2
+2023/03/09 18:58:30	Moving to sample location A2
+2023/03/09 18:58:35	Arrived at sample location A2
+2023/03/09 18:58:35	Waiting to start sample location A2
+2023/03/09 18:58:35	Processing sample location A2
+2023/03/09 18:58:59	Sample completed location A2
+2023/03/09 18:58:59	Waiting for ejection start location A1
+2023/03/09 18:58:59	Ejecting sensor location A1
+2023/03/09 18:59:54	Ejecting completed location A1
+2023/03/09 18:59:54	Experiment finished
+2023/03/09 18:59:54	Ready
