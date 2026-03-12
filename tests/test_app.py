@@ -8,7 +8,7 @@ def test_package_has_version():
     """Testing package version exist."""
     assert mcp_pykingenie.__version__ is not None
 
-"
+
 @pytest.mark.asyncio
 async def test_mcp_server():
     """Testing MCP server."""
