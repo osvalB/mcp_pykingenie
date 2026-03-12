@@ -13,7 +13,7 @@ def test_package_has_version():
 async def test_mcp_server():
     """Testing MCP server."""
     async with Client(mcp_pykingenie.mcp) as client:
-        result = await client.call_tool("import_gator_experiment", {})
-        assert "Gator experiment added from" in result.data
+        result = await client.call_tool("load_octet_example", {})
+        assert "Octet experiment added from" in result.data
 
 
