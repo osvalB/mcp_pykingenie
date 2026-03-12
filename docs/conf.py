@@ -58,10 +58,18 @@ extensions = [
     "autoapi.extension",
 ]
 autoapi_dirs = ['../src/mcp_pykingenie']
+autoapi_options = [
+    'members',
+    'undoc-members',
+    'show-inheritance',
+    'show-module-summary',
+    # 'imported-members' intentionally omitted: prevents duplicate object
+    # descriptions caused by re-exports in __init__.py (e.g. mcp_pykingenie.mcp)
+]
 autosummary_generate = True
 autodoc_member_order = "groupwise"
 default_role = "literal"
-napoleon_google_docstring = False
+napoleon_google_docstring = True
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = False
 napoleon_use_rtype = True  # having a separate entry generally helps readability
@@ -89,9 +97,8 @@ source_suffix = {
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "anndata": ("https://anndata.readthedocs.io/en/stable/", None),
-    "scanpy": ("https://scanpy.readthedocs.io/en/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
     "click": ("https://click.palletsprojects.com/en/stable/", None),
 }
 
@@ -125,4 +132,5 @@ nitpick_ignore = [
     # If building the documentation fails because of a missing link that is outside your control,
     # you can add an exception to this list.
     #     ("py:class", "igraph.Graph"),
+    ("py:class", "fastmcp.FastMCP"),
 ]

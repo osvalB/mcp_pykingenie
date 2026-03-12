@@ -7,7 +7,9 @@
 [badge-tests]: https://img.shields.io/github/actions/workflow/status/osvalB/mcp_pykingenie/test.yaml?branch=main
 [badge-docs]: https://img.shields.io/readthedocs/mcp_pykingenie
 
-The mcp_kingenie is a [MCP-server](https://github.com/modelcontextprotocol) that provides tools for the analysis of binding kinetics data.
+The mcp_pykingenie is a [MCP-server](https://github.com/modelcontextprotocol) that provides tools for the analysis of binding kinetics data.
+It is based on the [pykingenie](https://github.com/osvalB/pykingenie) Python package .
+
 
 ## Demo Videos
 

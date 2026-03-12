@@ -6,6 +6,7 @@ import pandas as pd
 from ..server import PY_KINETICS, DATA_DIR, EXAMPLE_DATA_DIR
 
 from datetime import datetime
+from io import StringIO
 
 import pykingenie
 
@@ -13,8 +14,11 @@ import pykingenie
 def current_hour_min_sec():
     """
     Get the current time in HH-MM-SS format.
-    Returns:
-        str: Current time as a string.
+
+    Returns
+    -------
+    str
+        Current time as a string.
     """
     now = datetime.now()
     return now.strftime('%H-%M-%S')
@@ -24,10 +28,17 @@ def current_hour_min_sec():
 def import_octet_experiment_base(folder: str = '.', exp_name: str = 'Experiment') -> str:
     """
     Add a new experiment to the pykinetics analyzer from an Octet folder.
-    Args:
-        folder: Name of the folder containing the Octet data files. (.frd files)
-        exp_name: Name of the experiment to be added.
-    Returns:
+
+    Parameters
+    ----------
+    folder : str
+        Name of the folder containing the Octet data files (.frd files).
+    exp_name : str
+        Name of the experiment to be added.
+
+    Returns
+    -------
+    str
         A confirmation message.
     """
 
@@ -54,7 +65,10 @@ def import_octet_experiment_base(folder: str = '.', exp_name: str = 'Experiment'
 def print_data_dir() -> str:
     """
     Print the path to the data directory, where the generated files will be stored.
-    Returns:
+
+    Returns
+    -------
+    str
         The path to the data directory.
     """
     return f"{DATA_DIR}"
@@ -63,10 +77,16 @@ def print_data_dir() -> str:
 @mcp.tool()
 def list_files_in_folder(folder: str = '') -> list:
     """
-    List all files in the selected folder
-    Args:
-        folder: The folder to list files from
-    Returns:
+    List all files in the selected folder.
+
+    Parameters
+    ----------
+    folder : str
+        The folder to list files from.
+
+    Returns
+    -------
+    list
         A list of file names in the data directory.
     """
 
@@ -88,11 +108,19 @@ def list_files_in_folder(folder: str = '') -> list:
 def import_kingenie_surface_csv(csv: str, exp_name: str = 'Experiment') -> str:
     """
     Add a new experiment to the pykinetics analyzer.
+
     The csv file can be created using the simulation tool in the KinGenie online tool.
-    Args:
-        csv: Path to the CSV file containing the simulaton data.
-        exp_name: Name of the experiment to be added.
-    Returns:
+
+    Parameters
+    ----------
+    csv : str
+        Path to the CSV file containing the simulation data.
+    exp_name : str
+        Name of the experiment to be added.
+
+    Returns
+    -------
+    str
         A confirmation message.
     """
     exp = pykingenie.KinGenieCsv()
@@ -118,10 +146,17 @@ def import_kingenie_surface_csv(csv: str, exp_name: str = 'Experiment') -> str:
 def import_octet_experiment(folder: str = '.', exp_name: str = 'Experiment') -> str:
     """
     Add a new experiment to the pykinetics analyzer from an Octet folder.
-    Args:
-        folder: Name of the folder containing the Octet data files. (.frd files)
-        exp_name: Name of the experiment to be added.
-    Returns:
+
+    Parameters
+    ----------
+    folder : str
+        Name of the folder containing the Octet data files (.frd files).
+    exp_name : str
+        Name of the experiment to be added.
+
+    Returns
+    -------
+    str
         A confirmation message.
     """
 
@@ -132,12 +167,19 @@ def import_octet_experiment(folder: str = '.', exp_name: str = 'Experiment') -> 
 def import_gator_experiment(folder: str = '.', exp_name: str = 'Experiment') -> str:
     """
     Add a new experiment to the pykinetics analyzer from a Gator folder / zip file.
-    Args:
-        folder: Name of the folder containing the Gator data files:
-            ('Assay_#_Channel#.csv') and the corresponding files describing the metadata
-            (Setting.ini and ExperimentStep.ini)
-        exp_name: Name of the experiment to be added.
-    Returns:
+
+    Parameters
+    ----------
+    folder : str
+        Name of the folder containing the Gator data files
+        (``Assay_#_Channel#.csv``) and the corresponding metadata files
+        (``Settings.ini`` and ``ExperimentStep.ini``).
+    exp_name : str
+        Name of the experiment to be added.
+
+    Returns
+    -------
+    str
         A confirmation message.
     """
 
@@ -174,9 +216,13 @@ def import_gator_experiment(folder: str = '.', exp_name: str = 'Experiment') -> 
 def load_octet_example() -> str:
     """
     Load an example experiment from the pykinetics analyzer.
+
     The example experiment comes from an Octet (Biolayer interferometry) experiment.
     This will load the example data provided with the pykingenie package.
-    Returns:
+
+    Returns
+    -------
+    str
         A confirmation message.
     """
     example_folder_path = os.path.join(EXAMPLE_DATA_DIR, 'test_bli_folder')
@@ -188,12 +234,21 @@ def load_octet_example() -> str:
 def plot_sample_plate_info(experiment_id: str = '1', font_size: int = 18, save_html: bool = False) -> str:
     """
     Plot the sample plate information for a given experiment in the pykinetics analyzer.
-    Args:
-    experiment_name: The name of the experiment to plot. If a number is provided, it will be used to select the experiment by its index.
-    font_size: The font size for the plot annotations.
-    save_html: If True, saves the plot as an HTML file for interactive viewing.
-    Returns:
-        The html string of a Plotly Figure object containing the sample plate information.
+
+    Parameters
+    ----------
+    experiment_id : str
+        The name or index of the experiment to plot. If a number is provided,
+        it will be used to select the experiment by its index.
+    font_size : int
+        The font size for the plot annotations.
+    save_html : bool
+        If True, saves the plot as an HTML file for interactive viewing.
+
+    Returns
+    -------
+    str
+        The path to the saved image file.
     """
 
     if experiment_id not in PY_KINETICS.experiment_names:
@@ -229,7 +284,10 @@ def plot_sample_plate_info(experiment_id: str = '1', font_size: int = 18, save_h
 def get_legends_table() -> str:
     """
     Get the legend dataframe containing the sensor names, their unique IDs, and colors.
-    Returns:
+
+    Returns
+    -------
+    str
         A JSON string representing the legend DataFrame.
     """
 
@@ -259,28 +317,45 @@ async def plot_traces_with_all_steps(legends_df: str = "",
                                      save_html: bool = False) -> str:
     """
     Plot the traces from the pykinetics analyzer using the provided legend DataFrame.
-    The legend DataFrame can be first created using the `get_legends_table` tool.
-    The plot will include all steps such as the baseline, association, dissociation, and regeneration phases.
-    Args:
-        legends_df: A JSON string representing the legend DataFrame.
-        plot_width: Width of the plot in pixels*50.
-        plot_height: Height of the plot in pixels*50.
-        plot_type: Type of the plot to generate ('png', 'svg', 'jpeg').
-        font_size: Font size for the plot annotations.
-        show_grid_x: Whether to show grid lines on the x-axis.
-        show_grid_y: Whether to show grid lines on the y-axis.
-        marker_size: Size of the markers in the plot.
-        line_width: Width of the lines in the plot.
-        save_html: Whether to save the plot as an HTML file for interactive viewing.
-    Returns:
-        A string indicating the path to the saved image file.
+
+    The legend DataFrame can be first created using the ``get_legends_table`` tool.
+    The plot will include all steps such as baseline, association, dissociation,
+    and regeneration phases.
+
+    Parameters
+    ----------
+    legends_df : str
+        A JSON string representing the legend DataFrame.
+    plot_width : int
+        Width of the plot in pixels*50.
+    plot_height : int
+        Height of the plot in pixels*50.
+    plot_type : str
+        Type of the plot to generate (``'png'``, ``'svg'``, ``'jpeg'``).
+    font_size : int
+        Font size for the plot annotations.
+    show_grid_x : bool
+        Whether to show grid lines on the x-axis.
+    show_grid_y : bool
+        Whether to show grid lines on the y-axis.
+    marker_size : int
+        Size of the markers in the plot.
+    line_width : int
+        Width of the lines in the plot.
+    save_html : bool
+        Whether to save the plot as an HTML file for interactive viewing.
+
+    Returns
+    -------
+    str
+        Path to the saved image file.
     """
 
     # generate legends_df if not provided
     if not legends_df:
         legends_df = get_legends_table()
 
-    legends_df = pd.read_json(legends_df, orient='records')
+    legends_df = pd.read_json(StringIO(legends_df), orient='records')
 
     fig = pykingenie.plot_traces_all(PY_KINETICS, legends_df,
                                      plot_width,
@@ -315,21 +390,36 @@ async def plot_steady_state(plot_width: int = 26,
                             line_width: int = 2,
                             save_html: bool = False) -> str:
     """
+    Plot the steady state data from the pykinetics analyzer.
 
-    Plot the steady state data from the pykinetics analyzer. It uses the 'fitting' objects
-    It can only be run after the `generate_fitting_dataset` tool has been run.
-    Args:
-        plot_width: Width of the plot in pixels*50.
-        plot_height: Height of the plot in pixels*50.
-        plot_type: Type of the plot to generate ('png', 'svg', 'jpeg').
-        font_size: Font size for the plot annotations.
-        show_grid_x: Whether to show grid lines on the x-axis.
-        show_grid_y: Whether to show grid lines on the y-axis.
-        marker_size: Size of the markers in the plot.
-        line_width: Width of the lines in the plot.
-        save_html: Whether to save the plot as an HTML file for interactive viewing.
-    Returns:
-        str indicating the path to the saved image file.
+    Uses the ``fitting`` objects. Can only be run after the
+    ``generate_fitting_dataset`` tool has been run.
+
+    Parameters
+    ----------
+    plot_width : int
+        Width of the plot in pixels*50.
+    plot_height : int
+        Height of the plot in pixels*50.
+    plot_type : str
+        Type of the plot to generate (``'png'``, ``'svg'``, ``'jpeg'``).
+    font_size : int
+        Font size for the plot annotations.
+    show_grid_x : bool
+        Whether to show grid lines on the x-axis.
+    show_grid_y : bool
+        Whether to show grid lines on the y-axis.
+    marker_size : int
+        Size of the markers in the plot.
+    line_width : int
+        Width of the lines in the plot.
+    save_html : bool
+        Whether to save the plot as an HTML file for interactive viewing.
+
+    Returns
+    -------
+    str
+        Path to the saved image file.
     """
 
     fig = pykingenie.plot_steady_state(PY_KINETICS,
@@ -361,7 +451,10 @@ async def plot_steady_state(plot_width: int = 26,
 def list_experiment_names() -> list:
     """
     Get the names of all experiments in the pykinetics analyzer.
-    Returns:
+
+    Returns
+    -------
+    list
         A list of experiment names.
     """
     return PY_KINETICS.experiment_names
@@ -374,12 +467,22 @@ def align_association(experiment_id: str = '1',
                       new_names: bool = False) -> str:
     """
     Align the association phase of the specified experiment in the pykinetics analyzer.
-    Args:
-        experiment_id: The name of the experiment to align. If a number is provided, it will be used to select the experiment by its index.
-        sensor_names: A list of sensor names to align.
-        in_place: If True, modifies the existing sensors; if False, creates new sensors.
-        new_names : If True, uses new names for the aligned sensors.
-    Returns:
+
+    Parameters
+    ----------
+    experiment_id : str
+        The name of the experiment to align. If a number is provided, it will be
+        used to select the experiment by its index.
+    sensor_names : list
+        A list of sensor names to align.
+    in_place : bool
+        If True, modifies the existing sensors; if False, creates new sensors.
+    new_names : bool
+        If True, uses new names for the aligned sensors.
+
+    Returns
+    -------
+    str
         A confirmation message.
     """
 
@@ -406,15 +509,24 @@ def subtract_reference(experiment_id: str = '1', list_of_sensor_names: list = []
                        reference_sensor: str = '1', inplace: bool = True) -> str:
     """
     Subtract the reference sensor from the specified sensors in the pykinetics analyzer.
-    Args:
-        experiment_id: The name of the experiment to subtract the reference from.
+
+    Parameters
+    ----------
+    experiment_id : str
+        The name of the experiment to subtract the reference from.
         If a number is provided, it will be used to select the experiment by its index.
-        list_of_sensor_names: A list of sensor names to subtract the reference from.
-        If no names are provided, all sensors in the experiment will be used, except the reference sensor.
-        reference_sensor: The name of the reference sensor to subtract.
+    list_of_sensor_names : list
+        A list of sensor names to subtract the reference from.
+        If no names are provided, all sensors except the reference will be used.
+    reference_sensor : str
+        The name of the reference sensor to subtract.
         If a number is provided, it will be used to select the sensor by its index.
-        inplace: If True, modifies the existing sensors; if False, creates new sensors.
-    Returns:
+    inplace : bool
+        If True, modifies the existing sensors; if False, creates new sensors.
+
+    Returns
+    -------
+    str
         A confirmation message.
     """
 
@@ -452,16 +564,29 @@ def subtract_reference(experiment_id: str = '1', list_of_sensor_names: list = []
 def align_dissociation(experiment_id: str = '1',
                        sensor_names: list = [],
                        in_place: bool = True,
-                       new_names: bool = False) -> str:
+                       new_names: bool = False,
+                       npoints: int = 1) -> str:
     """
     Align the dissociation phase of the specified experiment in the pykinetics analyzer.
-    Args:
-        experiment_id: The name of the experiment to align. If a number is provided, it will be used to select the experiment by its index.
-        sensor_names: A list of sensor names to align.
-        If no names are provided, all sensors in the experiment will be used.
-        in_place: If True, modifies the existing sensors; if False, creates new sensors.
-        new_names : If True, uses new names for the aligned sensors.
-    Returns:
+
+    Parameters
+    ----------
+    experiment_id : str
+        The name of the experiment to align. If a number is provided, it will be
+        used to select the experiment by its index.
+    sensor_names : list
+        A list of sensor names to align. If no names are provided, all sensors in
+        the experiment will be used.
+    in_place : bool
+        If True, modifies the existing sensors; if False, creates new sensors.
+    new_names : bool
+        If True, uses new names for the aligned sensors.
+    npoints : int
+        Number of points to use for averaging at alignment positions.
+
+    Returns
+    -------
+    str
         A confirmation message.
     """
 
@@ -488,13 +613,26 @@ def align_and_subtract(experiment_id: str = '1',
                        reference_sensor: str = '1',
                        align_dissociation: bool = False) -> str:
     """
-    Given an experiment ID and a reference sensor, align the association phases of all sensors in the experiment,
-    and then subtract the reference sensor from all other sensors.
-    Args:
-        experiment_id: The name of the experiment. If a number is provided, it will be used to select the experiment by its index.
-        reference_sensor: The name of the reference sensor to subtract. If a number is provided, it will be used to select the sensor by its index.
-        align_dissociation: If True, aligns the dissociation phase of the sensors after subtraction.
+    Align association phases and subtract the reference sensor from all other sensors.
 
+    Given an experiment ID and a reference sensor, aligns the association phases of
+    all sensors in the experiment, then subtracts the reference sensor from all others.
+
+    Parameters
+    ----------
+    experiment_id : str
+        The name of the experiment. If a number is provided, it will be used to
+        select the experiment by its index.
+    reference_sensor : str
+        The name of the reference sensor to subtract. If a number is provided, it
+        will be used to select the sensor by its index.
+    align_dissociation : bool
+        If True, aligns the dissociation phase of the sensors after subtraction.
+
+    Returns
+    -------
+    str
+        A confirmation message.
     """
 
     if experiment_id not in PY_KINETICS.experiment_names:
@@ -539,10 +677,15 @@ def align_and_subtract(experiment_id: str = '1',
 @mcp.tool()
 def obtain_sample_info_table() -> str:
     """
-    Obtain the dataframe with the analyte concentration, sensor, Smax ID, Sample ID, analyte location and loading location.
-    The dataframe can be used to generate a fitting dataset with the tool `initiate_fitting_datasets`.
-    Print the dataset to the user as a in a nicely formatted table
-    Returns:
+    Obtain the dataframe with analyte concentration and sensor metadata.
+
+    Returns a table with the analyte concentration, sensor, Smax ID, Sample ID,
+    analyte location and loading location. The dataframe can be used to generate
+    a fitting dataset with the ``initiate_fitting_datasets`` tool.
+
+    Returns
+    -------
+    str
         A pandas DataFrame in JSON format.
     """
 
@@ -557,17 +700,26 @@ def obtain_sample_info_table() -> str:
 def initiate_fitting_datasets(json_str: str) -> str:
     """
     Generate a fitting dataset from the JSON representation of the DataFrame.
-    A template for the JSON representation can be generated using the `obtain_df_for_fitting` tool.
-    The idea is that the user can edit the JSON string to select only the data they want to fit,
-    change the analyte concentrations, or change the sample names.
 
-    Args:
-        json_str: JSON string representing the DataFrame.
+    A template for the JSON representation can be generated using the
+    ``obtain_sample_info_table`` tool. The user can edit the JSON string to select
+    only the data they want to fit, change the analyte concentrations, or change
+    the sample names.
+
+    Parameters
+    ----------
+    json_str : str
+        JSON string representing the DataFrame.
+
+    Returns
+    -------
+    str
+        A message listing the names of the generated fitting datasets.
     """
 
     try:
         # Load the JSON string into a DataFrame
-        df = pd.read_json(json_str, orient='records')
+        df = pd.read_json(StringIO(json_str), orient='records')
     except:
         PY_KINETICS.merge_ligand_conc_df()  # So it works in case the user did not run the `obtain_df_for_fitting` tool
         df = PY_KINETICS.combined_ligand_conc_df
@@ -605,24 +757,44 @@ async def plot_kinetic_traces(plot_width: int = 26,
                               save_html: bool = False) -> str:
     """
     Plot the association and dissociation traces from the pykinetics analyzer.
-    It requires that the fitting datasets have been generated using the `initiate_fitting_datasets` tool.
-    The ligand concentrations are colored using the viridis color palette.
-    If available, the fitted curves will be plotted as well.
-    Args:
-        plot_width: Width of the plot in pixels*50.
-        plot_height: Height of the plot in pixels*50.
-        plot_type: Type of the plot to generate ('png', 'svg', 'jpeg').
-        font_size: Font size for the plot annotations.
-        show_grid_x: Whether to show grid lines on the x-axis.
-        show_grid_y: Whether to show grid lines on the y-axis.
-        marker_size: Size of the markers in the plot.
-        line_width: Width of the lines in the plot.
-        split_by_smax_id: If True, splits the plots by Smax ID.
-        max_points_per_plot: Maximum number of points per plot. If exceeded, data will be subsetted.
-        smooth_curves_fit: If True, applies a rolling window smoothing to the fitted curves.
-        rolling_window: Size of the rolling window for smoothing.
-        save_html: If True, saves the plot as an HTML file for interactive viewing.
 
+    Requires that the fitting datasets have been generated using the
+    ``initiate_fitting_datasets`` tool. The ligand concentrations are colored using
+    the viridis color palette. If available, the fitted curves will be plotted as well.
+
+    Parameters
+    ----------
+    plot_width : int
+        Width of the plot in pixels*50.
+    plot_height : int
+        Height of the plot in pixels*50.
+    plot_type : str
+        Type of the plot to generate (``'png'``, ``'svg'``, ``'jpeg'``).
+    font_size : int
+        Font size for the plot annotations.
+    show_grid_x : bool
+        Whether to show grid lines on the x-axis.
+    show_grid_y : bool
+        Whether to show grid lines on the y-axis.
+    marker_size : int
+        Size of the markers in the plot.
+    line_width : int
+        Width of the lines in the plot.
+    split_by_smax_id : bool
+        If True, splits the plots by Smax ID.
+    max_points_per_plot : int
+        Maximum number of points per plot. If exceeded, data will be subsetted.
+    smooth_curves_fit : bool
+        If True, applies a rolling window smoothing to the fitted curves.
+    rolling_window : int
+        Size of the rolling window for smoothing.
+    save_html : bool
+        If True, saves the plot as an HTML file for interactive viewing.
+
+    Returns
+    -------
+    str
+        Path to the saved image file.
     """
 
     fig = pykingenie.plot_association_dissociation(PY_KINETICS,
@@ -660,13 +832,24 @@ async def run_fitting(fitting_model: str = 'one_to_one',
                       linked_smax: bool = False) -> str:
     """
     Run the fitting process with the specified model and region.
-    Args:
-        fitting_model: The model to be used for fitting.
-            can be 'one_to_one', 'one_to_one_mtl' (mass transport limitation), 'one_to_one_if' (induced fit)
-        fitting_region: The region of the data to be fitted.
-            can be 'association_dissociation', 'association', or 'dissociation'.
-        linked_smax: Whether to link the Smax values across curves.
-            In other words, if we should assume the same sensor capacity
+
+    Parameters
+    ----------
+    fitting_model : str
+        The model to be used for fitting. Can be ``'one_to_one'``,
+        ``'one_to_one_mtl'`` (mass transport limitation), or
+        ``'one_to_one_if'`` (induced fit).
+    fitting_region : str
+        The region of the data to be fitted. Can be
+        ``'association_dissociation'``, ``'association'``, or ``'dissociation'``.
+    linked_smax : bool
+        Whether to link the Smax values across curves, i.e. assume the same
+        sensor capacity.
+
+    Returns
+    -------
+    str
+        A confirmation message with the fitting settings used.
     """
 
     PY_KINETICS.submit_steady_state_fitting()  # To obtain initial values for the Kd and Smax parameters
@@ -683,8 +866,13 @@ async def run_fitting(fitting_model: str = 'one_to_one',
 @mcp.tool()
 def get_kinetics_fitting_results() -> str:
     """
-    Get the results of the fitting process. It creates a DataFrame with the fitted parameters, such as Kd, k_off and Smax
-    Returns:
+    Get the results of the fitting process.
+
+    Creates a DataFrame with the fitted parameters, such as Kd, k_off and Smax.
+
+    Returns
+    -------
+    str
         A JSON string representing the fitting results.
     """
 
@@ -698,11 +886,20 @@ def get_kinetics_fitting_results() -> str:
 @mcp.tool()
 def list_experiment_properties(variable: str, fittings: bool = False) -> list:
     """
-    Get the properties of the experiments stored in PY_KINETICS
-    Args:
-        variable: The attribute to retrieve, e.g., 'ligand_concentration', 'sensor_names', etc.
-        fittings: If True, returns attributes from the fitting objects instead of the experiments.
-    Returns:
+    Get the properties of the experiments stored in PY_KINETICS.
+
+    Parameters
+    ----------
+    variable : str
+        The attribute to retrieve, e.g., ``'ligand_concentration'``,
+        ``'sensor_names'``, etc.
+    fittings : bool
+        If True, returns attributes from the fitting objects instead of
+        the experiments.
+
+    Returns
+    -------
+    list
         A list of values for the specified variable from the experiments or fittings.
     """
 
@@ -713,12 +910,19 @@ def list_experiment_properties(variable: str, fittings: bool = False) -> list:
 def list_experiment_attributes(experiment_name: str) -> dict:
     """
     List all attributes of one experiment in the pykinetics analyzer.
+
     Run this tool only if the user asks for it specifically.
-    Args:
-        experiment_name: The name of the experiment to list attributes for.
-            If a number is provided, it will be used to select the experiment by its index.
-    Returns:
-        A list of experiment attributes.
+
+    Parameters
+    ----------
+    experiment_name : str
+        The name of the experiment to list attributes for.
+        If a number is provided, it will be used to select the experiment by its index.
+
+    Returns
+    -------
+    dict
+        A dictionary of experiment attributes.
     """
 
     # Default to the first experiment if no name is provided
@@ -733,3 +937,4 @@ def list_experiment_attributes(experiment_name: str) -> dict:
     attributes = vars(experiment)
 
     return attributes
+
