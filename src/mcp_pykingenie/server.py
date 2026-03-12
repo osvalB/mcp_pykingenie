@@ -1,7 +1,7 @@
-from fastmcp import FastMCP
 import os
 from pathlib import Path
 import pykingenie
+from .mcp import mcp
 
 PY_KINETICS = pykingenie.KineticsAnalyzer()
 
@@ -53,5 +53,4 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Location of the data files
 
-# This is the shared MCP server instance
-mcp = FastMCP("mcp_pykingenie")
+

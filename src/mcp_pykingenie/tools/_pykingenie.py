@@ -3,7 +3,7 @@ from mcp_pykingenie.mcp import mcp
 import os
 import pandas as pd
 
-from ..server import mcp, PY_KINETICS, DATA_DIR, EXAMPLE_DATA_DIR
+from ..server import PY_KINETICS, DATA_DIR, EXAMPLE_DATA_DIR
 
 from datetime import datetime
 
