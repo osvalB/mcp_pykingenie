@@ -54,4 +54,4 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 # Location of the data files
 
 # This is the shared MCP server instance
-mcp = FastMCP("mcp_kingenie")
+mcp = FastMCP("mcp_pykingenie")
