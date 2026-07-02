@@ -7,46 +7,37 @@
 [badge-tests]: https://img.shields.io/github/actions/workflow/status/osvalB/mcp_pykingenie/test.yaml?branch=main
 [badge-docs]: https://img.shields.io/readthedocs/mcp_pykingenie
 
-The mcp_pykingenie is a [MCP-server](https://github.com/modelcontextprotocol) that provides tools for the analysis of binding kinetics data.
-It is based on the [pykingenie](https://github.com/osvalB/pykingenie) Python package .
+This repository contains a local MCP server for the analysis of binding kinetics data from Octet and Gator experiments.
+It is based on the Python package [pykingenie](https://github.com/osvalB/pykingenie).
 
+## Demo videos
 
-## Demo Videos
-
-- [Video 1 – Example with Visual Studio Code](https://drive.google.com/file/d/1PtUdFNThLG6F2T55cUc4p69JeCwhSrNs/view?usp=drive_link)  
-- [Video 2 – Example with Claude](https://drive.google.com/file/d/1iXqUMakI-m5Vrpya-cI7e0YT6krsfvbn/view?usp=drive_link)
+- [Example with Visual Studio Code](https://drive.google.com/file/d/1PtUdFNThLG6F2T55cUc4p69JeCwhSrNs/view?usp=drive_link)
+- [Example with Claude](https://drive.google.com/file/d/1iXqUMakI-m5Vrpya-cI7e0YT6krsfvbn/view?usp=drive_link)
 
 ## Getting started
 
-Please refer to the [documentation][],
-in particular, the [API documentation][].
-
-<!--
-You can also find the project on [BioContextAI](https://biocontext.ai), the community-hub for biomedical MCP servers: [mcp_pykingenie on BioContextAI](https://biocontext.ai/registry/osvalB/mcp_pykingenie).
--->
+Please refer to the [documentation][], in particular the [API documentation][].
 
 ## Installation
 
-You need to have Python 3.10 or newer installed on your system.
-If you don't have Python installed, we recommend installing [uv][].
+You need to have Python 3.11 or newer installed on your system.
+If you do not have Python installed, we recommend installing [uv][].
 
-There are several alternative options to install mcp_pykingenie:
+### Run from the command line
 
-### 1. Use `uvx` to run it immediately
-After publication to PyPI:
 ```bash
 uvx mcp_pykingenie
 ```
 
-Or from a Git repository:
+By default, generated plots and relative-path input data are stored in
+`~/Desktop/mcp_pykingenie/user_data/<YYYY-MM-DD>/`. Use the `print_data_dir`
+MCP tool to inspect the active output folder for a running server.
 
-```bash
-uvx git+https://github.com/osvalB/mcp_pykingenie.git@main
-```
+### Configure an MCP client
 
-### 2. Include it in one of various clients that supports the `mcp.json` standard
-
-If your MCP server is published to PyPI, use the following configuration:
+Add the server to any MCP-compatible client that supports the `mcpServers`
+configuration format:
 
 ```json
 {
@@ -58,7 +49,11 @@ If your MCP server is published to PyPI, use the following configuration:
   }
 }
 ```
-In case the MCP server is not yet published to PyPI, use this configuration:
+
+After updating the configuration, restart the MCP client so it can launch the
+server.
+
+If you want to run directly from the Git repository:
 
 ```json
 {
@@ -71,7 +66,32 @@ In case the MCP server is not yet published to PyPI, use this configuration:
 }
 ```
 
-For purely local development (e.g., in Cursor or VS Code), use the following configuration:
+#### Claude Desktop
+
+In Claude Desktop, open **Settings**, go to **Developer**, and click
+**Edit Config**. Add `mcp_pykingenie` to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "mcp_pykingenie": {
+      "command": "uvx",
+      "args": ["mcp_pykingenie"]
+    }
+  }
+}
+```
+
+Claude Desktop stores this file at:
+
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Save the file, then fully quit and reopen Claude Desktop.
+
+### Local development
+
+To run the server from a local checkout, use an absolute path to the repository:
 
 ```json
 {
@@ -81,7 +101,7 @@ For purely local development (e.g., in Cursor or VS Code), use the following con
       "args": [
         "--refresh",
         "--from",
-        "path/to/repository",
+        "/absolute/path/to/mcp_pykingenie",
         "mcp_pykingenie"
       ]
     }
@@ -89,29 +109,74 @@ For purely local development (e.g., in Cursor or VS Code), use the following con
 }
 ```
 
-If you want to reuse and existing environment for local development, use the following configuration:
+If you want to reuse the checkout's existing environment, run it through `uv`:
 
 ```json
 {
   "mcpServers": {
     "mcp_pykingenie": {
       "command": "uv",
-      "args": ["run", "--directory", "path/to/repository", "mcp_pykingenie"]
+      "args": ["run", "--directory", "/absolute/path/to/mcp_pykingenie", "mcp_pykingenie"]
     }
   }
 }
 ```
 
-### 3. Install it through `pip`:
+For HTTP transport during development:
+
+```bash
+uv run mcp_pykingenie -t http -p 8000
+```
+
+### Install with pip
 
 ```bash
 pip install --user mcp_pykingenie
 ```
 
-### 4. Install the latest development version:
+Then run the server with:
 
 ```bash
-pip install git+https://github.com/osvalB/mcp_pykingenie.git@main
+mcp_pykingenie
+```
+
+If your shell cannot find the command, make sure your user-level Python scripts
+directory is on `PATH`.
+
+### Install from source
+
+```bash
+git clone https://github.com/osvalB/mcp_pykingenie.git
+cd mcp_pykingenie
+uv sync --extra dev --extra doc --extra test
+```
+
+Run tests with:
+
+```bash
+uv run pytest
+```
+
+Build the documentation with:
+
+```bash
+uv run --extra doc make -C docs html
+```
+
+## Example workflow
+
+Once connected through your MCP client, ask your AI assistant to run a flow like:
+
+```text
+1. load the Octet example experiment
+2. align the association phase
+3. align the dissociation phase
+4. subtract the sensor H1
+5. plot all the steps
+6. show me the sample information
+7. create a fitting dataset using sample wt - imd
+8. fit the data with a one-to-one model
+9. plot the fitted curves
 ```
 
 ## Contact
@@ -120,12 +185,24 @@ If you found a bug, please use the [issue tracker][].
 
 ## Citation
 
-> t.b.a
+If you use `mcp_pykingenie`, please cite it as:
+
+Burastero, O. (2026). `mcp_pykingenie` (Version 0.0.1) [Computer software].
+GitHub. https://github.com/osvalB/mcp_pykingenie
+
+```bibtex
+@software{burastero_2026_mcp_pykingenie,
+  author = {Burastero, Osvaldo},
+  title = {mcp_pykingenie},
+  version = {0.0.1},
+  year = {2026},
+  url = {https://github.com/osvalB/mcp_pykingenie}
+}
+```
 
 [uv]: https://github.com/astral-sh/uv
 [issue tracker]: https://github.com/osvalB/mcp_pykingenie/issues
 [tests]: https://github.com/osvalB/mcp_pykingenie/actions/workflows/test.yaml
 [documentation]: https://mcp_pykingenie.readthedocs.io
-[changelog]: https://mcp_pykingenie.readthedocs.io/en/latest/changelog.html
-[api documentation]: https://mcp_pykingenie.readthedocs.io/en/latest/api.html
+[api documentation]: https://mcp_pykingenie.readthedocs.io/en/latest/modules.html
 [pypi]: https://pypi.org/project/mcp_pykingenie
