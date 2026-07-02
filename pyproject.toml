@@ -61,7 +61,7 @@ optional-dependencies.test = [
   "pytest-asyncio",
 ]
 # https://docs.pypi.org/project_metadata/#project-urls
-urls.Documentation = "https://mcp_pykingenie.readthedocs.io/"
+urls.Documentation = "https://osvalb.github.io/mcp_pykingenie/"
 urls.Homepage = "https://github.com/osvalB/mcp_pykingenie"
 urls.Source = "https://github.com/osvalB/mcp_pykingenie"
 
