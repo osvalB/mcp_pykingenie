@@ -64,6 +64,10 @@ Data Processing
      - Align the dissociation phase of sensors.
    * - ``subtract_reference``
      - Subtract a reference sensor from other sensors.
+   * - ``subtract_experiment``
+     - Subtract one surface-based experiment from another sensor by sensor.
+   * - ``subtract_sensor_columns``
+     - Subtract paired sensor columns within one surface-based experiment.
    * - ``align_and_subtract``
      - Align and subtract a reference sensor in one step.
 
@@ -97,6 +101,8 @@ Fitting
    * - ``initiate_fitting_datasets``
      - Generate fitting datasets from a sample info JSON table.
    * - ``run_fitting``
-     - Run kinetic fitting with ``one_to_one``, ``one_to_one_mtl``, or ``one_to_one_if``.
+     - Run fitting. Steady-state initialization supports ``one_to_one`` and ``two_to_one``. Kinetic ``one_to_one`` supports ``association_dissociation``, ``association``, and ``dissociation``; ``one_to_one_mtl``, ``one_to_one_if``, and ``two_to_one`` support only ``association_dissociation``.
    * - ``get_kinetics_fitting_results``
      - Retrieve fitting results, including ``Kd``, ``k_off``, ``Smax``, and derived ``k_on``.
+   * - ``create_export_df``
+     - Export raw or fitted association/dissociation trace points from generated fitting datasets as JSON records.

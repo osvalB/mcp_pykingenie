@@ -11,6 +11,43 @@ from io import StringIO
 import pykingenie
 
 
+STEADY_STATE_FITTING_MODELS = {"one_to_one", "two_to_one"}
+
+KINETIC_FITTING_MODEL_REGIONS = {
+    "one_to_one": {
+        "association_dissociation",
+        "association",
+        "dissociation",
+    },
+    "one_to_one_mtl": {"association_dissociation"},
+    "one_to_one_if": {"association_dissociation"},
+    "two_to_one": {"association_dissociation"},
+}
+
+
+def resolve_experiment_name(experiment_id: str) -> str | None:
+    """
+    Resolve a PyKinGenie experiment name from a name or 1-based index.
+
+    Parameters
+    ----------
+    experiment_id : str
+        Experiment name or 1-based index in ``PY_KINETICS.experiment_names``.
+
+    Returns
+    -------
+    str or None
+        The resolved experiment name, or None when the selector is invalid.
+    """
+    if experiment_id in PY_KINETICS.experiment_names:
+        return experiment_id
+
+    try:
+        return PY_KINETICS.experiment_names[int(experiment_id) - 1]
+    except (ValueError, IndexError):
+        return None
+
+
 def current_hour_min_sec():
     """
     Get the current time in HH-MM-SS format.
@@ -597,6 +634,101 @@ def subtract_reference(experiment_id: str = '1', list_of_sensor_names: list = []
 
 
 @mcp.tool()
+def subtract_experiment(experiment_id: str = '1',
+                        reference_experiment_id: str = '2',
+                        inplace: bool = True) -> str:
+    """
+    Subtract one surface-based experiment from another sensor by sensor.
+
+    This calls ``SurfaceBasedExperiment.subtract_experiment`` on the selected
+    target experiment. PyKinGenie sorts sensor names alphanumerically and
+    subtracts each matching sensor trace from the reference experiment. Both
+    experiments must have the same number of sensors and compatible time data.
+
+    Parameters
+    ----------
+    experiment_id : str
+        Name or 1-based index of the experiment to modify.
+    reference_experiment_id : str
+        Name or 1-based index of the experiment to subtract from
+        ``experiment_id``.
+    inplace : bool
+        If True, modifies the target experiment; if False, creates new sensors.
+
+    Returns
+    -------
+    str
+        A confirmation message with the updated target sensor names.
+    """
+    experiment_name = resolve_experiment_name(experiment_id)
+    if experiment_name is None:
+        return f"Experiment with index {experiment_id} not found in kingenie."
+
+    reference_experiment_name = resolve_experiment_name(reference_experiment_id)
+    if reference_experiment_name is None:
+        return f"Experiment with index {reference_experiment_id} not found in kingenie."
+
+    target_experiment = PY_KINETICS.experiments[experiment_name]
+    reference_experiment = PY_KINETICS.experiments[reference_experiment_name]
+
+    target_experiment.subtract_experiment(reference_experiment, inplace=inplace)
+
+    return (
+        f"Experiment '{reference_experiment_name}' subtracted from experiment "
+        f"'{experiment_name}'. New sensor names: {target_experiment.sensor_names}."
+    )
+
+
+@mcp.tool()
+def subtract_sensor_columns(experiment_id: str = '1',
+                            sensors_column_one: int = 1,
+                            sensors_column_two: int = 2,
+                            inplace: bool = True) -> str:
+    """
+    Subtract one column of sensors from another in a surface experiment.
+
+    This calls ``SurfaceBasedExperiment.subtraction_by_column``. PyKinGenie
+    finds sensor names containing ``sensors_column_one`` and subtracts the
+    corresponding sensor obtained by replacing that column number with
+    ``sensors_column_two``.
+
+    Parameters
+    ----------
+    experiment_id : str
+        Name or 1-based index of the experiment to modify.
+    sensors_column_one : int
+        Column number of the sensors to subtract from.
+    sensors_column_two : int
+        Column number of the reference sensors to subtract.
+    inplace : bool
+        If True, modifies the target sensors; if False, creates new sensors.
+
+    Returns
+    -------
+    str
+        A confirmation message listing PyKinGenie's subtraction messages and
+        updated sensor names.
+    """
+    experiment_name = resolve_experiment_name(experiment_id)
+    if experiment_name is None:
+        return f"Experiment with index {experiment_id} not found in kingenie."
+
+    experiment = PY_KINETICS.experiments[experiment_name]
+    subtraction_messages = experiment.subtraction_by_column(
+        sensors_column_one,
+        sensors_column_two,
+        inplace=inplace,
+    )
+
+    return (
+        f"Sensor column {sensors_column_two} subtracted from column "
+        f"{sensors_column_one} for experiment '{experiment_name}'. "
+        f"Operations: {subtraction_messages}. "
+        f"New sensor names: {experiment.sensor_names}."
+    )
+
+
+@mcp.tool()
 def align_dissociation(experiment_id: str = '1',
                        sensor_names: list = [],
                        in_place: bool = True,
@@ -873,42 +1005,82 @@ async def plot_kinetic_traces(plot_width: int = 26,
 @mcp.tool()
 async def run_fitting(fitting_model: str = 'one_to_one',
                       fitting_region: str = 'association_dissociation',
-                      linked_smax: bool = False) -> str:
+                      linked_smax: bool = False,
+                      steady_state_model: str = 'one_to_one',
+                      fit_sigma: bool = False) -> str:
     """
     Run PyKinGenie steady-state initialization and kinetic fitting.
 
     The wrapper first calls ``submit_steady_state_fitting`` to obtain starting
     values, then calls ``submit_kinetics_fitting`` with the selected kinetic
-    model, fitted region, and Smax sharing setting.
+    model, fitted region, Smax sharing setting, and optional two-site
+    cooperativity setting.
 
     Parameters
     ----------
     fitting_model : str
-        The model to be used for fitting. Can be ``'one_to_one'``,
-        ``'one_to_one_mtl'`` (mass transport limitation), or
-        ``'one_to_one_if'`` (induced fit).
+        Kinetic model to fit. PyKinGenie accepts ``'one_to_one'``,
+        ``'one_to_one_mtl'`` (mass transport limitation),
+        ``'one_to_one_if'`` (induced fit), and ``'two_to_one'``. Only
+        ``'one_to_one'`` supports every fitting region; the other kinetic
+        models support only ``'association_dissociation'``.
     fitting_region : str
-        The region of the data to be fitted. Can be
-        ``'association_dissociation'``, ``'association'``, or ``'dissociation'``.
+        The region of the data to be fitted. ``'one_to_one'`` supports
+        ``'association_dissociation'``, ``'association'``, and
+        ``'dissociation'``. ``'one_to_one_mtl'``, ``'one_to_one_if'``, and
+        ``'two_to_one'`` support only ``'association_dissociation'``.
     linked_smax : bool
         Whether to link the Smax values across curves, i.e. assume the same
         sensor capacity.
+    steady_state_model : str
+        Steady-state model used to initialize kinetic fitting. PyKinGenie
+        accepts ``'one_to_one'`` and ``'two_to_one'``.
+    fit_sigma : bool
+        If True with ``'two_to_one'`` steady-state or kinetic fitting, fit the
+        shared cooperativity factor sigma.
 
     Returns
     -------
     str
         A confirmation message with the fitting settings used.
     """
+    if steady_state_model not in STEADY_STATE_FITTING_MODELS:
+        valid_models = ", ".join(sorted(STEADY_STATE_FITTING_MODELS))
+        raise ValueError(
+            f"Unknown steady-state fitting model '{steady_state_model}'. "
+            f"Valid models: {valid_models}."
+        )
 
-    PY_KINETICS.submit_steady_state_fitting()  # To obtain initial values for the Kd and Smax parameters
+    valid_regions = KINETIC_FITTING_MODEL_REGIONS.get(fitting_model)
+    if valid_regions is None:
+        valid_models = ", ".join(sorted(KINETIC_FITTING_MODEL_REGIONS))
+        raise ValueError(
+            f"Unknown kinetic fitting model '{fitting_model}'. "
+            f"Valid models: {valid_models}."
+        )
+
+    if fitting_region not in valid_regions:
+        valid_regions_message = ", ".join(sorted(valid_regions))
+        raise ValueError(
+            f"Fitting model '{fitting_model}' does not support region "
+            f"'{fitting_region}'. Valid regions: {valid_regions_message}."
+        )
+
+    PY_KINETICS.submit_steady_state_fitting(
+        fitting_model=steady_state_model,
+        fit_sigma=fit_sigma,
+    )  # To obtain initial values for the Kd and Smax parameters
 
     PY_KINETICS.submit_kinetics_fitting(fitting_model=fitting_model,
                                         fitting_region=fitting_region,
-                                        shared_smax=linked_smax)
+                                        shared_smax=linked_smax,
+                                        fit_sigma=fit_sigma)
 
     return (f"Fitting submitted with model: {fitting_model}, "
             f"region: {fitting_region}, "
-            f"linked Smax: {linked_smax}.")
+            f"linked Smax: {linked_smax}, "
+            f"steady-state model: {steady_state_model}, "
+            f"fit sigma: {fit_sigma}.")
 
 
 @mcp.tool()
@@ -931,6 +1103,36 @@ def get_kinetics_fitting_results() -> str:
     results_json = df.to_json(orient='records')
 
     return results_json
+
+
+@mcp.tool()
+def create_export_df(export_type: str = 'raw') -> str:
+    """
+    Return exported PyKinGenie association/dissociation traces as JSON records.
+
+    This calls ``PY_KINETICS.create_export_df`` for all generated fitting
+    objects. Raw export returns the measured association and dissociation
+    signals; fitted export returns fitted curves after ``run_fitting`` has been
+    called.
+
+    Parameters
+    ----------
+    export_type : str
+        Signal type to export. Accepts ``'raw'``, ``'fit'``, or ``'fitted'``.
+        ``'fitted'`` is normalized to PyKinGenie's ``'fit'`` spelling.
+
+    Returns
+    -------
+    str
+        JSON records for a DataFrame with exported trace points.
+    """
+    if export_type not in {"raw", "fit", "fitted"}:
+        raise ValueError("export_type must be 'raw', 'fit', or 'fitted'.")
+
+    pykingenie_export_type = "fit" if export_type == "fitted" else export_type
+    df = PY_KINETICS.create_export_df(type=pykingenie_export_type)
+
+    return df.to_json(orient='records')
 
 
 @mcp.tool()

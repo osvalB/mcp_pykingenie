@@ -28,6 +28,7 @@ from mcp_pykingenie.paths import (
     get_example_data_root,
     get_user_data_root,
 )
+from pykingenie.surface_exp import SurfaceBasedExperiment
 
 
 MIN_PYKINGENIE_VERSION = Version("1.0.0")
@@ -470,6 +471,9 @@ def test_invalid_experiment_selectors_return_not_found_messages():
     assert pykingenie_tools.plot_sample_plate_info(experiment_id="99") == expected
     assert pykingenie_tools.align_association(experiment_id="99") == expected
     assert pykingenie_tools.subtract_reference(experiment_id="99") == expected
+    assert pykingenie_tools.subtract_experiment(experiment_id="99", reference_experiment_id="1") == expected
+    assert pykingenie_tools.subtract_experiment(experiment_id="1", reference_experiment_id="99") == expected
+    assert pykingenie_tools.subtract_sensor_columns(experiment_id="99") == expected
     assert pykingenie_tools.align_dissociation(experiment_id="99") == expected
     assert pykingenie_tools.align_and_subtract(experiment_id="99") == expected
 
@@ -520,6 +524,59 @@ def test_align_and_subtract_runs_real_combined_workflow():
     assert "Dissociation phase aligned" in message
     assert "G1 - H1" in sensor_names
     assert "H1" in sensor_names
+
+
+def test_subtract_experiment_runs_real_surface_experiment_subtraction():
+    """Testing experiment subtraction uses PyKinGenie's real Octet traces."""
+    pykingenie_tools.load_octet_example()
+    pykingenie_tools.import_octet_experiment(
+        str(get_example_data_root() / "test_bli_folder"),
+        "Reference Experiment",
+    )
+
+    message = pykingenie_tools.subtract_experiment(
+        experiment_id="Example Experiment",
+        reference_experiment_id="Reference Experiment",
+    )
+
+    experiment = server.PY_KINETICS.experiments["Example Experiment"]
+    assert "Experiment 'Reference Experiment' subtracted" in message
+    assert "A1 - A1" in experiment.sensor_names
+    np.testing.assert_allclose(experiment.ys[experiment.sensor_names.index("A1 - A1")][0], 0, atol=1e-12)
+
+
+def test_subtract_sensor_columns_runs_real_surface_column_subtraction():
+    """Testing column subtraction calls PyKinGenie's surface experiment method."""
+    experiment = SurfaceBasedExperiment("Column Experiment", "synthetic_surface")
+    experiment.sensor_names = ["A1", "A2", "B1", "B2"]
+    experiment.xs = [[np.array([0.0, 1.0])]] * 4
+    experiment.ys = [
+        [np.array([1.0, 2.0])],
+        [np.array([0.25, 0.75])],
+        [np.array([3.0, 5.0])],
+        [np.array([1.0, 1.5])],
+    ]
+    experiment.ligand_conc_df = pd.DataFrame(
+        {
+            "Sensor": experiment.sensor_names,
+            "SampleID": ["Sample A", "Sample A", "Sample B", "Sample B"],
+        }
+    )
+    experiment.traces_loaded = True
+    experiment.create_unique_sensor_names()
+    server.PY_KINETICS.add_experiment(experiment, "Column Experiment")
+
+    message = pykingenie_tools.subtract_sensor_columns(
+        experiment_id="Column Experiment",
+        sensors_column_one=1,
+        sensors_column_two=2,
+    )
+
+    assert "Subtracted A2 from A1" in message
+    assert "Subtracted B2 from B1" in message
+    assert experiment.sensor_names == ["A1 - A2", "A2", "B1 - B2", "B2"]
+    np.testing.assert_allclose(experiment.ys[0][0], [0.75, 1.25])
+    np.testing.assert_allclose(experiment.ys[2][0], [2.0, 3.5])
 
 
 @pytest.mark.asyncio
@@ -576,6 +633,98 @@ def test_initiate_fitting_datasets_falls_back_to_default_table_for_invalid_json(
 
     assert "Fitting datasets generated with the following names:" in message
     assert pykingenie_tools.PY_KINETICS.fittings_names
+
+
+@pytest.mark.asyncio
+async def test_run_fitting_supports_real_two_to_one_model():
+    """Testing run_fitting supports PyKinGenie's real two-to-one model."""
+    _load_example_and_selected_fitting()
+
+    message = await pykingenie_tools.run_fitting(
+        fitting_model="two_to_one",
+        steady_state_model="two_to_one",
+        fit_sigma=False,
+    )
+
+    assert (
+        "Fitting submitted with model: two_to_one, "
+        "region: association_dissociation, linked Smax: False, "
+        "steady-state model: two_to_one, fit sigma: False."
+    ) == message
+
+
+@pytest.mark.asyncio
+async def test_create_export_df_returns_real_raw_and_fitted_traces():
+    """Testing export DataFrame returns real raw and fitted surface traces."""
+    _load_example_and_selected_fitting()
+
+    raw_json = pykingenie_tools.create_export_df()
+    raw_df = pd.read_json(StringIO(raw_json), orient='records')
+
+    await pykingenie_tools.run_fitting()
+    fitted_json = pykingenie_tools.create_export_df(export_type="fitted")
+    fitted_df = pd.read_json(StringIO(fitted_json), orient='records')
+
+    expected_columns = {
+        "Time",
+        "Signal",
+        "Analyte_concentration_micromolar",
+        "Type",
+        "ID",
+    }
+    assert set(raw_df.columns) == expected_columns
+    assert set(fitted_df.columns) == expected_columns
+    assert {"Association", "Dissociation"} <= set(raw_df["Type"])
+    assert {"Association", "Dissociation"} <= set(fitted_df["Type"])
+    assert len(raw_df) > 0
+    assert len(fitted_df) > 0
+
+    with pytest.raises(ValueError, match="export_type"):
+        pykingenie_tools.create_export_df(export_type="unknown")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        (
+            {"steady_state_model": "one_to_one_mtl"},
+            "Unknown steady-state fitting model",
+        ),
+        (
+            {"fitting_model": "unknown"},
+            "Unknown kinetic fitting model",
+        ),
+        (
+            {
+                "fitting_model": "one_to_one_mtl",
+                "fitting_region": "association",
+            },
+            "does not support region",
+        ),
+        (
+            {
+                "fitting_model": "one_to_one_if",
+                "fitting_region": "dissociation",
+            },
+            "does not support region",
+        ),
+        (
+            {
+                "fitting_model": "two_to_one",
+                "fitting_region": "association",
+            },
+            "does not support region",
+        ),
+    ],
+)
+async def test_run_fitting_rejects_unsupported_real_model_region_combinations(
+    kwargs,
+    match,
+):
+    """Testing run_fitting rejects PyKinGenie unsupported fitting selections."""
+    with pytest.raises(ValueError, match=match):
+        await pykingenie_tools.run_fitting(**kwargs)
 
 
 @pytest.mark.asyncio
@@ -655,7 +804,8 @@ async def test_mcp_server():
         result = await client.call_tool("run_fitting", {})
         assert (
             "Fitting submitted with model: one_to_one, "
-            "region: association_dissociation, linked Smax: False."
+            "region: association_dissociation, linked Smax: False, "
+            "steady-state model: one_to_one, fit sigma: False."
         ) == result.data
 
         result = await client.call_tool("get_kinetics_fitting_results", {})
@@ -674,3 +824,14 @@ async def test_mcp_server():
         assert df["Name"].unique().tolist() == ["wt - imd"]
 
         np.testing.assert_allclose(df.loc[0, "k_off [1/s]"], 0.00235, rtol=0.01)
+
+        result = await client.call_tool("create_export_df", {"export_type": "fitted"})
+        export_df = pd.read_json(StringIO(result.data), orient='records')
+        assert set(export_df.columns) == {
+            "Time",
+            "Signal",
+            "Analyte_concentration_micromolar",
+            "Type",
+            "ID",
+        }
+        assert len(export_df) > 0
