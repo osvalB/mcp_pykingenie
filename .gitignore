@@ -1,5 +1,6 @@
 # Temp files
 .DS_Store
+.idea/
 *~
 buck-out/
 
@@ -7,12 +8,18 @@ buck-out/
 # Compiled files
 .venv/
 __pycache__/
+*.py[cod]
 .*cache/
 
 # Distribution / packaging
+/build/
 /dist/
+*.egg-info/
 
 # Tests and coverage
+.coverage
+.coverage.*
+htmlcov/
 /data/
 /node_modules/
 
