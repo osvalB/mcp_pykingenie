@@ -43,11 +43,17 @@ def run_app(
     logger = logging.getLogger(__name__)
 
     from mcp_pykingenie.mcp import mcp
+    from mcp_pykingenie.server import DATA_DIR
 
     if environment == EnvironmentType.DEVELOPMENT:
         logger.info("Starting MCP server (DEVELOPMENT mode)")
+        click.echo(f"mcp_pykingenie results folder: {DATA_DIR}", err=True)
         if transport == "http":
             mcp.run(transport=transport, port=port, host=hostname)
+        elif transport == "stdio":
+            from mcp_pykingenie.stdio import run_stdio
+
+            run_stdio(mcp)
         else:
             mcp.run(transport=transport)
     else:

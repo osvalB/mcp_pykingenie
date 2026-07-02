@@ -33,6 +33,14 @@ MCP Server
    :undoc-members:
    :show-inheritance:
 
+Stdio Transport
+---------------
+
+.. automodule:: mcp_pykingenie.stdio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Tools
 -----
 

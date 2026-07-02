@@ -15,14 +15,9 @@ It is based on the Python package [pykingenie](https://github.com/osvalB/pykinge
 - [Example with Visual Studio Code](https://drive.google.com/file/d/1PtUdFNThLG6F2T55cUc4p69JeCwhSrNs/view?usp=drive_link)
 - [Example with Claude](https://drive.google.com/file/d/1iXqUMakI-m5Vrpya-cI7e0YT6krsfvbn/view?usp=drive_link)
 
-## Getting started
-
-Please refer to the [documentation][], in particular the [API documentation][].
-
 ## Installation
 
-You need to have Python 3.11 or newer installed on your system.
-If you do not have Python installed, we recommend installing [uv][].
+We recommend running mcp_pykingenie with [uv][].
 
 ### Run from the command line
 
@@ -31,8 +26,13 @@ uvx mcp_pykingenie
 ```
 
 By default, generated plots and relative-path input data are stored in
-`~/Desktop/mcp_pykingenie/user_data/<YYYY-MM-DD>/`. Use the `print_data_dir`
+`~/user_data_mcp_pykingenie/<YYYY-MM-DD>/`. To choose a different results
+folder, set `RESULTS_DIR` before starting the server. Use the `print_data_dir`
 MCP tool to inspect the active output folder for a running server.
+
+```bash
+RESULTS_DIR=~/Documents/user_data_mcp_pykingenie uvx mcp_pykingenie
+```
 
 ### Configure an MCP client
 
@@ -44,7 +44,10 @@ configuration format:
   "mcpServers": {
     "mcp_pykingenie": {
       "command": "uvx",
-      "args": ["mcp_pykingenie"]
+      "args": ["mcp_pykingenie"],
+      "env": {
+        "RESULTS_DIR": "/absolute/path/to/results-folder"
+      }
     }
   }
 }
@@ -76,7 +79,10 @@ In Claude Desktop, open **Settings**, go to **Developer**, and click
   "mcpServers": {
     "mcp_pykingenie": {
       "command": "uvx",
-      "args": ["mcp_pykingenie"]
+      "args": ["mcp_pykingenie"],
+      "env": {
+        "RESULTS_DIR": "/Users/your-name/Documents/user_data_mcp_pykingenie"
+      }
     }
   }
 }
@@ -187,14 +193,14 @@ If you found a bug, please use the [issue tracker][].
 
 If you use `mcp_pykingenie`, please cite it as:
 
-Burastero, O. (2026). `mcp_pykingenie` (Version 0.0.1) [Computer software].
+Burastero, O. (2026). `mcp_pykingenie` (Version 1.0) [Computer software].
 GitHub. https://github.com/osvalB/mcp_pykingenie
 
 ```bibtex
 @software{burastero_2026_mcp_pykingenie,
   author = {Burastero, Osvaldo},
   title = {mcp_pykingenie},
-  version = {0.0.1},
+  version = {1.0},
   year = {2026},
   url = {https://github.com/osvalB/mcp_pykingenie}
 }

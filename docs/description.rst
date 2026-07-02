@@ -26,8 +26,9 @@ MCP Tools
 
 The server keeps a ``pykingenie.KineticsAnalyzer`` instance in memory for the
 current MCP session. Generated plots are written to the active data directory,
-which defaults to ``~/Desktop/mcp_pykingenie/user_data/<YYYY-MM-DD>/``. Use
-the ``print_data_dir`` tool to display the exact folder used by the running
+which defaults to ``~/user_data_mcp_pykingenie/<YYYY-MM-DD>/``. Set
+``RESULTS_DIR`` before starting the server to choose a different root folder.
+Use the ``print_data_dir`` tool to display the exact folder used by the running
 server.
 
 Example Chat Flow

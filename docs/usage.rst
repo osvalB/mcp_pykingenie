@@ -21,10 +21,16 @@ MCP clients that support an ``mcp.json`` configuration can start
      "mcpServers": {
        "mcp_pykingenie": {
          "command": "uvx",
-         "args": ["mcp_pykingenie"]
+         "args": ["mcp_pykingenie"],
+         "env": {
+           "RESULTS_DIR": "/absolute/path/to/results-folder"
+         }
        }
      }
    }
+
+``RESULTS_DIR`` is the folder where plots and generated files are stored. The
+server creates a date-stamped subfolder inside it for each run.
 
 Claude Desktop
 --------------
@@ -39,7 +45,10 @@ In Claude Desktop, open **Settings**, go to **Developer**, and click
      "mcpServers": {
        "mcp_pykingenie": {
          "command": "uvx",
-         "args": ["mcp_pykingenie"]
+         "args": ["mcp_pykingenie"],
+         "env": {
+           "RESULTS_DIR": "/Users/your-name/Documents/user_data_mcp_pykingenie"
+         }
        }
      }
    }
@@ -110,7 +119,10 @@ VS Code with GitHub Copilot
      "servers": {
        "mcp_pykingenie": {
          "command": "uvx",
-         "args": ["mcp_pykingenie"]
+         "args": ["mcp_pykingenie"],
+         "env": {
+           "RESULTS_DIR": "/absolute/path/to/results-folder"
+         }
        }
      }
    }

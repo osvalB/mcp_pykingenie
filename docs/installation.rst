@@ -18,8 +18,14 @@ Run the server directly with ``uvx``:
    uvx mcp_pykingenie
 
 By default, generated plots and imported relative-path data are stored in a
-date-stamped folder under ``~/Desktop/mcp_pykingenie/user_data/<YYYY-MM-DD>/``.
-Use the ``print_data_dir`` MCP tool to inspect the active output folder.
+date-stamped folder under ``~/user_data_mcp_pykingenie/<YYYY-MM-DD>/``. To
+choose a different results folder, set ``RESULTS_DIR`` before starting the
+server. Use the ``print_data_dir`` MCP tool to inspect the active output
+folder.
+
+.. code-block:: bash
+
+   RESULTS_DIR=~/Documents/user_data_mcp_pykingenie uvx mcp_pykingenie
 
 Install from PyPI
 -----------------
@@ -38,6 +44,12 @@ Then run the server with:
 
 If your shell cannot find the command, make sure your user-level Python scripts
 directory is on ``PATH``.
+
+You can use the same output-folder setting when running the installed command:
+
+.. code-block:: bash
+
+   RESULTS_DIR=~/Documents/user_data_mcp_pykingenie mcp_pykingenie
 
 Install from Source
 -------------------

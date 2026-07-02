@@ -1,56 +1,41 @@
 import os
-from pathlib import Path
+from datetime import datetime
+
 import pykingenie
+
 from .mcp import mcp
+from .paths import get_example_data_root, get_user_data_root
+
+SKIP_USER_DATA_INIT = os.environ.get("MCP_PYKINGENIE_SKIP_USER_DATA_INIT") == "1"
 
 PY_KINETICS = pykingenie.KineticsAnalyzer()
 
+# Define the paths to the project data directories.
+DATA_DIR = str(get_user_data_root())
+EXAMPLE_DATA_DIR = str(get_example_data_root())
 
-def _resolve_desktop_dir() -> Path:
-    """Return a Desktop directory path across Linux/macOS/Windows."""
-    home = Path.home()
-    candidates = [
-        home / "Desktop",
-        home / "desktop",
-        home / "OneDrive" / "Desktop",  # common Windows redirected Desktop
-    ]
+# Create the data directory if it doesn't exist.
+if not SKIP_USER_DATA_INIT and not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
-    userprofile = os.environ.get("USERPROFILE")
-    if userprofile:
-        candidates.append(Path(userprofile) / "Desktop")
+DATA_DIR_NO_DATE = DATA_DIR
 
-    xdg_desktop = os.environ.get("XDG_DESKTOP_DIR")
-    if xdg_desktop:
-        candidates.append(Path(xdg_desktop).expanduser())
-
-    for path in candidates:
-        if path.is_dir():
-            return path
-
-    # If no desktop folder exists (e.g. headless systems), create a standard one under home.
-    fallback = home / "Desktop"
-    fallback.mkdir(parents=True, exist_ok=True)
-    return fallback
-
-
-# Define the path to the data directory on the user's Desktop.
-current_dir = Path(__file__).resolve().parent
-desktop_dir = _resolve_desktop_dir()
-GLOBAL_USER_DATA_DIR = desktop_dir / "mcp_pykingenie" / "user_data"
-
-# Keep example data path unchanged from original behavior.
-EXAMPLE_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "example_data")
-
-# Create the global data directory if it doesn't exist.
-GLOBAL_USER_DATA_DIR.mkdir(parents=True, exist_ok=True)
-
-# Create a folder with the current date, inside data
-from datetime import datetime
+# Create a folder with the current date, inside data.
 today = datetime.today().strftime('%Y-%m-%d')
-DATA_DIR = GLOBAL_USER_DATA_DIR / today
+DATA_DIR = os.path.join(DATA_DIR, today)
 
-DATA_DIR.mkdir(parents=True, exist_ok=True)
+if not SKIP_USER_DATA_INIT and not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
-# Location of the data files
+
+def build_server_instructions(data_dir: str) -> str:
+    """Return MCP server instructions including the active output folder."""
+    return f"""This server provides tools for analysing binding kinetics data.
+You can import Octet and Gator experiments, align sensorgrams, subtract reference sensors,
+prepare fitting datasets, run kinetic fits, and plot results.
+Plots and generated files for this session are saved in: {data_dir}"""
 
 
+SERVER_INSTRUCTIONS = build_server_instructions(DATA_DIR)
+
+mcp.instructions = SERVER_INSTRUCTIONS
