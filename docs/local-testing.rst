@@ -45,9 +45,11 @@ To verify which tools are registered on the live ``mcp`` instance:
    asyncio.run(main())
    PY
 
-Test with FastMCP Inspector
----------------------------
+Test with MCP Inspector
+-----------------------
+
+To launch the MCP Inspector against a local checkout, run:
 
 .. code-block:: bash
 
-   fastmcp dev src/mcp_pykingenie/main.py:mcp
+   npx @modelcontextprotocol/inspector uv --directory /Users/oburastero/Desktop/arise/mcp_pykingenie run mcp_pykingenie

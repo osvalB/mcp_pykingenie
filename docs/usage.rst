@@ -145,9 +145,8 @@ To use the HTTP transport:
 
    uv run mcp_pykingenie -t http -p 8000
 
-If your environment provides the FastMCP development CLI, you can also use it
-for interactive MCP debugging:
+To use the MCP Inspector for interactive debugging against a local checkout:
 
 .. code-block:: bash
 
-   fastmcp dev src/mcp_pykingenie/main.py:mcp
+   npx @modelcontextprotocol/inspector uv --directory /Users/oburastero/Desktop/arise/mcp_pykingenie run mcp_pykingenie
