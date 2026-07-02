@@ -856,7 +856,7 @@ async def run_fitting(fitting_model: str = 'one_to_one',
 
     PY_KINETICS.submit_kinetics_fitting(fitting_model=fitting_model,
                                         fitting_region=fitting_region,
-                                        linkedSmax=linked_smax)
+                                        shared_smax=linked_smax)
 
     return (f"Fitting submitted with model: {fitting_model}, "
             f"region: {fitting_region}, "
@@ -937,4 +937,3 @@ def list_experiment_attributes(experiment_name: str) -> dict:
     attributes = vars(experiment)
 
     return attributes
-

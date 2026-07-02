@@ -32,7 +32,7 @@ dependencies = [
   "numpy>=2.4.3",
   "pandas>=3.0.1",
   "plotly>=6.6.0",
-  "pykingenie>=0.1.13",
+  "pykingenie>=1.0.0",
   "scipy>=1.17.1",
 ]
 optional-dependencies.dev = [
@@ -84,7 +84,7 @@ scripts.clean = "git clean -fdX -- {args:docs}"
 # Test the lowest and highest supported Python versions with normal deps
 [[tool.hatch.envs.hatch-test.matrix]]
 deps = [ "stable" ]
-python = [ "3.11", "3.13" ]
+python = [ "3.12", "3.13" ]
 
 # Test the newest supported Python version also with pre-release deps
 [[tool.hatch.envs.hatch-test.matrix]]

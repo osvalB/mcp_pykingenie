@@ -1691,7 +1691,7 @@ requires-dist = [
     { name = "pandas", marker = "extra == 'doc'" },
     { name = "plotly", specifier = ">=6.6.0" },
     { name = "pre-commit", marker = "extra == 'dev'" },
-    { name = "pykingenie", specifier = ">=0.1.13" },
+    { name = "pykingenie", specifier = ">=1.0.0" },
     { name = "pytest", marker = "extra == 'test'" },
     { name = "pytest-asyncio", marker = "extra == 'test'" },
     { name = "scipy", specifier = ">=1.17.1" },
@@ -2540,7 +2540,7 @@ crypto = [
 
 [[package]]
 name = "pykingenie"
-version = "0.1.13"
+version = "1.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "kaleido" },
@@ -2550,9 +2550,9 @@ dependencies = [
     { name = "plotly" },
     { name = "scipy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/68/73/abf094c3e060bdffd13c4089d411f4be9272fda1d637377e5fcdb596ae8d/pykingenie-0.1.13.tar.gz", hash = "sha256:b3eccfaa0e00e36108ba53719d0732bb217547a9a8bbbfdad5b12f956dc8ff7d", size = 86511, upload_time = "2026-02-14T10:17:37.99Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/42/6c/688df72717336df85156b43912bd4830254881cd2946b483c94388bccd04/pykingenie-1.0.0.tar.gz", hash = "sha256:394bda6f7199b27e6a7f024aa7816a7909283defd359cc42c6ba9e76e0345761", size = 104247, upload_time = "2026-06-30T08:37:53.184Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/dd/4523320c666f33af774c15f5dd7ce1d4ebaead93cf7d8e1fa7860c950217/pykingenie-0.1.13-py3-none-any.whl", hash = "sha256:4c8344f3fdd051c7e4d727a2bbef3d0fb5c39ac53e945f5387a1b2079e8518f5", size = 75118, upload_time = "2026-02-14T10:17:37.104Z" },
+    { url = "https://files.pythonhosted.org/packages/ba/04/5942b91fa7a3e3e80a65e4af96e3db207126e7bd5b952fc2202f95009534/pykingenie-1.0.0-py3-none-any.whl", hash = "sha256:91aa940a1e6786a81f92c8f356425794ff865a3304e4becb0f0b32ddc484af9a", size = 81973, upload_time = "2026-06-30T08:37:51.706Z" },
 ]
 
 [[package]]
