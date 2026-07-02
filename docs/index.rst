@@ -1,8 +1,9 @@
 mcp_pykingenie documentation
 ============================
 
-Welcome to ``mcp_pykingenie``, an MCP server for binding kinetics analysis
-using ``pykingenie``.
+Welcome to ``mcp_pykingenie``, an MCP server for surface-based binding
+kinetics analysis using ``pykingenie``. This server is intended only for
+surface-based binding data, such as Octet and Gator BLI experiments.
 
 .. toctree::
    :maxdepth: 2

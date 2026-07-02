@@ -30,9 +30,9 @@ if not SKIP_USER_DATA_INIT and not os.path.exists(DATA_DIR):
 
 def build_server_instructions(data_dir: str) -> str:
     """Return MCP server instructions including the active output folder."""
-    return f"""This server provides tools for analysing binding kinetics data.
+    return f"""This server provides tools for analysing surface-based binding kinetics data only.
 You can import Octet and Gator experiments, align sensorgrams, subtract reference sensors,
-prepare fitting datasets, run kinetic fits, and plot results.
+prepare fitting datasets, run either steady-state or kinetic fits, and plot results.
 Plots and generated files for this session are saved in: {data_dir}"""
 
 

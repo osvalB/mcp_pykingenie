@@ -182,7 +182,7 @@ Once connected through your MCP client, ask your AI assistant to run a flow like
 5. plot all the steps
 6. show me the sample information
 7. create a fitting dataset using sample wt - imd
-8. fit the data with a one-to-one model
+8. run kinetic fitting with a one-to-one model
 9. plot the fitted curves
 ```
 

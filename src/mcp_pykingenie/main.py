@@ -41,7 +41,7 @@ def run_app(
 ):
     """Run the MCP server "mcp_pykingenie".
 
-    MCP_PYKINGENIE is a MCP server that provides tools for the analysis of binding kinetics data.
+    MCP_PYKINGENIE is a MCP server that provides tools for the analysis of surface-based binding kinetics data only.
     If the environment variable MCP_ENVIRONMENT is set to "PRODUCTION", it will run the Starlette app with streamable HTTP for the MCP server. Otherwise, it will run the MCP server via stdio.
     The port is set via "-p/--port" or the MCP_PORT environment variable, defaulting to "8000" if not set.
     The hostname is set via "-h/--host" or the MCP_HOSTNAME environment variable, defaulting to "0.0.0.0" if not set.

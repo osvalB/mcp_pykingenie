@@ -146,6 +146,7 @@ def test_example_data_root_points_to_packaged_data():
 def test_server_instructions_show_current_data_folder():
     """Testing server instructions include the current output folder."""
     assert server.DATA_DIR in server.SERVER_INSTRUCTIONS
+    assert "surface-based binding kinetics data only" in server.SERVER_INSTRUCTIONS
     assert "Plots and generated files for this session are saved in:" in server.SERVER_INSTRUCTIONS
 
 
@@ -427,6 +428,25 @@ def test_import_gator_experiment_accepts_absolute_zip_file():
     assert len(experiment.xs[0]) > 0
 
 
+def test_import_gator_experiment_accepts_relative_zip_file():
+    """Testing Gator import resolves relative zip files from the active data dir."""
+    zip_stem = "gator_relative_zip_case"
+    zip_name = f"{zip_stem}.zip"
+    zip_path = Path(server.DATA_DIR) / zip_name
+
+    with zipfile.ZipFile(zip_path, "w") as zip_file:
+        for source_file in (TEST_DATA_DIR / "gator_minimal").iterdir():
+            zip_file.write(source_file, Path(zip_stem) / source_file.name)
+
+    message = pykingenie_tools.import_gator_experiment(zip_name, "Gator Relative Zip Example")
+
+    experiment = server.PY_KINETICS.experiments["Gator Relative Zip Example"]
+    assert message == f"Gator experiment added from {zip_stem}."
+    assert experiment.sensor_names == ["A", "B", "C", "D", "E", "F", "G", "H"]
+    assert experiment.no_steps > 0
+    assert len(experiment.xs[0]) > 0
+
+
 def test_import_kingenie_surface_csv_accepts_relative_and_absolute_paths():
     """Testing KinGenie CSV import uses real simulation CSV files."""
     csv_name = "single_cycle_kingenie.csv"
@@ -636,21 +656,30 @@ def test_initiate_fitting_datasets_falls_back_to_default_table_for_invalid_json(
 
 
 @pytest.mark.asyncio
-async def test_run_fitting_supports_real_two_to_one_model():
-    """Testing run_fitting supports PyKinGenie's real two-to-one model."""
+async def test_split_fitting_tools_support_real_two_to_one_model():
+    """Testing split fitting tools support PyKinGenie's real two-to-one model."""
     _load_example_and_selected_fitting()
 
-    message = await pykingenie_tools.run_fitting(
-        fitting_model="two_to_one",
+    steady_state_message = await pykingenie_tools.run_steady_state_fitting(
         steady_state_model="two_to_one",
+        fit_sigma=False,
+    )
+    assert (
+        "Steady-state fitting submitted with model: two_to_one, "
+        "fit sigma: False."
+    ) == steady_state_message
+
+    _load_example_and_selected_fitting()
+    kinetics_message = await pykingenie_tools.run_kinetics_fitting(
+        fitting_model="two_to_one",
         fit_sigma=False,
     )
 
     assert (
-        "Fitting submitted with model: two_to_one, "
+        "Kinetics fitting submitted with model: two_to_one, "
         "region: association_dissociation, linked Smax: False, "
-        "steady-state model: two_to_one, fit sigma: False."
-    ) == message
+        "fit sigma: False."
+    ) == kinetics_message
 
 
 @pytest.mark.asyncio
@@ -661,7 +690,7 @@ async def test_create_export_df_returns_real_raw_and_fitted_traces():
     raw_json = pykingenie_tools.create_export_df()
     raw_df = pd.read_json(StringIO(raw_json), orient='records')
 
-    await pykingenie_tools.run_fitting()
+    await pykingenie_tools.run_kinetics_fitting()
     fitted_json = pykingenie_tools.create_export_df(export_type="fitted")
     fitted_df = pd.read_json(StringIO(fitted_json), orient='records')
 
@@ -683,14 +712,34 @@ async def test_create_export_df_returns_real_raw_and_fitted_traces():
         pykingenie_tools.create_export_df(export_type="unknown")
 
 
+def test_fitting_result_tools_report_empty_states_clearly():
+    """Testing result/export tools reject missing fitting state with clear errors."""
+    with pytest.raises(RuntimeError, match="No fitting datasets are available"):
+        pykingenie_tools.get_kinetics_fitting_results()
+
+    with pytest.raises(RuntimeError, match="No fitting datasets are available"):
+        pykingenie_tools.create_export_df()
+
+    _load_example_and_selected_fitting()
+
+    with pytest.raises(RuntimeError, match="No kinetic fitting results are available"):
+        pykingenie_tools.get_kinetics_fitting_results()
+
+    with pytest.raises(RuntimeError, match="No fitted kinetic traces are available"):
+        pykingenie_tools.create_export_df(export_type="fitted")
+
+
+@pytest.mark.asyncio
+async def test_run_steady_state_fitting_rejects_unsupported_real_model():
+    """Testing steady-state fitting rejects PyKinGenie unsupported models."""
+    with pytest.raises(ValueError, match="Unknown steady-state fitting model"):
+        await pykingenie_tools.run_steady_state_fitting(steady_state_model="one_to_one_mtl")
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-        (
-            {"steady_state_model": "one_to_one_mtl"},
-            "Unknown steady-state fitting model",
-        ),
         (
             {"fitting_model": "unknown"},
             "Unknown kinetic fitting model",
@@ -718,13 +767,13 @@ async def test_create_export_df_returns_real_raw_and_fitted_traces():
         ),
     ],
 )
-async def test_run_fitting_rejects_unsupported_real_model_region_combinations(
+async def test_run_kinetics_fitting_rejects_unsupported_real_model_region_combinations(
     kwargs,
     match,
 ):
-    """Testing run_fitting rejects PyKinGenie unsupported fitting selections."""
+    """Testing kinetic fitting rejects PyKinGenie unsupported fitting selections."""
     with pytest.raises(ValueError, match=match):
-        await pykingenie_tools.run_fitting(**kwargs)
+        await pykingenie_tools.run_kinetics_fitting(**kwargs)
 
 
 @pytest.mark.asyncio
@@ -801,11 +850,17 @@ async def test_mcp_server():
 
         assert "Plot saved to" in result.data
 
-        result = await client.call_tool("run_fitting", {})
+        result = await client.call_tool("run_steady_state_fitting", {})
         assert (
-            "Fitting submitted with model: one_to_one, "
+            "Steady-state fitting submitted with model: one_to_one, "
+            "fit sigma: False."
+        ) == result.data
+
+        result = await client.call_tool("run_kinetics_fitting", {})
+        assert (
+            "Kinetics fitting submitted with model: one_to_one, "
             "region: association_dissociation, linked Smax: False, "
-            "steady-state model: one_to_one, fit sigma: False."
+            "fit sigma: False."
         ) == result.data
 
         result = await client.call_tool("get_kinetics_fitting_results", {})

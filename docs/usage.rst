@@ -1,6 +1,9 @@
 Usage
 =====
 
+``mcp_pykingenie`` is intended only for surface-based binding data, such as
+Octet and Gator BLI experiments.
+
 Video Demonstrations
 --------------------
 

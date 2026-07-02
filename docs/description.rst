@@ -1,16 +1,17 @@
 Overview
 ========
 
-``mcp_pykingenie`` exposes ``pykingenie`` binding kinetics workflows through
-the Model Context Protocol. It provides tools for importing Octet and Gator
-experiments, aligning association and dissociation phases, subtracting
-reference sensors, preparing fitting datasets, running kinetic fits, plotting
-traces, and inspecting fitted parameters.
+``mcp_pykingenie`` exposes ``pykingenie`` surface-based binding kinetics
+workflows through the Model Context Protocol. This MCP server is only for
+surface-based binding data, such as Octet and Gator BLI experiments. It
+provides tools for importing experiments, aligning association and dissociation
+phases, subtracting reference sensors, preparing fitting datasets, running
+kinetic fits, plotting traces, and inspecting fitted parameters.
 
 Basic Workflow
 --------------
 
-The typical workflow for binding kinetics analysis is:
+The typical workflow for surface-based binding kinetics analysis is:
 
 1. Import an Octet or Gator experiment.
 2. Align the association phase.
@@ -18,8 +19,8 @@ The typical workflow for binding kinetics analysis is:
 4. Subtract a reference sensor.
 5. Inspect the sample information table.
 6. Select traces and generate fitting datasets.
-7. Run a kinetic fitting model.
-8. Plot fitted curves and retrieve fitting results.
+7. Run either a steady-state fitting model or a kinetic fitting model.
+8. Plot fitted curves and retrieve fitting results, when running kinetic fitting.
 
 MCP Tools
 ---------
@@ -46,7 +47,7 @@ like:
    5. plot all the steps
    6. show me the sample information
    7. create a fitting dataset using sample wt - imd
-   8. fit the data with a one-to-one model
+   8. run kinetic fitting with a one-to-one model
    9. plot the fitted curves
 
 Local Development

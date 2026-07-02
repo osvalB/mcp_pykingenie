@@ -1,7 +1,9 @@
 MCP Tools Reference
 ===================
 
-``mcp_pykingenie`` exposes the following tools to your AI assistant.
+``mcp_pykingenie`` exposes the following tools to your AI assistant. These
+tools are intended only for surface-based binding data, such as Octet and Gator
+BLI experiments.
 
 Data Import
 -----------
@@ -100,8 +102,10 @@ Fitting
      - Description
    * - ``initiate_fitting_datasets``
      - Generate fitting datasets from a sample info JSON table.
-   * - ``run_fitting``
-     - Run fitting. Steady-state initialization supports ``one_to_one`` and ``two_to_one``. Kinetic ``one_to_one`` supports ``association_dissociation``, ``association``, and ``dissociation``; ``one_to_one_mtl``, ``one_to_one_if``, and ``two_to_one`` support only ``association_dissociation``.
+   * - ``run_steady_state_fitting``
+     - Run steady-state fitting as an alternative to kinetic fitting. Supports ``one_to_one`` and ``two_to_one``.
+   * - ``run_kinetics_fitting``
+     - Run kinetic fitting as an alternative to standalone steady-state fitting. The tool handles PyKinGenie's required starting values internally. ``one_to_one`` supports ``association_dissociation``, ``association``, and ``dissociation``; ``one_to_one_mtl``, ``one_to_one_if``, and ``two_to_one`` support only ``association_dissociation``.
    * - ``get_kinetics_fitting_results``
      - Retrieve fitting results, including ``Kd``, ``k_off``, ``Smax``, and derived ``k_on``.
    * - ``create_export_df``

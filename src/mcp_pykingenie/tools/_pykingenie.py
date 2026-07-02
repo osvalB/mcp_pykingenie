@@ -245,7 +245,7 @@ def import_gator_experiment(folder: str = '.', exp_name: str = 'Experiment') -> 
     # Check if we have a zip file or a folder, if we have a zip, extract it to a folder
     if folder_path.endswith('.zip'):
         import zipfile
-        with zipfile.ZipFile(folder, 'r') as zip_ref:
+        with zipfile.ZipFile(folder_path, 'r') as zip_ref:
             zip_ref.extractall(DATA_DIR)  # Extract to the data directory
             # Obtain the name of the zip file without the .zip extension
             # and use it as the folder name
@@ -1003,18 +1003,57 @@ async def plot_kinetic_traces(plot_width: int = 26,
 
 
 @mcp.tool()
-async def run_fitting(fitting_model: str = 'one_to_one',
-                      fitting_region: str = 'association_dissociation',
-                      linked_smax: bool = False,
-                      steady_state_model: str = 'one_to_one',
-                      fit_sigma: bool = False) -> str:
+async def run_steady_state_fitting(steady_state_model: str = 'one_to_one',
+                                   fit_sigma: bool = False) -> str:
     """
-    Run PyKinGenie steady-state initialization and kinetic fitting.
+    Run PyKinGenie steady-state fitting for generated fitting datasets.
 
-    The wrapper first calls ``submit_steady_state_fitting`` to obtain starting
-    values, then calls ``submit_kinetics_fitting`` with the selected kinetic
+    This calls ``PY_KINETICS.submit_steady_state_fitting`` to fit
+    concentration-response data independently from kinetic trace fitting.
+
+    Parameters
+    ----------
+    steady_state_model : str
+        Steady-state model to fit. PyKinGenie accepts ``'one_to_one'`` and
+        ``'two_to_one'``.
+    fit_sigma : bool
+        If True with ``'two_to_one'`` steady-state fitting, fit the shared
+        cooperativity factor sigma.
+
+    Returns
+    -------
+    str
+        A confirmation message with the steady-state fitting settings used.
+    """
+    if steady_state_model not in STEADY_STATE_FITTING_MODELS:
+        valid_models = ", ".join(sorted(STEADY_STATE_FITTING_MODELS))
+        raise ValueError(
+            f"Unknown steady-state fitting model '{steady_state_model}'. "
+            f"Valid models: {valid_models}."
+        )
+
+    PY_KINETICS.submit_steady_state_fitting(
+        fitting_model=steady_state_model,
+        fit_sigma=fit_sigma,
+    )
+
+    return (f"Steady-state fitting submitted with model: {steady_state_model}, "
+            f"fit sigma: {fit_sigma}.")
+
+
+@mcp.tool()
+async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
+                               fitting_region: str = 'association_dissociation',
+                               linked_smax: bool = False,
+                               fit_sigma: bool = False) -> str:
+    """
+    Run PyKinGenie kinetic fitting for generated fitting datasets.
+
+    This calculates the starting values required by PyKinGenie internally, then
+    calls ``PY_KINETICS.submit_kinetics_fitting`` with the selected kinetic
     model, fitted region, Smax sharing setting, and optional two-site
-    cooperativity setting.
+    cooperativity setting. Use ``run_steady_state_fitting`` separately only
+    when you want a standalone steady-state fit.
 
     Parameters
     ----------
@@ -1032,25 +1071,15 @@ async def run_fitting(fitting_model: str = 'one_to_one',
     linked_smax : bool
         Whether to link the Smax values across curves, i.e. assume the same
         sensor capacity.
-    steady_state_model : str
-        Steady-state model used to initialize kinetic fitting. PyKinGenie
-        accepts ``'one_to_one'`` and ``'two_to_one'``.
     fit_sigma : bool
-        If True with ``'two_to_one'`` steady-state or kinetic fitting, fit the
-        shared cooperativity factor sigma.
+        If True with ``'two_to_one'`` kinetic fitting, fit the shared
+        cooperativity factor sigma.
 
     Returns
     -------
     str
-        A confirmation message with the fitting settings used.
+        A confirmation message with the kinetic fitting settings used.
     """
-    if steady_state_model not in STEADY_STATE_FITTING_MODELS:
-        valid_models = ", ".join(sorted(STEADY_STATE_FITTING_MODELS))
-        raise ValueError(
-            f"Unknown steady-state fitting model '{steady_state_model}'. "
-            f"Valid models: {valid_models}."
-        )
-
     valid_regions = KINETIC_FITTING_MODEL_REGIONS.get(fitting_model)
     if valid_regions is None:
         valid_models = ", ".join(sorted(KINETIC_FITTING_MODEL_REGIONS))
@@ -1066,20 +1095,20 @@ async def run_fitting(fitting_model: str = 'one_to_one',
             f"'{fitting_region}'. Valid regions: {valid_regions_message}."
         )
 
+    steady_state_model = "two_to_one" if fitting_model == "two_to_one" else "one_to_one"
     PY_KINETICS.submit_steady_state_fitting(
         fitting_model=steady_state_model,
         fit_sigma=fit_sigma,
-    )  # To obtain initial values for the Kd and Smax parameters
+    )
 
     PY_KINETICS.submit_kinetics_fitting(fitting_model=fitting_model,
                                         fitting_region=fitting_region,
                                         shared_smax=linked_smax,
                                         fit_sigma=fit_sigma)
 
-    return (f"Fitting submitted with model: {fitting_model}, "
+    return (f"Kinetics fitting submitted with model: {fitting_model}, "
             f"region: {fitting_region}, "
             f"linked Smax: {linked_smax}, "
-            f"steady-state model: {steady_state_model}, "
             f"fit sigma: {fit_sigma}.")
 
 
@@ -1097,6 +1126,19 @@ def get_kinetics_fitting_results() -> str:
     str
         A JSON string representing the fitting results.
     """
+    if not PY_KINETICS.fittings_names:
+        raise RuntimeError(
+            "No fitting datasets are available. Run initiate_fitting_datasets before retrieving kinetic results."
+        )
+
+    has_kinetic_results = any(
+        getattr(PY_KINETICS.fittings[name], "fit_params_kinetics", None) is not None
+        for name in PY_KINETICS.fittings_names
+    )
+    if not has_kinetic_results:
+        raise RuntimeError(
+            "No kinetic fitting results are available. Run run_kinetics_fitting before retrieving results."
+        )
 
     PY_KINETICS.get_fitting_results()
     df = PY_KINETICS.fit_params_kinetics_all
@@ -1112,8 +1154,8 @@ def create_export_df(export_type: str = 'raw') -> str:
 
     This calls ``PY_KINETICS.create_export_df`` for all generated fitting
     objects. Raw export returns the measured association and dissociation
-    signals; fitted export returns fitted curves after ``run_fitting`` has been
-    called.
+    signals; fitted export returns fitted curves after ``run_kinetics_fitting``
+    has been called.
 
     Parameters
     ----------
@@ -1128,6 +1170,21 @@ def create_export_df(export_type: str = 'raw') -> str:
     """
     if export_type not in {"raw", "fit", "fitted"}:
         raise ValueError("export_type must be 'raw', 'fit', or 'fitted'.")
+
+    if not PY_KINETICS.fittings_names:
+        raise RuntimeError(
+            "No fitting datasets are available. Run initiate_fitting_datasets before exporting traces."
+        )
+
+    if export_type in {"fit", "fitted"}:
+        has_fitted_traces = any(
+            getattr(PY_KINETICS.fittings[name], "signal_assoc_fit", None) is not None
+            for name in PY_KINETICS.fittings_names
+        )
+        if not has_fitted_traces:
+            raise RuntimeError(
+                "No fitted kinetic traces are available. Run run_kinetics_fitting before exporting fitted traces."
+            )
 
     pykingenie_export_type = "fit" if export_type == "fitted" else export_type
     df = PY_KINETICS.create_export_df(type=pykingenie_export_type)

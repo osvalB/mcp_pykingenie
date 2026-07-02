@@ -5,8 +5,9 @@ Requirements
 ------------
 
 ``mcp_pykingenie`` requires Python 3.11 or later. The MCP server depends on
-``pykingenie`` and FastMCP, plus the scientific Python stack used for binding
-kinetics analysis.
+``pykingenie`` and FastMCP, plus the scientific Python stack used for
+surface-based binding kinetics analysis. The server is intended only for
+surface-based binding data, such as Octet and Gator BLI experiments.
 
 Run with uvx
 ------------
