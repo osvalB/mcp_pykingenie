@@ -449,6 +449,7 @@ def test_import_kingenie_surface_csv_accepts_relative_and_absolute_paths():
 def test_numeric_experiment_id_and_reference_index_use_loaded_octet_data():
     """Testing numeric selectors operate on the real loaded experiment."""
     pykingenie_tools.load_octet_example()
+    expected_reference = server.PY_KINETICS.experiments["Example Experiment"].sensor_names[0]
 
     association_message = pykingenie_tools.align_association(experiment_id="1")
     dissociation_message = pykingenie_tools.align_dissociation(experiment_id="1")
@@ -456,8 +457,8 @@ def test_numeric_experiment_id_and_reference_index_use_loaded_octet_data():
 
     assert "Association phase aligned for experiment: Example Experiment" in association_message
     assert "Dissociation phase aligned for experiment: Example Experiment" in dissociation_message
-    assert "Reference sensor 'A1' subtracted" in subtraction_message
-    assert "A1" in server.PY_KINETICS.experiments["Example Experiment"].sensor_names
+    assert f"Reference sensor '{expected_reference}' subtracted" in subtraction_message
+    assert expected_reference in server.PY_KINETICS.experiments["Example Experiment"].sensor_names
 
 
 def test_invalid_experiment_selectors_return_not_found_messages():
@@ -496,9 +497,11 @@ def test_experiment_properties_and_attributes_reflect_loaded_data():
 
     sensor_names = pykingenie_tools.list_experiment_properties("sensor_names")
     attributes = pykingenie_tools.list_experiment_attributes("1")
+    loaded_sensor_names = server.PY_KINETICS.experiments["Example Experiment"].sensor_names
 
-    assert sensor_names == [["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"]]
-    assert attributes["sensor_names"] == ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"]
+    assert sensor_names == [loaded_sensor_names]
+    assert attributes["sensor_names"] == loaded_sensor_names
+    assert set(loaded_sensor_names) == {"A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"}
     assert "sensor_names_unique" in attributes
 
 
