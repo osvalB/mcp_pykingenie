@@ -186,6 +186,22 @@ Once connected through your MCP client, ask your AI assistant to run a flow like
 9. plot the fitted curves
 ```
 
+## Importing data
+
+Use `print_data_dir` to see the active MCP data directory. Import tools accept
+absolute paths, or paths relative to that directory.
+
+- Download the bundled Octet BLI example data:
+  [`octet_bli_example_data.zip`](docs/_static/downloads/octet_bli_example_data.zip).
+- `import_octet_experiment`: pass a folder containing Octet `.frd` files and
+  sample plate metadata.
+- `import_gator_experiment`: pass a Gator folder or `.zip` archive containing
+  channel CSV files plus `Setting.ini` and `ExperimentStep.ini`.
+- `import_kingenie_surface_csv`: pass a surface-simulation CSV with trace
+  columns such as `Time`, `Signal`, `Smax`, and
+  `Analyte_concentration_micromolar_constant`.
+- `load_octet_example`: load the packaged example to test the workflow.
+
 ## Contact
 
 If you found a bug, please use the [issue tracker][].

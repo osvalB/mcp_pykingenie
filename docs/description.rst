@@ -22,6 +22,35 @@ The typical workflow for surface-based binding kinetics analysis is:
 7. Run either a steady-state fitting model or a kinetic fitting model.
 8. Plot fitted curves and retrieve fitting results, when running kinetic fitting.
 
+Importing Data
+--------------
+
+Data can be imported from absolute paths or from paths relative to the active
+MCP data directory. Use ``print_data_dir`` to see that directory. Relative-path
+imports are useful when you first place or copy input files into the server's
+date-stamped data folder.
+
+Supported import paths are:
+
+* ``load_octet_example`` loads the packaged Octet BLI example and is the
+  quickest way to test the full workflow. Users can also download the same raw
+  example data as :download:`octet_bli_example_data.zip
+  <_static/downloads/octet_bli_example_data.zip>`.
+* ``import_octet_experiment`` imports an Octet folder containing ``.frd`` files
+  and the sample plate metadata files produced by the Octet software.
+* ``import_gator_experiment`` imports a Gator folder or ``.zip`` archive. The
+  folder/archive should contain the channel CSV files plus ``Setting.ini`` and
+  ``ExperimentStep.ini``. Zip archives are extracted into the active MCP data
+  directory before loading.
+* ``import_kingenie_surface_csv`` imports a KinGenie surface-simulation CSV.
+  The CSV should contain surface trace columns such as ``Time``, ``Signal``,
+  ``Smax``, and ``Analyte_concentration_micromolar_constant``.
+
+Each import tool stores the loaded experiment in the in-memory
+``pykingenie.KineticsAnalyzer`` under the supplied experiment name. Use
+``list_experiment_names`` after importing to confirm what is available for
+alignment, subtraction, plotting, and fitting.
+
 MCP Tools
 ---------
 

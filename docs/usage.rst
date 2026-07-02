@@ -35,6 +35,33 @@ MCP clients that support an ``mcp.json`` configuration can start
 ``RESULTS_DIR`` is the folder where plots and generated files are stored. The
 server creates a date-stamped subfolder inside it for each run.
 
+Importing Data
+--------------
+
+Before importing data, ask the assistant to run ``print_data_dir`` if you want
+to use relative paths. Relative input paths are resolved inside that active
+date-stamped MCP data directory; absolute paths can be used directly.
+
+The bundled Octet BLI example used by ``load_octet_example`` can be downloaded
+from the documentation as :download:`octet_bli_example_data.zip
+<_static/downloads/octet_bli_example_data.zip>`.
+
+Example requests:
+
+.. code-block:: text
+
+   Load the Octet example experiment.
+   Import the Octet folder /Users/me/data/octet_run_01 as experiment "Run 01".
+   Import the Gator zip gator_run.zip from the MCP data directory as "Gator Run".
+   Import the KinGenie surface CSV /Users/me/data/surface_simulation.csv.
+
+For Octet data, provide the folder containing the ``.frd`` files and sample
+plate metadata. For Gator data, provide either the folder or a ``.zip`` archive
+containing the channel CSV files plus ``Setting.ini`` and
+``ExperimentStep.ini``. For KinGenie surface CSV imports, provide a CSV with
+surface trace columns such as ``Time``, ``Signal``, ``Smax``, and
+``Analyte_concentration_micromolar_constant``.
+
 Claude Desktop
 --------------
 

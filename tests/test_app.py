@@ -143,6 +143,20 @@ def test_example_data_root_points_to_packaged_data():
     assert (example_data_dir / "test_bli_folder").is_dir()
 
 
+def test_documentation_example_bli_download_archive_contains_raw_data():
+    """Testing docs expose a downloadable Octet BLI example archive."""
+    archive_path = Path(__file__).parents[1] / "docs" / "_static" / "downloads" / "octet_bli_example_data.zip"
+
+    assert archive_path.is_file()
+
+    with zipfile.ZipFile(archive_path) as zip_file:
+        names = set(zip_file.namelist())
+
+    assert "test_bli_folder/230309_001.frd" in names
+    assert "test_bli_folder/230309_Manifest.fmx" in names
+    assert "test_bli_folder/230309_ExpMethod.fmf" in names
+
+
 def test_server_instructions_show_current_data_folder():
     """Testing server instructions include the current output folder."""
     assert server.DATA_DIR in server.SERVER_INSTRUCTIONS
