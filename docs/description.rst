@@ -71,7 +71,7 @@ Citation
 
 If you use ``mcp_pykingenie``, please cite it as:
 
-Burastero, O. (2026). ``mcp_pykingenie`` (Version 0.0.1) [Computer software].
+Burastero, O. (2026). ``mcp_pykingenie`` (Version 1.0.0) [Computer software].
 GitHub. https://github.com/osvalB/mcp_pykingenie
 
 .. code-block:: bibtex
@@ -79,7 +79,7 @@ GitHub. https://github.com/osvalB/mcp_pykingenie
    @software{burastero_2026_mcp_pykingenie,
      author = {Burastero, Osvaldo},
      title = {mcp_pykingenie},
-     version = {0.0.1},
+     version = {1.0.0},
      year = {2026},
      url = {https://github.com/osvalB/mcp_pykingenie}
    }

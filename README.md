@@ -1,9 +1,10 @@
 # mcp_pykingenie
 
+<!--
 [![BioContextAI - Registry](https://img.shields.io/badge/Registry-package?style=flat&label=BioContextAI&labelColor=%23fff&color=%233555a1&link=https%3A%2F%2Fbiocontext.ai%2Fregistry)](https://biocontext.ai/registry)
 [![Tests][badge-tests]][tests]
 [![Documentation][badge-docs]][documentation]
-
+-->
 [badge-tests]: https://img.shields.io/github/actions/workflow/status/osvalB/mcp_pykingenie/test.yaml?branch=main
 [badge-docs]: https://img.shields.io/readthedocs/mcp_pykingenie
 
