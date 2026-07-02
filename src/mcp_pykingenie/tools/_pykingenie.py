@@ -27,19 +27,23 @@ def current_hour_min_sec():
 # To be called by mcp tools import_octet_experiment and load_octet_example
 def import_octet_experiment_base(folder: str = '.', exp_name: str = 'Experiment') -> str:
     """
-    Add a new experiment to the pykinetics analyzer from an Octet folder.
+    Import Octet BLI data into the shared PyKinGenie analyzer.
+
+    The folder is read with :class:`pykingenie.OctetExperiment`. PyKinGenie
+    parses the ``.frd`` sensor traces and sample plate metadata, then the
+    resulting experiment is registered in ``PY_KINETICS``.
 
     Parameters
     ----------
     folder : str
-        Name of the folder containing the Octet data files (.frd files).
+        Absolute path or ``DATA_DIR``-relative folder containing Octet files.
     exp_name : str
-        Name of the experiment to be added.
+        Name used when storing the experiment in the analyzer.
 
     Returns
     -------
     str
-        A confirmation message.
+        Confirmation message naming the imported folder.
     """
 
     # Find if full path is provided or just the folder name
@@ -107,21 +111,25 @@ def list_files_in_folder(folder: str = '') -> list:
 @mcp.tool()
 def import_kingenie_surface_csv(csv: str, exp_name: str = 'Experiment') -> str:
     """
-    Add a new experiment to the pykinetics analyzer.
+    Import a KinGenie surface-simulation CSV into the analyzer.
 
-    The csv file can be created using the simulation tool in the KinGenie online tool.
+    The CSV is parsed with :class:`pykingenie.KinGenieCsv`. It should contain
+    exported surface-simulation columns such as ``Time``, ``Signal``, ``Smax``,
+    and ``Analyte_concentration_micromolar_constant``; a ``Cycle`` column is
+    supported for single-cycle data. If ``exp_name`` already exists, a numeric
+    suffix is appended before storing the experiment in ``PY_KINETICS``.
 
     Parameters
     ----------
     csv : str
-        Path to the CSV file containing the simulation data.
+        Absolute path or ``DATA_DIR``-relative path to the simulation CSV file.
     exp_name : str
-        Name of the experiment to be added.
+        Requested experiment name in the analyzer.
 
     Returns
     -------
     str
-        A confirmation message.
+        Confirmation message naming the imported CSV path.
     """
     exp = pykingenie.KinGenieCsv()
 
@@ -145,19 +153,22 @@ def import_kingenie_surface_csv(csv: str, exp_name: str = 'Experiment') -> str:
 @mcp.tool()
 def import_octet_experiment(folder: str = '.', exp_name: str = 'Experiment') -> str:
     """
-    Add a new experiment to the pykinetics analyzer from an Octet folder.
+    Import an Octet experiment folder into the shared PyKinGenie analyzer.
+
+    This wraps :class:`pykingenie.OctetExperiment`, loading sensor traces and
+    sample plate metadata before adding the experiment to ``PY_KINETICS``.
 
     Parameters
     ----------
     folder : str
-        Name of the folder containing the Octet data files (.frd files).
+        Absolute path or ``DATA_DIR``-relative folder containing Octet files.
     exp_name : str
-        Name of the experiment to be added.
+        Name used when storing the experiment in the analyzer.
 
     Returns
     -------
     str
-        A confirmation message.
+        Confirmation message naming the imported folder.
     """
 
     return import_octet_experiment_base(folder, exp_name)
@@ -166,21 +177,26 @@ def import_octet_experiment(folder: str = '.', exp_name: str = 'Experiment') -> 
 @mcp.tool()
 def import_gator_experiment(folder: str = '.', exp_name: str = 'Experiment') -> str:
     """
-    Add a new experiment to the pykinetics analyzer from a Gator folder / zip file.
+    Import Gator BLI data into the shared PyKinGenie analyzer.
+
+    Folder contents are parsed with :class:`pykingenie.GatorExperiment`, which
+    reads experiment steps, settings, and sensor-channel CSV traces. If a zip
+    file is provided, it is extracted under ``DATA_DIR`` and then read as a
+    folder.
 
     Parameters
     ----------
     folder : str
-        Name of the folder containing the Gator data files
-        (``Assay_#_Channel#.csv``) and the corresponding metadata files
-        (``Settings.ini`` and ``ExperimentStep.ini``).
+        Absolute path or ``DATA_DIR``-relative folder or zip file containing
+        ``Assay_#_Channel#.csv`` files plus ``Setting.ini`` and
+        ``ExperimentStep.ini``.
     exp_name : str
-        Name of the experiment to be added.
+        Name used when storing the experiment in the analyzer.
 
     Returns
     -------
     str
-        A confirmation message.
+        Confirmation message naming the imported folder or zip stem.
     """
 
     # Find if full path is provided or just the folder name
@@ -215,15 +231,16 @@ def import_gator_experiment(folder: str = '.', exp_name: str = 'Experiment') -> 
 @mcp.tool()
 def load_octet_example() -> str:
     """
-    Load an example experiment from the pykinetics analyzer.
+    Load the packaged Octet example into the shared analyzer.
 
-    The example experiment comes from an Octet (Biolayer interferometry) experiment.
-    This will load the example data provided with the pykingenie package.
+    The bundled BLI example is imported through the same
+    :class:`pykingenie.OctetExperiment` path as ``import_octet_experiment`` and
+    stored as ``"Example Experiment"``.
 
     Returns
     -------
     str
-        A confirmation message.
+        Confirmation message naming the packaged example folder.
     """
     example_folder_path = os.path.join(EXAMPLE_DATA_DIR, 'test_bli_folder')
 
@@ -233,7 +250,11 @@ def load_octet_example() -> str:
 @mcp.tool()
 def plot_sample_plate_info(experiment_id: str = '1', font_size: int = 18, save_html: bool = False) -> str:
     """
-    Plot the sample plate information for a given experiment in the pykinetics analyzer.
+    Save a PyKinGenie sample-plate layout plot for one experiment.
+
+    The plot is produced by :func:`pykingenie.plot_plate_info` and written as a
+    PNG in ``DATA_DIR``. The experiment may be selected by name or by 1-based
+    analyzer index.
 
     Parameters
     ----------
@@ -248,13 +269,13 @@ def plot_sample_plate_info(experiment_id: str = '1', font_size: int = 18, save_h
     Returns
     -------
     str
-        The path to the saved image file.
+        Message containing the saved PNG path.
     """
 
     if experiment_id not in PY_KINETICS.experiment_names:
         try:
             experiment_name = PY_KINETICS.experiment_names[int(experiment_id) - 1]
-        except KeyError:
+        except (ValueError, IndexError):
             return f"Experiment with index {experiment_id} not found in kingenie."
     else:
         experiment_name = experiment_id
@@ -283,12 +304,17 @@ def plot_sample_plate_info(experiment_id: str = '1', font_size: int = 18, save_h
 @mcp.tool()
 def get_legends_table() -> str:
     """
-    Get the legend dataframe containing the sensor names, their unique IDs, and colors.
+    Build a plotting legend table from PyKinGenie sensor metadata.
+
+    Sensor names and unique sensor IDs are collected with
+    ``PY_KINETICS.get_experiment_properties`` and converted with
+    :func:`pykingenie.get_plotting_df`.
 
     Returns
     -------
     str
-        A JSON string representing the legend DataFrame.
+        JSON records for a DataFrame with ``Internal_ID``, ``Color``,
+        ``Legend``, and ``Show`` columns.
     """
 
     labels = PY_KINETICS.get_experiment_properties('sensor_names')
@@ -316,20 +342,21 @@ async def plot_traces_with_all_steps(legends_df: str = "",
                                      line_width: int = 2,
                                      save_html: bool = False) -> str:
     """
-    Plot the traces from the pykinetics analyzer using the provided legend DataFrame.
+    Save a PyKinGenie plot containing all loaded trace steps.
 
-    The legend DataFrame can be first created using the ``get_legends_table`` tool.
-    The plot will include all steps such as baseline, association, dissociation,
-    and regeneration phases.
+    The plot is produced by :func:`pykingenie.plot_traces_all` using a legend
+    table created by ``get_legends_table`` or supplied as JSON records. It can
+    include baseline, loading, association, dissociation, and regeneration
+    segments present in the imported experiments.
 
     Parameters
     ----------
     legends_df : str
         A JSON string representing the legend DataFrame.
     plot_width : int
-        Width of the plot in pixels*50.
+        Plot width forwarded to PyKinGenie/Plotly.
     plot_height : int
-        Height of the plot in pixels*50.
+        Plot height forwarded to PyKinGenie/Plotly.
     plot_type : str
         Type of the plot to generate (``'png'``, ``'svg'``, ``'jpeg'``).
     font_size : int
@@ -348,7 +375,7 @@ async def plot_traces_with_all_steps(legends_df: str = "",
     Returns
     -------
     str
-        Path to the saved image file.
+        Message containing the saved image path.
     """
 
     # generate legends_df if not provided
@@ -390,17 +417,17 @@ async def plot_steady_state(plot_width: int = 26,
                             line_width: int = 2,
                             save_html: bool = False) -> str:
     """
-    Plot the steady state data from the pykinetics analyzer.
+    Save a PyKinGenie steady-state plot for generated fittings.
 
-    Uses the ``fitting`` objects. Can only be run after the
-    ``generate_fitting_dataset`` tool has been run.
+    This calls :func:`pykingenie.plot_steady_state` with ``plot_fit=True`` and
+    requires fitting datasets generated by ``initiate_fitting_datasets``.
 
     Parameters
     ----------
     plot_width : int
-        Width of the plot in pixels*50.
+        Plot width forwarded to PyKinGenie/Plotly.
     plot_height : int
-        Height of the plot in pixels*50.
+        Plot height forwarded to PyKinGenie/Plotly.
     plot_type : str
         Type of the plot to generate (``'png'``, ``'svg'``, ``'jpeg'``).
     font_size : int
@@ -419,7 +446,7 @@ async def plot_steady_state(plot_width: int = 26,
     Returns
     -------
     str
-        Path to the saved image file.
+        Message containing the saved image path.
     """
 
     fig = pykingenie.plot_steady_state(PY_KINETICS,
@@ -466,7 +493,12 @@ def align_association(experiment_id: str = '1',
                       in_place: bool = True,
                       new_names: bool = False) -> str:
     """
-    Align the association phase of the specified experiment in the pykinetics analyzer.
+    Align association phases for selected sensors in a PyKinGenie experiment.
+
+    This calls ``SurfaceBasedExperiment.align_association``. PyKinGenie
+    subtracts the signal before association from the selected traces and updates
+    trace arrays, sensor names, and ligand metadata according to ``in_place`` and
+    ``new_names``.
 
     Parameters
     ----------
@@ -474,7 +506,7 @@ def align_association(experiment_id: str = '1',
         The name of the experiment to align. If a number is provided, it will be
         used to select the experiment by its index.
     sensor_names : list
-        A list of sensor names to align.
+        Sensor names to align. If empty, all sensors in the experiment are used.
     in_place : bool
         If True, modifies the existing sensors; if False, creates new sensors.
     new_names : bool
@@ -489,7 +521,7 @@ def align_association(experiment_id: str = '1',
     if experiment_id not in PY_KINETICS.experiment_names:
         try:
             experiment_name = PY_KINETICS.experiment_names[int(experiment_id) - 1]
-        except KeyError:
+        except (ValueError, IndexError):
             return f"Experiment with index {experiment_id} not found in kingenie."
     else:
         experiment_name = experiment_id
@@ -508,7 +540,11 @@ def align_association(experiment_id: str = '1',
 def subtract_reference(experiment_id: str = '1', list_of_sensor_names: list = [],
                        reference_sensor: str = '1', inplace: bool = True) -> str:
     """
-    Subtract the reference sensor from the specified sensors in the pykinetics analyzer.
+    Subtract a reference sensor from selected PyKinGenie sensor traces.
+
+    This calls ``SurfaceBasedExperiment.subtraction`` and updates trace arrays,
+    sensor names, and ligand metadata. The reference sensor may be named
+    directly or selected by 1-based sensor index.
 
     Parameters
     ----------
@@ -533,7 +569,7 @@ def subtract_reference(experiment_id: str = '1', list_of_sensor_names: list = []
     if experiment_id not in PY_KINETICS.experiment_names:
         try:
             experiment_name = PY_KINETICS.experiment_names[int(experiment_id) - 1]
-        except KeyError:
+        except (ValueError, IndexError):
             return f"Experiment with index {experiment_id} not found in kingenie."
     else:
         experiment_name = experiment_id
@@ -565,9 +601,14 @@ def align_dissociation(experiment_id: str = '1',
                        sensor_names: list = [],
                        in_place: bool = True,
                        new_names: bool = False,
-                       npoints: int = 1) -> str:
+                       npoints: int = 10) -> str:
     """
-    Align the dissociation phase of the specified experiment in the pykinetics analyzer.
+    Align dissociation phases for selected sensors in a PyKinGenie experiment.
+
+    This calls ``SurfaceBasedExperiment.align_dissociation``. PyKinGenie smooths
+    or offsets traces around association-to-dissociation transitions and updates
+    trace arrays, sensor names, and ligand metadata according to ``in_place`` and
+    ``new_names``.
 
     Parameters
     ----------
@@ -582,7 +623,7 @@ def align_dissociation(experiment_id: str = '1',
     new_names : bool
         If True, uses new names for the aligned sensors.
     npoints : int
-        Number of points to use for averaging at alignment positions.
+        Number of points PyKinGenie uses around alignment positions.
 
     Returns
     -------
@@ -593,7 +634,7 @@ def align_dissociation(experiment_id: str = '1',
     if experiment_id not in PY_KINETICS.experiment_names:
         try:
             experiment_name = PY_KINETICS.experiment_names[int(experiment_id) - 1]
-        except KeyError:
+        except (ValueError, IndexError):
             return f"Experiment with index {experiment_id} not found in kingenie."
     else:
         experiment_name = experiment_id
@@ -602,7 +643,7 @@ def align_dissociation(experiment_id: str = '1',
     if not sensor_names:
         sensor_names = PY_KINETICS.experiments[experiment_name].sensor_names
 
-    PY_KINETICS.experiments[experiment_name].align_dissociation(sensor_names, in_place, new_names)
+    PY_KINETICS.experiments[experiment_name].align_dissociation(sensor_names, in_place, new_names, npoints)
 
     # Print the message with the experiment and sensor names
     return f"Dissociation phase aligned for experiment: {experiment_name} with sensors: {', '.join(sensor_names)}."
@@ -613,10 +654,11 @@ def align_and_subtract(experiment_id: str = '1',
                        reference_sensor: str = '1',
                        align_dissociation: bool = False) -> str:
     """
-    Align association phases and subtract the reference sensor from all other sensors.
+    Align traces and subtract a reference sensor in one PyKinGenie workflow.
 
-    Given an experiment ID and a reference sensor, aligns the association phases of
-    all sensors in the experiment, then subtracts the reference sensor from all others.
+    The selected experiment is association-aligned in place, optionally
+    dissociation-aligned in place, and then all non-reference sensors are
+    reference-subtracted in place.
 
     Parameters
     ----------
@@ -638,7 +680,7 @@ def align_and_subtract(experiment_id: str = '1',
     if experiment_id not in PY_KINETICS.experiment_names:
         try:
             experiment_name = PY_KINETICS.experiment_names[int(experiment_id) - 1]
-        except KeyError:
+        except (ValueError, IndexError):
             return f"Experiment with index {experiment_id} not found in kingenie."
     else:
         experiment_name = experiment_id
@@ -677,16 +719,17 @@ def align_and_subtract(experiment_id: str = '1',
 @mcp.tool()
 def obtain_sample_info_table() -> str:
     """
-    Obtain the dataframe with analyte concentration and sensor metadata.
+    Return merged PyKinGenie sample metadata as JSON records.
 
-    Returns a table with the analyte concentration, sensor, Smax ID, Sample ID,
-    analyte location and loading location. The dataframe can be used to generate
-    a fitting dataset with the ``initiate_fitting_datasets`` tool.
+    This calls ``PY_KINETICS.merge_ligand_conc_df`` across loaded experiments.
+    The resulting table can be edited and passed to
+    ``initiate_fitting_datasets`` to choose traces, concentrations, sample names,
+    replicates, and Smax grouping.
 
     Returns
     -------
     str
-        A pandas DataFrame in JSON format.
+        JSON records for the merged ligand-concentration DataFrame.
     """
 
     PY_KINETICS.merge_ligand_conc_df()
@@ -699,12 +742,13 @@ def obtain_sample_info_table() -> str:
 @mcp.tool()
 def initiate_fitting_datasets(json_str: str) -> str:
     """
-    Generate a fitting dataset from the JSON representation of the DataFrame.
+    Generate PyKinGenie fitting objects from sample metadata JSON.
 
     A template for the JSON representation can be generated using the
     ``obtain_sample_info_table`` tool. The user can edit the JSON string to select
-    only the data they want to fit, change the analyte concentrations, or change
-    the sample names.
+    only the data they want to fit, change analyte concentrations, change sample
+    names, and alter Smax grouping. Existing fitting objects are reset before
+    ``PY_KINETICS.generate_fittings`` is called.
 
     Parameters
     ----------
@@ -756,18 +800,18 @@ async def plot_kinetic_traces(plot_width: int = 26,
                               rolling_window: int = 10,
                               save_html: bool = False) -> str:
     """
-    Plot the association and dissociation traces from the pykinetics analyzer.
+    Save a PyKinGenie association/dissociation plot for fittings.
 
     Requires that the fitting datasets have been generated using the
-    ``initiate_fitting_datasets`` tool. The ligand concentrations are colored using
-    the viridis color palette. If available, the fitted curves will be plotted as well.
+    ``initiate_fitting_datasets`` tool. The ligand concentrations are colored by
+    PyKinGenie, and fitted curves are included when fitting results are present.
 
     Parameters
     ----------
     plot_width : int
-        Width of the plot in pixels*50.
+        Plot width forwarded to PyKinGenie/Plotly.
     plot_height : int
-        Height of the plot in pixels*50.
+        Plot height forwarded to PyKinGenie/Plotly.
     plot_type : str
         Type of the plot to generate (``'png'``, ``'svg'``, ``'jpeg'``).
     font_size : int
@@ -785,16 +829,16 @@ async def plot_kinetic_traces(plot_width: int = 26,
     max_points_per_plot : int
         Maximum number of points per plot. If exceeded, data will be subsetted.
     smooth_curves_fit : bool
-        If True, applies a rolling window smoothing to the fitted curves.
+        If True, asks PyKinGenie to smooth fitted curves.
     rolling_window : int
-        Size of the rolling window for smoothing.
+        Rolling-window value forwarded to PyKinGenie for smoothing.
     save_html : bool
         If True, saves the plot as an HTML file for interactive viewing.
 
     Returns
     -------
     str
-        Path to the saved image file.
+        Message containing the saved image path.
     """
 
     fig = pykingenie.plot_association_dissociation(PY_KINETICS,
@@ -831,7 +875,11 @@ async def run_fitting(fitting_model: str = 'one_to_one',
                       fitting_region: str = 'association_dissociation',
                       linked_smax: bool = False) -> str:
     """
-    Run the fitting process with the specified model and region.
+    Run PyKinGenie steady-state initialization and kinetic fitting.
+
+    The wrapper first calls ``submit_steady_state_fitting`` to obtain starting
+    values, then calls ``submit_kinetics_fitting`` with the selected kinetic
+    model, fitted region, and Smax sharing setting.
 
     Parameters
     ----------
@@ -866,9 +914,11 @@ async def run_fitting(fitting_model: str = 'one_to_one',
 @mcp.tool()
 def get_kinetics_fitting_results() -> str:
     """
-    Get the results of the fitting process.
+    Return PyKinGenie kinetic fitting results as JSON records.
 
-    Creates a DataFrame with the fitted parameters, such as Kd, k_off and Smax.
+    This calls ``PY_KINETICS.get_fitting_results`` and serializes
+    ``fit_params_kinetics_all``, which contains fitted parameters such as Kd,
+    k_off, k_on, and Smax when available.
 
     Returns
     -------
@@ -886,7 +936,9 @@ def get_kinetics_fitting_results() -> str:
 @mcp.tool()
 def list_experiment_properties(variable: str, fittings: bool = False) -> list:
     """
-    Get the properties of the experiments stored in PY_KINETICS.
+    Get a PyKinGenie property from all experiments or fittings.
+
+    This is a direct wrapper around ``PY_KINETICS.get_experiment_properties``.
 
     Parameters
     ----------
@@ -909,7 +961,7 @@ def list_experiment_properties(variable: str, fittings: bool = False) -> list:
 @mcp.tool()
 def list_experiment_attributes(experiment_name: str) -> dict:
     """
-    List all attributes of one experiment in the pykinetics analyzer.
+    Return all stored attributes for one PyKinGenie experiment.
 
     Run this tool only if the user asks for it specifically.
 
@@ -929,7 +981,7 @@ def list_experiment_attributes(experiment_name: str) -> dict:
     if experiment_name not in PY_KINETICS.experiment_names:
         try:
             experiment_name = PY_KINETICS.experiment_names[int(experiment_name) - 1]
-        except KeyError:
+        except (ValueError, IndexError):
             raise KeyError(f"Experiment with index {experiment_name} not found in kingenie.")
 
     experiment = PY_KINETICS.experiments[experiment_name]

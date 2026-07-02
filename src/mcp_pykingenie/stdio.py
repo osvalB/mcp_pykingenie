@@ -60,6 +60,7 @@ async def run_stdio_ignoring_empty_lines(
     show_banner: bool = True,
     log_level: str | None = None,
     stateless: bool = False,
+    stdio_context: Any | None = None,
 ) -> None:
     """
     Run a FastMCP server over stdio while ignoring blank inbound lines.
@@ -74,10 +75,15 @@ async def run_stdio_ignoring_empty_lines(
         Temporary log level to use while the server runs.
     stateless : bool
         Whether to run without session initialization state.
+    stdio_context : Any | None
+        Optional async context manager factory that yields read/write streams.
     """
     from fastmcp.server.context import reset_transport, set_transport
     from fastmcp.utilities.cli import log_server_banner
     from fastmcp.utilities.logging import get_logger, temporary_log_level
+
+    if stdio_context is None:
+        stdio_context = stdio_server_ignoring_empty_lines
 
     if show_banner:
         log_server_banner(server=server)
@@ -87,7 +93,7 @@ async def run_stdio_ignoring_empty_lines(
     try:
         with temporary_log_level(log_level):
             async with server._lifespan_manager():
-                async with stdio_server_ignoring_empty_lines() as (
+                async with stdio_context() as (
                     read_stream,
                     write_stream,
                 ):

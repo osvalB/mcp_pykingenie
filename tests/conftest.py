@@ -13,6 +13,7 @@ pytest_plugins = ("pytest_asyncio",)
 
 @pytest.fixture(autouse=True)
 def reset_kinetics_analyzer(tmp_path):
+    """Reset shared server/tool analyzer state before each test."""
     analyzer = pykingenie.KineticsAnalyzer()
     data_dir_path = tmp_path / "user_data"
     data_dir_path.mkdir()

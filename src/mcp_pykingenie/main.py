@@ -14,6 +14,18 @@ class EnvironmentType(enum.Enum):
     DEVELOPMENT = enum.auto()
 
 
+def run_development_transport(mcp, transport: str, port: int, hostname: str):
+    """Run the configured development transport."""
+    if transport == "http":
+        mcp.run(transport=transport, port=port, host=hostname)
+    elif transport == "stdio":
+        from mcp_pykingenie.stdio import run_stdio
+
+        run_stdio(mcp)
+    else:
+        mcp.run(transport=transport)
+
+
 @click.command(name="run")
 @click.option("-t", "--transport", "transport", type=str, help="MCP transport option. Defaults to 'stdio'.", default="stdio", envvar="MCP_TRANSPORT")
 @click.option("-p", "--port", "port", type=int, help="Port of MCP server. Defaults to '8000'", default=8000, envvar='MCP_PORT', required=False)
@@ -48,14 +60,7 @@ def run_app(
     if environment == EnvironmentType.DEVELOPMENT:
         logger.info("Starting MCP server (DEVELOPMENT mode)")
         click.echo(f"mcp_pykingenie results folder: {DATA_DIR}", err=True)
-        if transport == "http":
-            mcp.run(transport=transport, port=port, host=hostname)
-        elif transport == "stdio":
-            from mcp_pykingenie.stdio import run_stdio
-
-            run_stdio(mcp)
-        else:
-            mcp.run(transport=transport)
+        run_development_transport(mcp, transport, port, hostname)
     else:
         raise NotImplementedError()
         # logger.info("Starting Starlette app with Uvicorn in PRODUCTION mode.")
