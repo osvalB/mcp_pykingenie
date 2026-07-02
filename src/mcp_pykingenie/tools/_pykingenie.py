@@ -54,7 +54,7 @@ def import_octet_experiment_base(folder: str = '.', exp_name: str = 'Experiment'
 
     octet = pykingenie.OctetExperiment()
 
-    files = os.listdir(folder_path)
+    files = sorted(os.listdir(folder_path))
     files = [os.path.join(folder_path, f) for f in files]
 
     octet.read_sensor_data(files)
@@ -218,7 +218,7 @@ def import_gator_experiment(folder: str = '.', exp_name: str = 'Experiment') -> 
 
     gator = pykingenie.GatorExperiment()
 
-    files = os.listdir(folder_path)
+    files = sorted(os.listdir(folder_path))
     files = [os.path.join(folder_path, f) for f in files]
 
     gator.read_all_gator_data(files)
