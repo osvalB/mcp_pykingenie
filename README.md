@@ -1,10 +1,10 @@
 # mcp_pykingenie
 
 [![Tests][badge-tests]][tests]
-[![Documentation][badge-docs]][documentation]
+[![Read the Docs][badge-docs]][documentation]
 
 [badge-tests]: https://img.shields.io/github/actions/workflow/status/osvalB/mcp_pykingenie/test.yaml?branch=main&label=tests
-[badge-docs]: https://img.shields.io/github/actions/workflow/status/osvalB/mcp_pykingenie/docs.yaml?branch=main&label=docs
+[badge-docs]: https://img.shields.io/badge/docs-read%20the%20documentation-0A66C2?logo=readthedocs&logoColor=white
 
 This repository contains a local MCP server for the analysis of surface-based binding kinetics data from Octet and Gator experiments.
 It is based on the Python package [pykingenie](https://github.com/osvalB/pykingenie).
