@@ -4,7 +4,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "mcp_pykingenie"
-version = "1.0.0"
+version = "1.1.0"
 description = "MCP_PYKINGENIE is a MCP server that provides tools for the analysis of binding kinetics data."
 readme = "README.md"
 license = { file = "LICENSE" }
