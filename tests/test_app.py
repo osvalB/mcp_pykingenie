@@ -1,5 +1,6 @@
 from importlib.metadata import version
 import importlib
+import json
 from io import StringIO
 from pathlib import Path
 import runpy
@@ -13,14 +14,15 @@ import numpy as np
 import pandas as pd
 import pytest
 from click.testing import CliRunner
-from fastmcp import Client
+from mcp import Client
 from packaging.version import Version
 
 import mcp_pykingenie
 import mcp_pykingenie.server as server
-import mcp_pykingenie.stdio as stdio_module
+import mcp_pykingenie.config as config
 import mcp_pykingenie.tools._pykingenie as pykingenie_tools
 from mcp_pykingenie.main import run_app
+from mcp_pykingenie.mcp import mcp
 import mcp_pykingenie.main as main_module
 from mcp_pykingenie.paths import (
     RESULTS_DIR_ENV_VAR,
@@ -50,67 +52,23 @@ def _saved_path_from_message(message: str) -> Path:
     return Path(message.split(": ", 1)[1].strip())
 
 
-class AsyncLineStream:
-    """Minimal async iterator for stdio tests."""
+def _result_data(result):
+    """Extract the Python value returned by an MCP v2 tool call."""
+    structured = getattr(result, "structured_content", None)
+    if structured is not None:
+        if isinstance(structured, dict) and set(structured) == {"result"}:
+            return structured["result"]
+        return structured
 
-    def __init__(self, lines):
-        """Store raw lines to be yielded asynchronously."""
-        self._lines = iter(lines)
-
-    def __aiter__(self):
-        """Return this object as its async iterator."""
-        return self
-
-    async def __anext__(self):
-        """Return the next raw line or stop asynchronous iteration."""
+    content = getattr(result, "content", None) or []
+    if len(content) == 1 and hasattr(content[0], "text"):
+        text = content[0].text
         try:
-            return next(self._lines)
-        except StopIteration as exc:
-            raise StopAsyncIteration from exc
+            return json.loads(text)
+        except (json.JSONDecodeError, TypeError):
+            return text
 
-
-class FakeMcpRunner:
-    """Minimal MCP server runner for stdio transport tests."""
-
-    def __init__(self):
-        """Initialize captured initialization and run calls."""
-        self.initialization_options = None
-        self.run_call = None
-
-    def create_initialization_options(self, notification_options):
-        """Capture and return initialization options."""
-        self.initialization_options = notification_options
-        return {"notification_options": notification_options}
-
-    async def run(self, read_stream, write_stream, initialization_options, stateless=False):
-        """Capture the server run call arguments."""
-        self.run_call = {
-            "read_stream": read_stream,
-            "write_stream": write_stream,
-            "initialization_options": initialization_options,
-            "stateless": stateless,
-        }
-
-
-class FakeFastMcpServer:
-    """Minimal FastMCP-like server for stdio transport tests."""
-
-    name = "fake-server"
-    version = None
-
-    def __init__(self):
-        """Initialize the fake MCP runner and lifespan event log."""
-        self._mcp_server = FakeMcpRunner()
-        self.lifespan_events = []
-
-    @stdio_module.asynccontextmanager
-    async def _lifespan_manager(self):
-        """Record entry and exit from the server lifespan."""
-        self.lifespan_events.append("enter")
-        try:
-            yield
-        finally:
-            self.lifespan_events.append("exit")
+    return content
 
 
 def test_package_has_version():
@@ -159,22 +117,28 @@ def test_documentation_example_bli_download_archive_contains_raw_data():
 
 def test_server_instructions_show_current_data_folder():
     """Testing server instructions include the current output folder."""
-    assert server.DATA_DIR in server.SERVER_INSTRUCTIONS
-    assert "surface-based binding kinetics data only" in server.SERVER_INSTRUCTIONS
-    assert "Plots and generated files for this session are saved in:" in server.SERVER_INSTRUCTIONS
+    instructions = config.build_server_instructions(server.DATA_DIR)
 
+    assert server.DATA_DIR in instructions
+    assert "surface-based binding kinetics data only" in instructions
+    assert "Plots and generated files for this session are saved in:" in instructions
 
-def test_server_import_creates_results_directories(monkeypatch, tmp_path):
-    """Testing server startup creates the base and dated results folders."""
+def test_config_import_creates_results_directories(monkeypatch, tmp_path):
+    """Testing config startup creates the base and dated results folders."""
     results_dir = tmp_path / "created-results"
     monkeypatch.setenv(RESULTS_DIR_ENV_VAR, str(results_dir))
     monkeypatch.delenv("MCP_PYKINGENIE_SKIP_USER_DATA_INIT", raising=False)
 
-    reloaded_server = importlib.reload(server)
+    reloaded_config = importlib.reload(config)
 
     assert results_dir.is_dir()
-    assert Path(reloaded_server.DATA_DIR).is_dir()
-    assert Path(reloaded_server.DATA_DIR).parent == results_dir
+    assert Path(reloaded_config.DATA_DIR).is_dir()
+    assert Path(reloaded_config.DATA_DIR).parent == results_dir
+
+    # Restore config without creating the normal user-data directory.
+    monkeypatch.setenv("MCP_PYKINGENIE_SKIP_USER_DATA_INIT", "1")
+    monkeypatch.delenv(RESULTS_DIR_ENV_VAR, raising=False)
+    importlib.reload(config)
 
 
 def test_cli_prints_results_folder():
@@ -182,12 +146,19 @@ def test_cli_prints_results_folder():
     runner = CliRunner()
     calls = []
 
-    with patch.object(stdio_module, "run_stdio", lambda server: calls.append({"transport": "stdio"})):
+    fake_mcp = SimpleNamespace(
+        run=lambda **kwargs: calls.append(kwargs)
+    )
+
+    with patch("mcp_pykingenie.mcp.mcp", fake_mcp):
         result = runner.invoke(run_app, [])
 
     assert result.exit_code == 0
     assert calls == [{"transport": "stdio"}]
-    assert f"mcp_pykingenie results folder: {server.DATA_DIR}" in result.stderr
+    assert (
+        f"mcp_pykingenie results folder: {server.DATA_DIR}"
+        in result.stderr
+    )
 
 
 def test_cli_version_prints_package_version_without_starting_transport():
@@ -242,123 +213,6 @@ def test_package_entrypoint_prints_version():
             runpy.run_path(str(init_path), run_name="__main__")
 
     assert exc_info.value.code == 0
-
-
-@pytest.mark.asyncio
-async def test_stdio_server_ignores_empty_lines():
-    """Testing stdio transport filters blank JSON-RPC lines."""
-    observed_lines = []
-
-    @stdio_module.asynccontextmanager
-    async def fake_stdio_server(stdin=None, stdout=None):
-        """Capture the first non-empty line sent to the stdio transport."""
-        async for line in stdin:
-            observed_lines.append(line)
-            break
-        yield "read-stream", "write-stream"
-
-    with patch.object(stdio_module, "stdio_server", fake_stdio_server):
-        async with stdio_module.stdio_server_ignoring_empty_lines(
-            stdin=AsyncLineStream(["\n", "   \n", '{"jsonrpc":"2.0","id":1,"method":"ping"}\n']),
-            stdout=object(),
-        ) as streams:
-            assert streams == ("read-stream", "write-stream")
-
-    assert observed_lines == ['{"jsonrpc":"2.0","id":1,"method":"ping"}\n']
-
-
-@pytest.mark.asyncio
-async def test_stdio_transport_defaults_to_process_stdin():
-    """Testing stdio helper wraps process stdin by default."""
-    observed_lines = []
-
-    @stdio_module.asynccontextmanager
-    async def fake_stdio_server(stdin=None, stdout=None):
-        """Capture the default stdin stream after empty lines are filtered."""
-        async for line in stdin:
-            observed_lines.append(line)
-            break
-        yield "read-stream", "write-stream"
-
-    with (
-        patch.object(stdio_module.sys, "stdin", SimpleNamespace(buffer="raw-stdin")),
-        patch.object(stdio_module, "TextIOWrapper", lambda buffer, encoding: f"{encoding}:{buffer}"),
-        patch.object(
-            stdio_module.anyio,
-            "wrap_file",
-            lambda stream: AsyncLineStream(["\n", '{"jsonrpc":"2.0","id":1,"method":"ping"}\n']),
-        ),
-        patch.object(stdio_module, "stdio_server", fake_stdio_server),
-    ):
-        async with stdio_module.stdio_server_ignoring_empty_lines():
-            pass
-
-    assert observed_lines[0].strip().startswith("{")
-
-
-def test_run_stdio_sync_wrapper_dispatches_anyio_run():
-    """Testing synchronous stdio wrapper delegates execution to anyio."""
-    calls = []
-
-    with patch.object(stdio_module.anyio, "run", lambda runner: calls.append(runner)):
-        stdio_module.run_stdio("server", stateless=True)
-
-    assert calls
-
-
-@pytest.mark.asyncio
-async def test_run_stdio_ignoring_empty_lines_runs_lifespan_and_mcp_server():
-    """Testing stdio runner enters lifespan, configures streams, and resets cleanly."""
-    fake_server = FakeFastMcpServer()
-    stdio_events = []
-
-    @stdio_module.asynccontextmanager
-    async def fake_stdio_context():
-        """Yield fake read/write streams and record context events."""
-        stdio_events.append("enter")
-        try:
-            yield "read-stream", "write-stream"
-        finally:
-            stdio_events.append("exit")
-
-    await stdio_module.run_stdio_ignoring_empty_lines(
-        fake_server,
-        show_banner=False,
-        log_level="INFO",
-        stateless=True,
-        stdio_context=fake_stdio_context,
-    )
-
-    assert fake_server.lifespan_events == ["enter", "exit"]
-    assert stdio_events == ["enter", "exit"]
-    assert fake_server._mcp_server.initialization_options.tools_changed is True
-    assert fake_server._mcp_server.run_call == {
-        "read_stream": "read-stream",
-        "write_stream": "write-stream",
-        "initialization_options": {
-            "notification_options": fake_server._mcp_server.initialization_options,
-        },
-        "stateless": True,
-    }
-
-
-@pytest.mark.asyncio
-async def test_run_stdio_ignoring_empty_lines_uses_default_context_and_banner():
-    """Testing stdio runner resolves the default context and can show the banner."""
-    fake_server = FakeFastMcpServer()
-
-    @stdio_module.asynccontextmanager
-    async def fake_stdio_context():
-        """Yield fake read/write streams for default-context resolution."""
-        yield "read-stream", "write-stream"
-
-    with patch.object(stdio_module, "stdio_server_ignoring_empty_lines", fake_stdio_context):
-        await stdio_module.run_stdio_ignoring_empty_lines(
-            fake_server,
-            stateless=False,
-        )
-
-    assert fake_server._mcp_server.run_call["stateless"] is False
 
 
 def test_list_files_in_folder_returns_only_real_files(tmp_path):
@@ -793,15 +647,15 @@ async def test_run_kinetics_fitting_rejects_unsupported_real_model_region_combin
 @pytest.mark.asyncio
 async def test_mcp_server():
     """Testing MCP server."""
-    async with Client(mcp_pykingenie.mcp) as client:
+    async with Client(mcp) as client:
         result = await client.call_tool("print_data_dir", {})
-        assert result.data == server.DATA_DIR
+        assert _result_data(result) == server.DATA_DIR
 
         result = await client.call_tool("load_octet_example", {})
-        assert "Octet experiment added from" in result.data
+        assert "Octet experiment added from" in _result_data(result)
 
         result = await client.call_tool("get_legends_table", {})
-        df_json = result.data
+        df_json = _result_data(result)
         df = pd.read_json(StringIO(df_json), orient='records')
 
         assert isinstance(df, pd.DataFrame)
@@ -810,27 +664,27 @@ async def test_mcp_server():
 
         result = await client.call_tool("plot_traces_with_all_steps", {"legends_df": df_json})
 
-        assert "Plot saved to" in result.data
+        assert "Plot saved to" in _result_data(result)
 
         result = await client.call_tool("list_experiment_names", {})
 
-        assert 'Example Experiment' == result.data[0]
+        assert 'Example Experiment' == _result_data(result)
 
         result = await client.call_tool("align_association", {"experiment_id": "Example Experiment"})
 
-        assert "Association phase aligned for experiment" in result.data
+        assert "Association phase aligned for experiment" in _result_data(result)
 
         result = await client.call_tool("align_dissociation", {"experiment_id": "Example Experiment"})
 
-        assert "Dissociation phase aligned for experiment" in result.data
+        assert "Dissociation phase aligned for experiment" in _result_data(result)
 
         result = await client.call_tool("subtract_reference", {"reference_sensor": "H1"})
 
-        assert "Reference sensor" in result.data
+        assert "Reference sensor" in _result_data(result)
 
         result = await client.call_tool("obtain_sample_info_table", {})
 
-        df_json = result.data
+        df_json = _result_data(result)
         df = pd.read_json(StringIO(df_json), orient='records')
 
         assert isinstance(df, pd.DataFrame)
@@ -854,32 +708,32 @@ async def test_mcp_server():
 
         result = await client.call_tool("initiate_fitting_datasets", {"json_str": df_json_new})
 
-        assert "Fitting datasets generated" in result.data
+        assert "Fitting datasets generated" in _result_data(result)
 
         result = await client.call_tool("plot_steady_state", {})
 
-        assert "Plot saved to" in result.data
+        assert "Plot saved to" in _result_data(result)
 
         result = await client.call_tool("plot_kinetic_traces", {})
 
-        assert "Plot saved to" in result.data
+        assert "Plot saved to" in _result_data(result)
 
         result = await client.call_tool("run_steady_state_fitting", {})
         assert (
             "Steady-state fitting submitted with model: one_to_one, "
             "fit sigma: False."
-        ) == result.data
+        ) == _result_data(result)
 
         result = await client.call_tool("run_kinetics_fitting", {})
         assert (
             "Kinetics fitting submitted with model: one_to_one, "
             "region: association_dissociation, linked Smax: False, "
             "fit sigma: False."
-        ) == result.data
+        ) == _result_data(result)
 
         result = await client.call_tool("get_kinetics_fitting_results", {})
 
-        results_json = result.data
+        results_json = _result_data(result)
         df = pd.read_json(StringIO(results_json), orient='records')
         assert isinstance(df, pd.DataFrame)
         assert set(df.columns) == {
@@ -895,7 +749,7 @@ async def test_mcp_server():
         np.testing.assert_allclose(df.loc[0, "k_off [1/s]"], 0.00235, rtol=0.01)
 
         result = await client.call_tool("create_export_df", {"export_type": "fitted"})
-        export_df = pd.read_json(StringIO(result.data), orient='records')
+        export_df = pd.read_json(StringIO(_result_data(result)), orient='records')
         assert set(export_df.columns) == {
             "Time",
             "Signal",
