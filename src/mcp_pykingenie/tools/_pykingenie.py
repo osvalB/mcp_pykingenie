@@ -1,12 +1,13 @@
 from mcp_pykingenie.mcp import mcp
 
 import os
+import json
 import pandas as pd
 
 from ..server import PY_KINETICS, DATA_DIR, EXAMPLE_DATA_DIR
 
 from datetime import datetime
-from io import StringIO
+from typing import Any
 
 import pykingenie
 
@@ -116,7 +117,7 @@ def print_data_dir() -> str:
 
 
 @mcp.tool()
-def list_files_in_folder(folder: str = '') -> list:
+def list_files_in_folder(folder: str = '') -> list[str]:
     """
     List all files in the selected folder.
 
@@ -131,18 +132,17 @@ def list_files_in_folder(folder: str = '') -> list:
         A list of file names in the data directory.
     """
 
-    # Return error if no folder is provided
     if not folder:
-        return FileNotFoundError("No folder provided. Please specify a folder.")
+        raise FileNotFoundError("No folder provided. Please specify a folder.")
 
     try:
-
         files = os.listdir(folder)
-        return [x for x in files if os.path.isfile(os.path.join(folder, x))]
+    except OSError as exc:
+        raise FileNotFoundError(
+            f"The folder '{folder}' does not exist or is not accessible."
+        ) from exc
 
-    except:
-        # Return error and message
-        raise FileNotFoundError(f"The folder '{folder}' does not exist or is not accessible.")
+    return [x for x in files if os.path.isfile(os.path.join(folder, x))]
 
 
 @mcp.tool()
@@ -339,7 +339,7 @@ def plot_sample_plate_info(experiment_id: str = '1', font_size: int = 18, save_h
 
 
 @mcp.tool()
-def get_legends_table() -> str:
+def get_legends_table() -> list[dict[str, Any]]:
     """
     Build a plotting legend table from PyKinGenie sensor metadata.
 
@@ -362,13 +362,11 @@ def get_legends_table() -> str:
     ids = [item for sublist in ids for item in sublist]
 
     df = pykingenie.get_plotting_df(ids, labels)
-    df_json = df.to_json(orient='records')
-
-    return df_json
+    return df.to_dict(orient="records")
 
 
 @mcp.tool()
-async def plot_traces_with_all_steps(legends_df: str = "",
+async def plot_traces_with_all_steps(legends_df: list[dict[str, Any]] | str | None = None,
                                      plot_width: int = 26,
                                      plot_height: int = 24,
                                      plot_type: str = 'png',
@@ -415,11 +413,13 @@ async def plot_traces_with_all_steps(legends_df: str = "",
         Message containing the saved image path.
     """
 
-    # generate legends_df if not provided
     if not legends_df:
         legends_df = get_legends_table()
 
-    legends_df = pd.read_json(StringIO(legends_df), orient='records')
+    if isinstance(legends_df, str):
+        legends_df = json.loads(legends_df)
+
+    legends_df = pd.DataFrame(legends_df)
 
     fig = pykingenie.plot_traces_all(PY_KINETICS, legends_df,
                                      plot_width,
@@ -512,7 +512,7 @@ async def plot_steady_state(plot_width: int = 26,
 
 
 @mcp.tool()
-def list_experiment_names() -> list:
+def list_experiment_names() -> list[str]:
     """
     Get the names of all experiments in the pykinetics analyzer.
 
@@ -526,7 +526,7 @@ def list_experiment_names() -> list:
 
 @mcp.tool()
 def align_association(experiment_id: str = '1',
-                      sensor_names: list = [],
+                      sensor_names: list[str] | None = None,
                       in_place: bool = True,
                       new_names: bool = False) -> str:
     """
@@ -574,7 +574,7 @@ def align_association(experiment_id: str = '1',
 
 
 @mcp.tool()
-def subtract_reference(experiment_id: str = '1', list_of_sensor_names: list = [],
+def subtract_reference(experiment_id: str = '1', list_of_sensor_names: list[str] | None = None,
                        reference_sensor: str = '1', inplace: bool = True) -> str:
     """
     Subtract a reference sensor from selected PyKinGenie sensor traces.
@@ -730,7 +730,7 @@ def subtract_sensor_columns(experiment_id: str = '1',
 
 @mcp.tool()
 def align_dissociation(experiment_id: str = '1',
-                       sensor_names: list = [],
+                       sensor_names: list[str] | None = None,
                        in_place: bool = True,
                        new_names: bool = False,
                        npoints: int = 10) -> str:
@@ -849,7 +849,7 @@ def align_and_subtract(experiment_id: str = '1',
 
 
 @mcp.tool()
-def obtain_sample_info_table() -> str:
+def obtain_sample_info_table() -> list[dict[str, Any]]:
     """
     Return merged PyKinGenie sample metadata as JSON records.
 
@@ -866,13 +866,11 @@ def obtain_sample_info_table() -> str:
 
     PY_KINETICS.merge_ligand_conc_df()
     df = PY_KINETICS.combined_ligand_conc_df
-    df_json = df.to_json(orient='records')
-
-    return df_json
+    return df.to_dict(orient="records")
 
 
 @mcp.tool()
-def initiate_fitting_datasets(json_str: str) -> str:
+def initiate_fitting_datasets(sample_info: list[dict[str, Any]] | str | None = None) -> str:
     """
     Generate PyKinGenie fitting objects from sample metadata JSON.
 
@@ -894,12 +892,14 @@ def initiate_fitting_datasets(json_str: str) -> str:
     """
 
     try:
-        # Load the JSON string into a DataFrame
-        df = pd.read_json(StringIO(json_str), orient='records')
-    except:
-        PY_KINETICS.merge_ligand_conc_df()  # So it works in case the user did not run the `obtain_df_for_fitting` tool
+        if isinstance(sample_info, str):
+            sample_info = json.loads(sample_info)
+        if sample_info is None:
+            raise ValueError("No sample metadata provided.")
+        df = pd.DataFrame(sample_info)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        PY_KINETICS.merge_ligand_conc_df()
         df = PY_KINETICS.combined_ligand_conc_df
-        print("Invalid JSON string provided. Using the default DataFrame.")
 
     # Clear all the current fittings in PY_KINETICS
     PY_KINETICS.init_fittings()
@@ -1113,7 +1113,7 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
 
 
 @mcp.tool()
-def get_kinetics_fitting_results() -> str:
+def get_kinetics_fitting_results() -> list[dict[str, Any]]:
     """
     Return PyKinGenie kinetic fitting results as JSON records.
 
@@ -1142,13 +1142,11 @@ def get_kinetics_fitting_results() -> str:
 
     PY_KINETICS.get_fitting_results()
     df = PY_KINETICS.fit_params_kinetics_all
-    results_json = df.to_json(orient='records')
-
-    return results_json
+    return df.to_dict(orient="records")
 
 
 @mcp.tool()
-def create_export_df(export_type: str = 'raw') -> str:
+def create_export_df(export_type: str = 'raw') -> list[dict[str, Any]]:
     """
     Return exported PyKinGenie association/dissociation traces as JSON records.
 
@@ -1188,12 +1186,11 @@ def create_export_df(export_type: str = 'raw') -> str:
 
     pykingenie_export_type = "fit" if export_type == "fitted" else export_type
     df = PY_KINETICS.create_export_df(type=pykingenie_export_type)
-
-    return df.to_json(orient='records')
+    return df.to_dict(orient="records")
 
 
 @mcp.tool()
-def list_experiment_properties(variable: str, fittings: bool = False) -> list:
+def list_experiment_properties(variable: str, fittings: bool = False) -> list[Any]:
     """
     Get a PyKinGenie property from all experiments or fittings.
 
@@ -1218,7 +1215,7 @@ def list_experiment_properties(variable: str, fittings: bool = False) -> list:
 
 
 @mcp.tool()
-def list_experiment_attributes(experiment_name: str) -> dict:
+def list_experiment_attributes(experiment_name: str) -> dict[str, Any]:
     """
     Return all stored attributes for one PyKinGenie experiment.
 

@@ -1,7 +1,6 @@
 from importlib.metadata import version
 import importlib
 import json
-from io import StringIO
 from pathlib import Path
 import runpy
 import shutil
@@ -40,10 +39,10 @@ TEST_DATA_DIR = Path(__file__).parent / "data"
 def _load_example_and_selected_fitting():
     """Load bundled Octet data and prepare one real fitting dataset."""
     pykingenie_tools.load_octet_example()
-    df_json = pykingenie_tools.obtain_sample_info_table()
-    df = pd.read_json(StringIO(df_json), orient='records')
+    sample_info = pykingenie_tools.obtain_sample_info_table()
+    df = pd.DataFrame(sample_info)
     df["Select"] = [True] * 8 + [False] * (len(df) - 8)
-    pykingenie_tools.initiate_fitting_datasets(df.to_json(orient='records'))
+    pykingenie_tools.initiate_fitting_datasets(df.to_dict(orient="records"))
     return df
 
 
@@ -237,11 +236,12 @@ def test_list_files_in_folder_reports_missing_folder():
 
 
 def test_list_files_in_folder_requires_folder_argument():
-    """Testing folder listing returns a useful error for empty input."""
-    result = pykingenie_tools.list_files_in_folder()
-
-    assert isinstance(result, FileNotFoundError)
-    assert str(result) == "No folder provided. Please specify a folder."
+    """Testing folder listing raises a useful error for empty input."""
+    with pytest.raises(
+        FileNotFoundError,
+        match="No folder provided. Please specify a folder.",
+    ):
+        pykingenie_tools.list_files_in_folder()
 
 
 def test_import_octet_experiment_accepts_folder_relative_to_data_dir():
@@ -555,12 +555,12 @@ async def test_create_export_df_returns_real_raw_and_fitted_traces():
     """Testing export DataFrame returns real raw and fitted surface traces."""
     _load_example_and_selected_fitting()
 
-    raw_json = pykingenie_tools.create_export_df()
-    raw_df = pd.read_json(StringIO(raw_json), orient='records')
+    raw_records = pykingenie_tools.create_export_df()
+    raw_df = pd.DataFrame(raw_records)
 
     await pykingenie_tools.run_kinetics_fitting()
-    fitted_json = pykingenie_tools.create_export_df(export_type="fitted")
-    fitted_df = pd.read_json(StringIO(fitted_json), orient='records')
+    fitted_records = pykingenie_tools.create_export_df(export_type="fitted")
+    fitted_df = pd.DataFrame(fitted_records)
 
     expected_columns = {
         "Time",
@@ -655,20 +655,23 @@ async def test_mcp_server():
         assert "Octet experiment added from" in _result_data(result)
 
         result = await client.call_tool("get_legends_table", {})
-        df_json = _result_data(result)
-        df = pd.read_json(StringIO(df_json), orient='records')
+        legends = _result_data(result)
+        df = pd.DataFrame(legends)
 
         assert isinstance(df, pd.DataFrame)
         assert set(df.columns) == {"Internal_ID", "Color", "Legend", "Show"}
         assert set(df["Legend"]) == {"A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"}
 
-        result = await client.call_tool("plot_traces_with_all_steps", {"legends_df": df_json})
+        result = await client.call_tool(
+            "plot_traces_with_all_steps",
+            {"legends_df": legends},
+        )
 
         assert "Plot saved to" in _result_data(result)
 
         result = await client.call_tool("list_experiment_names", {})
 
-        assert 'Example Experiment' == _result_data(result)
+        assert _result_data(result) == ["Example Experiment"]
 
         result = await client.call_tool("align_association", {"experiment_id": "Example Experiment"})
 
@@ -684,8 +687,8 @@ async def test_mcp_server():
 
         result = await client.call_tool("obtain_sample_info_table", {})
 
-        df_json = _result_data(result)
-        df = pd.read_json(StringIO(df_json), orient='records')
+        sample_info = _result_data(result)
+        df = pd.DataFrame(sample_info)
 
         assert isinstance(df, pd.DataFrame)
         assert set(df.columns) == {
@@ -704,9 +707,12 @@ async def test_mcp_server():
         # Set only the first eight rows to True
         df["Select"] = [True] * 8 + [False] * (len(df) - 8)
 
-        df_json_new = df.to_json(orient='records')
+        sample_info_new = df.to_dict(orient="records")
 
-        result = await client.call_tool("initiate_fitting_datasets", {"json_str": df_json_new})
+        result = await client.call_tool(
+            "initiate_fitting_datasets",
+            {"sample_info": sample_info_new},
+        )
 
         assert "Fitting datasets generated" in _result_data(result)
 
@@ -733,8 +739,8 @@ async def test_mcp_server():
 
         result = await client.call_tool("get_kinetics_fitting_results", {})
 
-        results_json = _result_data(result)
-        df = pd.read_json(StringIO(results_json), orient='records')
+        results = _result_data(result)
+        df = pd.DataFrame(results)
         assert isinstance(df, pd.DataFrame)
         assert set(df.columns) == {
             "Kd [\u00b5M]",
@@ -749,7 +755,7 @@ async def test_mcp_server():
         np.testing.assert_allclose(df.loc[0, "k_off [1/s]"], 0.00235, rtol=0.01)
 
         result = await client.call_tool("create_export_df", {"export_type": "fitted"})
-        export_df = pd.read_json(StringIO(_result_data(result)), orient='records')
+        export_df = pd.DataFrame(_result_data(result))
         assert set(export_df.columns) == {
             "Time",
             "Signal",
