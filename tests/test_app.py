@@ -535,7 +535,8 @@ def test_subtract_experiment_with_single_sensor_reference_zeroes_first_trace_onl
 
 
 def test_subtract_experiment_with_reference_missing_first_three_steps_still_yields_zero_traces():
-    """Requirement test: trimming first 3 reference steps should still allow full zero subtraction."""
+    """Requirement test: trimming first 3 reference steps should zero only baseline before association, 
+    assoc. & dissociation traces."""
     pykingenie_tools.load_octet_example()
     pykingenie_tools.import_octet_experiment(
         str(get_example_data_root() / "test_bli_folder"),
@@ -550,6 +551,7 @@ def test_subtract_experiment_with_reference_missing_first_three_steps_still_yiel
         reference_experiment.ys[sensor_index] = reference_experiment.ys[sensor_index][3:]
 
     reference_experiment.df_steps = reference_experiment.df_steps.iloc[3:].reset_index(drop=True)
+    ys_before = copy.deepcopy(target_experiment.ys)
 
     message = pykingenie_tools.subtract_experiment(
         experiment_id="Example Experiment",
@@ -558,9 +560,20 @@ def test_subtract_experiment_with_reference_missing_first_three_steps_still_yiel
 
     assert "Experiment 'Reference Experiment' subtracted" in message
 
-    for sensor_traces in target_experiment.ys:
-        for step_trace in sensor_traces:
-            np.testing.assert_allclose(step_trace, 0, atol=1e-12)
+    assoc_indices = target_experiment.df_steps.index[target_experiment.df_steps["Type"] == "ASSOC"].tolist()
+    assert assoc_indices
+
+    bl_indices = [x - 1 for x in assoc_indices]
+    diss_indices = [x + 1 for x in assoc_indices]
+
+    useful_indices = bl_indices + assoc_indices + diss_indices
+
+    for sensor_index, sensor_traces in enumerate(target_experiment.ys):
+        for step_index, step_trace in enumerate(sensor_traces):
+            if step_index in useful_indices:
+                np.testing.assert_allclose(step_trace, 0, atol=1e-12)
+            else:
+                np.testing.assert_allclose(step_trace, ys_before[sensor_index][step_index], atol=1e-12)
 
 
 def test_subtract_sensor_columns_runs_real_surface_column_subtraction():
