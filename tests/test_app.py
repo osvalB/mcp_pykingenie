@@ -1,6 +1,7 @@
 from importlib.metadata import version
 import importlib
 import json
+import copy
 from pathlib import Path
 import runpy
 import shutil
@@ -350,6 +351,47 @@ def test_numeric_experiment_id_and_reference_index_use_loaded_octet_data():
     assert expected_reference in server.PY_KINETICS.experiments["Example Experiment"].sensor_names
 
 
+def test_inter_step_correction():
+    """Testing inter-step correction runs on a real loaded experiment."""
+    pykingenie_tools.load_octet_example()
+
+    bli = server.PY_KINETICS.experiments["Example Experiment"]
+
+    assoc_idx = bli.df_steps.index[bli.df_steps['Type'] == 'ASSOC'].to_numpy()[0]
+
+    assert assoc_idx == 11
+    non_assoc_idx = assoc_idx + 1
+
+    ys_ori = copy.deepcopy(bli.ys.copy())
+    
+    ys_ori_assoc = ys_ori[0][assoc_idx]
+    ys_ori_not_assoc = ys_ori[0][non_assoc_idx]
+
+    message = pykingenie_tools.inter_step_correction(
+        experiment_id="1",
+        npoints=2,
+        in_place=False,  # Change to False to test not in place
+        new_names=True, 
+        sensor_names=["A1"]
+    )
+
+    assert "Inter-step correction (shift association) done for experiment: Example Experiment" in message
+    assert "A1" in message
+
+    # Extract the new ys after inter-step correction
+    ys_new= copy.deepcopy(bli.ys.copy())
+    ys_new_assoc = ys_new[-1][assoc_idx]
+
+    # Verify both are numpy arrays
+    assert isinstance(ys_new_assoc, np.ndarray), "The new ys should be a numpy array."
+
+    assert not np.array_equal(ys_ori_assoc, ys_new_assoc), "The ASSOC step should have been corrected by the inter-step correction."
+    
+    ys_new_not_assoc = ys_new[-1][non_assoc_idx]
+    assert np.array_equal(ys_ori_not_assoc, ys_new_not_assoc), "The non-ASSOC step should not have been modified by the inter-step correction."
+    
+
+
 def test_invalid_experiment_selectors_return_not_found_messages():
     """Testing invalid experiment selectors report the expected error text."""
     pykingenie_tools.load_octet_example()
@@ -677,7 +719,10 @@ async def test_mcp_server():
 
         assert "Association phase aligned for experiment" in _result_data(result)
 
-        result = await client.call_tool("align_dissociation", {"experiment_id": "Example Experiment"})
+        result = await client.call_tool("align_dissociation", {
+            "experiment_id": "Example Experiment",
+            "npoints": 10
+        })
 
         assert "Dissociation phase aligned for experiment" in _result_data(result)
 

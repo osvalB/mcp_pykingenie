@@ -727,20 +727,70 @@ def subtract_sensor_columns(experiment_id: str = '1',
         f"New sensor names: {experiment.sensor_names}."
     )
 
+@mcp.tool()
+def inter_step_correction(experiment_id: str = '1',
+                        sensor_names: list[str] | None = None,
+                        in_place: bool = True,
+                        new_names: bool = False,
+                        npoints: int = 2) -> str:
+    """
+    Perform the inter-step correction by shifting the association phase in a PyKinGenie experiment.
+    This process step assumes that the baseline and dissociation phases were carried out in the same well.
+
+    Note: in the Octet software, this is called "Inter-Step Correction" with the option "Align data to Dissociation Step"
+
+    This calls ``SurfaceBasedExperiment.assoc_inter_step_correction``. PyKinGenie 
+    moves the association traces to match the beginning of the dissociation phase.
+
+    Parameters
+    ----------
+    experiment_id : str
+        The name of the experiment to align. If a number is provided, it will be
+        used to select the experiment by its index.
+    sensor_names : list
+        A list of sensor names to align. If no names are provided, all sensors in
+        the experiment will be used.
+    in_place : bool
+        If True, modifies the existing sensors; if False, creates new sensors.
+    new_names : bool
+        If True, uses new names for the aligned sensors.
+    npoints : int
+        Number of points PyKinGenie uses around alignment positions.
+
+    Returns
+    -------
+    str
+        A confirmation message.
+    """
+
+    if experiment_id not in PY_KINETICS.experiment_names:
+        try:
+            experiment_name = PY_KINETICS.experiment_names[int(experiment_id) - 1]
+        except (ValueError, IndexError):
+            return f"Experiment with index {experiment_id} not found in kingenie."
+    else:
+        experiment_name = experiment_id
+
+    # If no sensor names are provided, use all sensors in the experiment
+    if not sensor_names:
+        sensor_names = PY_KINETICS.experiments[experiment_name].sensor_names
+
+    PY_KINETICS.experiments[experiment_name].assoc_inter_step_correction(sensor_names, in_place, new_names, npoints)
+
+    # Print the message with the experiment and sensor names
+    return f"Inter-step correction (shift association) done for experiment: {experiment_name} with sensors: {', '.join(sensor_names)}."
 
 @mcp.tool()
 def align_dissociation(experiment_id: str = '1',
                        sensor_names: list[str] | None = None,
                        in_place: bool = True,
                        new_names: bool = False,
-                       npoints: int = 10) -> str:
+                       npoints: int = 2) -> str:
     """
     Align dissociation phases for selected sensors in a PyKinGenie experiment.
 
-    This calls ``SurfaceBasedExperiment.align_dissociation``. PyKinGenie smooths
-    or offsets traces around association-to-dissociation transitions and updates
-    trace arrays, sensor names, and ligand metadata according to ``in_place`` and
-    ``new_names``.
+    This calls ``SurfaceBasedExperiment.align_dissociation``. PyKinGenie shifts the 
+    dissociation traces to match the end of the association phase.
 
     Parameters
     ----------
