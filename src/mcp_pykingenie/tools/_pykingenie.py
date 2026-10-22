@@ -654,6 +654,8 @@ def subtract_experiment(experiment_id: str = '1',
         ``experiment_id``.
     inplace : bool
         If True, modifies the target experiment; if False, creates new sensors.
+    only_interaction : bool
+        If True, only subtracts the interaction terms (baseline before association, assoc. & dissociation phases) between sensors.
 
     Returns
     -------
@@ -671,7 +673,17 @@ def subtract_experiment(experiment_id: str = '1',
     target_experiment = PY_KINETICS.experiments[experiment_name]
     reference_experiment = PY_KINETICS.experiments[reference_experiment_name]
 
-    target_experiment.subtract_experiment(reference_experiment, inplace=inplace)
+    # Find experiment compatibility 
+    compatible, compatibility_type = target_experiment.find_experiments_compatibility(reference_experiment)
+
+    if not compatible:
+        raise ValueError(
+            f"Experiments '{experiment_name}' and '{reference_experiment_name}' are not compatible: {compatibility_type}"
+        )
+
+    only_interaction = compatibility_type == "interaction"
+
+    target_experiment.subtract_experiment(reference_experiment, inplace=inplace, only_interaction = only_interaction)
 
     return (
         f"Experiment '{reference_experiment_name}' subtracted from experiment "

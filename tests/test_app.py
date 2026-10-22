@@ -475,6 +475,94 @@ def test_subtract_experiment_runs_real_surface_experiment_subtraction():
     np.testing.assert_allclose(experiment.ys[experiment.sensor_names.index("A1 - A1")][0], 0, atol=1e-12)
 
 
+def test_subtract_experiment_same_experiment_yields_all_zero_traces():
+    """Testing subtracting an experiment from itself yields all-zero traces."""
+    pykingenie_tools.load_octet_example()
+
+    message = pykingenie_tools.subtract_experiment(
+        experiment_id="Example Experiment",
+        reference_experiment_id="Example Experiment",
+    )
+
+    experiment = server.PY_KINETICS.experiments["Example Experiment"]
+    assert "Experiment 'Example Experiment' subtracted" in message
+
+    for sensor_traces in experiment.ys:
+        for step_trace in sensor_traces:
+            np.testing.assert_allclose(step_trace, 0, atol=1e-12)
+
+
+def test_subtract_experiment_with_single_sensor_reference_zeroes_first_trace_only():
+    """Testing subtraction with only the first reference sensor modifies all traces against that sensor."""
+    pykingenie_tools.load_octet_example()
+    pykingenie_tools.import_octet_experiment(
+        str(get_example_data_root() / "test_bli_folder"),
+        "Reference Experiment",
+    )
+
+    target_experiment = server.PY_KINETICS.experiments["Example Experiment"]
+    reference_experiment = server.PY_KINETICS.experiments["Reference Experiment"]
+
+    reference_experiment.sensor_names = reference_experiment.sensor_names[:1]
+    reference_experiment.xs = reference_experiment.xs[:1]
+    reference_experiment.ys = reference_experiment.ys[:1]
+
+    if hasattr(reference_experiment, "sensor_names_unique"):
+        reference_experiment.sensor_names_unique = reference_experiment.sensor_names_unique[:1]
+    if hasattr(reference_experiment, "ligand_conc_df"):
+        reference_experiment.ligand_conc_df = reference_experiment.ligand_conc_df[
+            reference_experiment.ligand_conc_df["Sensor"].isin(reference_experiment.sensor_names)
+        ].copy()
+
+    message = pykingenie_tools.subtract_experiment(
+        experiment_id="Example Experiment",
+        reference_experiment_id="Reference Experiment",
+    )
+
+    assert "Experiment 'Reference Experiment' subtracted" in message
+
+    first_sensor_index = target_experiment.sensor_names.index("A1 - A1")
+    np.testing.assert_allclose(target_experiment.ys[first_sensor_index][0], 0, atol=1e-12)
+
+    non_zero_other_traces = []
+    for sensor_name, sensor_traces in zip(target_experiment.sensor_names, target_experiment.ys):
+        if sensor_name == "A1 - A1":
+            continue
+        sensor_max = max(float(np.max(np.abs(step_trace))) for step_trace in sensor_traces)
+        non_zero_other_traces.append(sensor_max > 0)
+
+    assert all(non_zero_other_traces)
+
+
+def test_subtract_experiment_with_reference_missing_first_three_steps_still_yields_zero_traces():
+    """Requirement test: trimming first 3 reference steps should still allow full zero subtraction."""
+    pykingenie_tools.load_octet_example()
+    pykingenie_tools.import_octet_experiment(
+        str(get_example_data_root() / "test_bli_folder"),
+        "Reference Experiment",
+    )
+
+    target_experiment = server.PY_KINETICS.experiments["Example Experiment"]
+    reference_experiment = server.PY_KINETICS.experiments["Reference Experiment"]
+
+    for sensor_index in range(len(reference_experiment.xs)):
+        reference_experiment.xs[sensor_index] = reference_experiment.xs[sensor_index][3:]
+        reference_experiment.ys[sensor_index] = reference_experiment.ys[sensor_index][3:]
+
+    reference_experiment.df_steps = reference_experiment.df_steps.iloc[3:].reset_index(drop=True)
+
+    message = pykingenie_tools.subtract_experiment(
+        experiment_id="Example Experiment",
+        reference_experiment_id="Reference Experiment",
+    )
+
+    assert "Experiment 'Reference Experiment' subtracted" in message
+
+    for sensor_traces in target_experiment.ys:
+        for step_trace in sensor_traces:
+            np.testing.assert_allclose(step_trace, 0, atol=1e-12)
+
+
 def test_subtract_sensor_columns_runs_real_surface_column_subtraction():
     """Testing column subtraction calls PyKinGenie's surface experiment method."""
     experiment = SurfaceBasedExperiment("Column Experiment", "synthetic_surface")
