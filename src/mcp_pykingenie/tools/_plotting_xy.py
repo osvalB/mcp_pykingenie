@@ -109,7 +109,8 @@ def _save_xy_figure(fig, base_name: str, save_html: bool) -> str:
     fig : xy.Chart or xy.facets.FacetGrid
         Figure returned by a ``pykingenie.utils.plotting_xy`` helper.
     base_name : str
-        File name prefix. A time stamp and the extension are appended.
+        File name prefix. A time stamp, a counter if the name is taken, and
+        the extension are appended.
     save_html : bool
         If True, also save a standalone interactive HTML file.
 
@@ -119,15 +120,22 @@ def _save_xy_figure(fig, base_name: str, save_html: bool) -> str:
         Message containing the saved image path.
     """
     plot_type = (PLOT_CONFIG.plot_type or "png").lower()
-    time_str = kg.current_hour_min_sec()
+    stem = os.path.join(kg.DATA_DIR, f"{base_name}_{kg.current_hour_min_sec()}")
 
-    image_filename = os.path.join(kg.DATA_DIR, f"{base_name}_{time_str}.{plot_type}")
+    # XY plots render in well under a second, so add a counter to avoid
+    # overwriting a plot saved earlier within the same second.
+    counter = 1
+    unique_stem = stem
+    while any(os.path.exists(f"{unique_stem}.{ext}") for ext in (plot_type, "html")):
+        counter += 1
+        unique_stem = f"{stem}_{counter}"
+
+    image_filename = f"{unique_stem}.{plot_type}"
     fig.write_image(image_filename)
 
     if save_html:
         # Save the plot also as an HTML file for interactive viewing
-        html_filename = os.path.join(kg.DATA_DIR, f"{base_name}_{time_str}.html")
-        fig.to_html(html_filename)
+        fig.to_html(f"{unique_stem}.html")
 
     return "Plot saved to: " + image_filename + "\n"
 

@@ -742,6 +742,21 @@ async def test_xy_plot_tools_use_shared_config_format_and_legends():
     assert not image_path.with_suffix(".html").exists()
 
 
+def test_xy_plots_saved_in_the_same_second_get_unique_names():
+    """Testing repeated XY plots do not overwrite each other."""
+    pykingenie_tools.load_octet_example()
+
+    with patch.object(pykingenie_tools, "current_hour_min_sec", return_value="12-00-00"):
+        first = _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info_xy(save_html=True))
+        second = _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info_xy(save_html=True))
+
+    assert first != second
+    assert second.stem == first.stem + "_2"
+    for image_path in (first, second):
+        assert image_path.is_file()
+        assert image_path.with_suffix(".html").is_file()
+
+
 def test_xy_sample_plate_plot_reports_missing_experiment():
     """Testing XY sample plate plotting reports unknown experiments."""
     pykingenie_tools.load_octet_example()
