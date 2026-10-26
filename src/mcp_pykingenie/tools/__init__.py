@@ -5,9 +5,20 @@ from ._pykingenie import (
     import_octet_experiment,
     import_gator_experiment,
     load_octet_example,
-    plot_sample_plate_info,
     get_legends_table,
-    plot_traces_with_all_steps
+)
+from ._plotting_xy import (
+    get_xy_plot_configs,
+    reset_xy_plot_configs,
+    update_xy_plot_config,
+    update_xy_axis_config,
+    update_xy_layout_config,
+    update_xy_legend_config,
+    update_xy_trace_config,
+    plot_sample_plate_info_xy,
+    plot_traces_with_all_steps_xy,
+    plot_steady_state_xy,
+    plot_kinetic_traces_xy,
 )
 
 __all__ = [
@@ -16,7 +27,16 @@ __all__ = [
     "import_octet_experiment",
     "import_gator_experiment",
     "load_octet_example",
-    "plot_sample_plate_info",
     "get_legends_table",
-    "plot_traces_with_all_steps"
+    "get_xy_plot_configs",
+    "reset_xy_plot_configs",
+    "update_xy_plot_config",
+    "update_xy_axis_config",
+    "update_xy_layout_config",
+    "update_xy_legend_config",
+    "update_xy_trace_config",
+    "plot_sample_plate_info_xy",
+    "plot_traces_with_all_steps_xy",
+    "plot_steady_state_xy",
+    "plot_kinetic_traces_xy",
 ]

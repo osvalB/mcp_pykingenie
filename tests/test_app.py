@@ -15,12 +15,14 @@ import pandas as pd
 import pytest
 from click.testing import CliRunner
 from mcp import Client
+from mcp.server.mcpserver.exceptions import ToolError
 from packaging.version import Version
 
 import mcp_pykingenie
 import mcp_pykingenie.server as server
 import mcp_pykingenie.config as config
 import mcp_pykingenie.tools._pykingenie as pykingenie_tools
+import mcp_pykingenie.tools._plotting_xy as plotting_xy_tools
 from mcp_pykingenie.main import run_app
 from mcp_pykingenie.mcp import mcp
 import mcp_pykingenie.main as main_module
@@ -398,7 +400,6 @@ def test_invalid_experiment_selectors_return_not_found_messages():
 
     expected = "Experiment with index 99 not found in kingenie."
 
-    assert pykingenie_tools.plot_sample_plate_info(experiment_id="99") == expected
     assert pykingenie_tools.align_association(experiment_id="99") == expected
     assert pykingenie_tools.subtract_reference(experiment_id="99") == expected
     assert pykingenie_tools.subtract_experiment(experiment_id="99", reference_experiment_id="1") == expected
@@ -610,50 +611,126 @@ def test_subtract_sensor_columns_runs_real_surface_column_subtraction():
     np.testing.assert_allclose(experiment.ys[2][0], [2.0, 3.5])
 
 
-@pytest.mark.asyncio
-async def test_plot_tools_save_html_artifacts_for_real_octet_data():
-    """Testing plot tools produce real image and HTML artifacts."""
-    _load_example_and_selected_fitting()
-
-    all_steps_path = _saved_path_from_message(
-        await pykingenie_tools.plot_traces_with_all_steps(
-            save_html=True,
-        )
-    )
-    steady_state_path = _saved_path_from_message(await pykingenie_tools.plot_steady_state(save_html=True))
-    kinetic_traces_path = _saved_path_from_message(await pykingenie_tools.plot_kinetic_traces(save_html=True))
-
-    for image_path in [all_steps_path, steady_state_path, kinetic_traces_path]:
-        assert image_path.is_file()
-        assert image_path.with_suffix(".html").is_file()
-
-
-def test_sample_plate_plot_saves_image_and_html_for_numeric_experiment_id():
-    """Testing sample plate plotting resolves numeric IDs against real data."""
+def test_xy_sample_plate_plot_accepts_experiment_name():
+    """Testing XY sample plate plotting accepts a real experiment name."""
     pykingenie_tools.load_octet_example()
 
     image_path = _saved_path_from_message(
-        pykingenie_tools.plot_sample_plate_info(
-            experiment_id="1",
-            save_html=True,
-        )
-    )
-
-    assert image_path.is_file()
-    assert image_path.with_suffix(".html").is_file()
-
-
-def test_sample_plate_plot_accepts_experiment_name():
-    """Testing sample plate plotting accepts a real experiment name."""
-    pykingenie_tools.load_octet_example()
-
-    image_path = _saved_path_from_message(
-        pykingenie_tools.plot_sample_plate_info(
+        plotting_xy_tools.plot_sample_plate_info_xy(
             experiment_id="Example Experiment",
         )
     )
 
     assert image_path.is_file()
+
+
+def test_xy_config_tools_update_only_provided_fields():
+    """Testing XY config tools keep unspecified fields and reset to defaults."""
+    plot_config = plotting_xy_tools.update_xy_plot_config(plot_width=700, x_range=[0, 100])
+    assert plot_config["plot_width"] == 700
+    assert plot_config["x_range"] == (0.0, 100.0)
+    assert plot_config["plot_height"] is None
+
+    plot_config = plotting_xy_tools.update_xy_plot_config(plot_type="SVG")
+    assert plot_config["plot_width"] == 700
+    assert plot_config["plot_type"] == "svg"
+
+    axis_config = plotting_xy_tools.update_xy_axis_config(x_bounds="data", y_label="Shift (nm)")
+    assert axis_config["x_bounds"] == "data"
+    assert axis_config["y_label"] == "Shift (nm)"
+
+    assert plotting_xy_tools.update_xy_layout_config(ncols=2)["ncols"] == 2
+    assert plotting_xy_tools.update_xy_legend_config(loc="lower left")["loc"] == "lower left"
+    assert plotting_xy_tools.update_xy_trace_config(show_fit=False)["show_fit"] is False
+
+    configs = plotting_xy_tools.get_xy_plot_configs()
+    assert set(configs) == {"plot_config", "axis_config", "layout_config", "legend_config", "trace_config"}
+    assert configs["plot_config"]["plot_width"] == 700
+
+    assert plotting_xy_tools.update_xy_plot_config(x_range=[])["x_range"] is None
+
+    plotting_xy_tools.reset_xy_plot_configs()
+    configs = plotting_xy_tools.get_xy_plot_configs()
+    assert configs["plot_config"]["plot_width"] is None
+    assert configs["trace_config"]["show_fit"] is None
+
+
+def test_xy_config_tools_reject_invalid_values_without_changing_config():
+    """Testing invalid XY settings raise and keep the previous configuration."""
+    plotting_xy_tools.update_xy_plot_config(plot_width=700)
+
+    with pytest.raises(ToolError, match="plot_width"):
+        plotting_xy_tools.update_xy_plot_config(plot_width=0)
+    with pytest.raises(ToolError, match="plot_type"):
+        plotting_xy_tools.update_xy_plot_config(plot_type="gif")
+    with pytest.raises(ToolError, match="opacity"):
+        plotting_xy_tools.update_xy_trace_config(opacity=2)
+
+    assert plotting_xy_tools.get_xy_plot_configs()["plot_config"]["plot_width"] == 700
+    assert plotting_xy_tools.get_xy_plot_configs()["trace_config"]["opacity"] == 1
+
+
+@pytest.mark.asyncio
+async def test_xy_plot_tools_save_image_and_html_for_real_octet_data():
+    """Testing XY plot tools produce real image and HTML artifacts."""
+    _load_example_and_selected_fitting()
+    await pykingenie_tools.run_steady_state_fitting()
+
+    paths = [
+        _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info_xy(experiment_id="1", save_html=True)),
+        _saved_path_from_message(await plotting_xy_tools.plot_traces_with_all_steps_xy(save_html=True)),
+        _saved_path_from_message(await plotting_xy_tools.plot_steady_state_xy(save_html=True)),
+        _saved_path_from_message(await plotting_xy_tools.plot_kinetic_traces_xy(save_html=True)),
+    ]
+
+    for image_path in paths:
+        assert image_path.suffix == ".png"
+        assert image_path.is_file()
+        assert image_path.with_suffix(".html").is_file()
+
+
+@pytest.mark.asyncio
+async def test_xy_plot_tools_use_shared_config_format_and_legends():
+    """Testing XY plots follow the configured format and legend selection."""
+    pykingenie_tools.load_octet_example()
+    plotting_xy_tools.update_xy_plot_config(plot_type="svg", plot_width=600, plot_height=400)
+
+    legends = pykingenie_tools.get_legends_table()
+    for row in legends[1:]:
+        row["Show"] = False
+
+    image_path = _saved_path_from_message(
+        await plotting_xy_tools.plot_traces_with_all_steps_xy(legends_df=json.dumps(legends))
+    )
+
+    assert image_path.suffix == ".svg"
+    assert image_path.is_file()
+    assert not image_path.with_suffix(".html").exists()
+
+
+def test_xy_plots_saved_in_the_same_second_get_unique_names():
+    """Testing repeated XY plots do not overwrite each other."""
+    pykingenie_tools.load_octet_example()
+
+    with patch.object(pykingenie_tools, "current_hour_min_sec", return_value="12-00-00"):
+        first = _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info_xy(save_html=True))
+        second = _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info_xy(save_html=True))
+
+    assert first != second
+    assert second.stem == first.stem + "_2"
+    for image_path in (first, second):
+        assert image_path.is_file()
+        assert image_path.with_suffix(".html").is_file()
+
+
+def test_xy_sample_plate_plot_reports_missing_experiment():
+    """Testing XY sample plate plotting reports unknown experiments."""
+    pykingenie_tools.load_octet_example()
+
+    assert (
+        plotting_xy_tools.plot_sample_plate_info_xy(experiment_id="99")
+        == "Experiment with index 99 not found in kingenie."
+    )
 
 
 def test_initiate_fitting_datasets_falls_back_to_default_table_for_invalid_json():
@@ -806,7 +883,7 @@ async def test_mcp_server():
         assert set(df["Legend"]) == {"A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"}
 
         result = await client.call_tool(
-            "plot_traces_with_all_steps",
+            "plot_traces_with_all_steps_xy",
             {"legends_df": legends},
         )
 
@@ -862,13 +939,21 @@ async def test_mcp_server():
 
         assert "Fitting datasets generated" in _result_data(result)
 
-        result = await client.call_tool("plot_steady_state", {})
+        result = await client.call_tool("update_xy_plot_config", {"plot_width": 800, "x_range": [0, 500]})
+        assert _result_data(result)["plot_width"] == 800
 
-        assert "Plot saved to" in _result_data(result)
+        # The time range does not fit the logarithmic concentration axis.
+        result = await client.call_tool("plot_steady_state_xy", {})
+        assert result.is_error
+        assert "log" in _result_data(result)
 
-        result = await client.call_tool("plot_kinetic_traces", {})
+        result = await client.call_tool("update_xy_plot_config", {"x_range": []})
+        assert _result_data(result)["x_range"] is None
 
-        assert "Plot saved to" in _result_data(result)
+        for tool in ("plot_sample_plate_info_xy", "plot_traces_with_all_steps_xy",
+                     "plot_steady_state_xy", "plot_kinetic_traces_xy"):
+            result = await client.call_tool(tool, {})
+            assert "Plot saved to" in _result_data(result)
 
         result = await client.call_tool("run_steady_state_fitting", {})
         assert (

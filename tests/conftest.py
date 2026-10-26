@@ -8,6 +8,7 @@ os.environ.setdefault("MCP_PYKINGENIE_SKIP_USER_DATA_INIT", "1")
 import mcp_pykingenie.config as config
 import mcp_pykingenie.server as server
 import mcp_pykingenie.tools._pykingenie as pykingenie_tools
+import mcp_pykingenie.tools._plotting_xy as plotting_xy_tools
 
 
 pytest_plugins = ("pytest_asyncio",)
@@ -29,5 +30,8 @@ def reset_kinetics_analyzer(tmp_path):
     # Redirect generated files to the temporary test directory.
     server.DATA_DIR = data_dir
     pykingenie_tools.DATA_DIR = data_dir
+
+    # Restore the shared XY plot settings.
+    plotting_xy_tools.reset_xy_configs()
 
     yield

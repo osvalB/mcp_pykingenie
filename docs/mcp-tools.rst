@@ -103,24 +103,62 @@ Data Processing
    * - ``align_and_subtract``
      - Align and subtract a reference sensor in one step.
 
-Plotting
---------
+XY Plotting
+-----------
+
+These tools use the XY plotting helpers of
+``pykingenie.utils.plotting_xy``. They save the image in the format set with
+``update_xy_plot_config`` (``png`` by default; ``jpeg``, ``webp``, ``svg`` and
+``pdf`` are also supported) and, with ``save_html=True``, a standalone
+interactive HTML file. The earlier PyKinGenie plotting tools
+(``plot_sample_plate_info``, ``plot_traces_with_all_steps``,
+``plot_kinetic_traces`` and ``plot_steady_state``) were removed; their code is
+kept commented out in ``mcp_pykingenie/tools/_plotting_legacy.py``.
 
 .. list-table::
    :header-rows: 1
 
    * - Tool
      - Description
-   * - ``plot_sample_plate_info``
+   * - ``plot_sample_plate_info_xy``
      - Plot the sample plate layout for an experiment.
    * - ``get_legends_table``
      - Get the sensor legend DataFrame used by trace plots.
-   * - ``plot_traces_with_all_steps``
-     - Plot all BLI steps, including baseline, association, dissociation, and regeneration phases.
-   * - ``plot_kinetic_traces``
-     - Plot association and dissociation traces from fitting datasets.
-   * - ``plot_steady_state``
-     - Plot steady-state binding data.
+   * - ``plot_traces_with_all_steps_xy``
+     - Plot all BLI steps, one panel per experiment. Accepts the table from ``get_legends_table``.
+   * - ``plot_kinetic_traces_xy``
+     - Plot association and dissociation traces from fitting datasets, with fitted curves when available.
+   * - ``plot_steady_state_xy``
+     - Plot steady-state binding data, with fitted curves when available.
+
+XY Plot Settings
+^^^^^^^^^^^^^^^^
+
+All XY plots share one instance of each PyKinGenie configuration dataclass.
+The update tools change only the parameters that are provided, so settings
+build up across calls until ``reset_xy_plot_configs`` is used. Fields left
+unset keep the defaults of each plot, such as its size or axis labels. Range
+and bounds fields are cleared by passing an empty list.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Tool
+     - Description
+   * - ``update_xy_plot_config``
+     - Plot size in pixels, image format, font size, title, and initial x/y ranges (``PlotConfig``).
+   * - ``update_xy_axis_config``
+     - Grid lines, ticks, line widths, labels, scales, axis reversal, and navigation bounds (``AxisConfig``).
+   * - ``update_xy_layout_config``
+     - Columns or stacked panels, spacing, shared axes, subplot titles, and splitting by Smax ID (``LayoutConfig``).
+   * - ``update_xy_legend_config``
+     - Legend visibility, position, columns, title, font size, and interactions (``LegendConfig``).
+   * - ``update_xy_trace_config``
+     - Markers, lines, opacity, fitted curves, smoothing, and sampling (``TraceConfig``).
+   * - ``get_xy_plot_configs``
+     - Show the current XY plot settings.
+   * - ``reset_xy_plot_configs``
+     - Restore all XY plot settings to the defaults.
 
 Fitting
 -------
