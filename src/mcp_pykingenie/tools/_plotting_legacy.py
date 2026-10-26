@@ -1,9 +1,10 @@
 """Legacy PyKinGenie plotting tools, kept for reference only.
 
 These tools were replaced by the XY plotting tools in
-:mod:`mcp_pykingenie.tools._plotting_xy`. The code is commented out so it is
-neither imported nor registered with the MCP server. To restore a tool,
-uncomment it, move it back to :mod:`mcp_pykingenie.tools._pykingenie` and
+:mod:`mcp_pykingenie.tools._plotting_xy`, which now use the same tool names.
+The code is commented out so it is neither imported nor registered with the
+MCP server. To restore a tool, uncomment it, give it a name that does not clash
+with the XY tool, move it back to :mod:`mcp_pykingenie.tools._pykingenie` and
 add it to :mod:`mcp_pykingenie.tools`.
 """
 

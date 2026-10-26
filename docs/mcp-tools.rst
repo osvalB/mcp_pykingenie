@@ -110,25 +110,24 @@ These tools use the XY plotting helpers of
 ``pykingenie.utils.plotting_xy``. They save the image in the format set with
 ``update_xy_plot_config`` (``png`` by default; ``jpeg``, ``webp``, ``svg`` and
 ``pdf`` are also supported) and, with ``save_html=True``, a standalone
-interactive HTML file. The earlier PyKinGenie plotting tools
-(``plot_sample_plate_info``, ``plot_traces_with_all_steps``,
-``plot_kinetic_traces`` and ``plot_steady_state``) were removed; their code is
-kept commented out in ``mcp_pykingenie/tools/_plotting_legacy.py``.
+interactive HTML file. The earlier versions of these tools, based on the
+PyKinGenie Plotly helpers, are kept commented out in
+``mcp_pykingenie/tools/_plotting_legacy.py``.
 
 .. list-table::
    :header-rows: 1
 
    * - Tool
      - Description
-   * - ``plot_sample_plate_info_xy``
+   * - ``plot_sample_plate_info``
      - Plot the sample plate layout for an experiment.
    * - ``get_legends_table``
      - Get the sensor legend DataFrame used by trace plots.
-   * - ``plot_traces_with_all_steps_xy``
+   * - ``plot_traces_with_all_steps``
      - Plot all BLI steps, one panel per experiment. Accepts the table from ``get_legends_table``.
-   * - ``plot_kinetic_traces_xy``
+   * - ``plot_kinetic_traces``
      - Plot association and dissociation traces from fitting datasets, with fitted curves when available.
-   * - ``plot_steady_state_xy``
+   * - ``plot_steady_state``
      - Plot steady-state binding data, with fitted curves when available.
 
 XY Plot Settings
