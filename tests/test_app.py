@@ -907,6 +907,86 @@ async def test_export_tools_return_datasets_and_fitted_curves():
         export_tools.get_export_data("plots")
 
 
+def _fake_fitting(**changes):
+    """Build a minimal fitting object with two traces and one Smax group."""
+    fit = SimpleNamespace(
+        time_assoc_lst=[np.array([0.0, 1.0]), np.array([0.0, 1.0])],
+        assoc_lst=[np.array([0.1, 0.2]), np.array([0.3, np.nan])],
+        time_disso_lst=[np.array([2.0]), np.array([2.0])],
+        disso_lst=[np.array([0.2]), np.array([0.4])],
+        lig_conc_lst=[1.0, 2.0],
+        smax_id=[0, 0],
+        names=["Sample"],
+        signal_assoc_fit=None,
+        signal_disso_fit=None,
+        signal_ss_fit=None,
+        lig_conc_lst_per_id=[[1.0, 2.0]],
+    )
+    for key, value in changes.items():
+        setattr(fit, key, value)
+    return fit
+
+
+def _use_fake_fittings(monkeypatch, **fittings):
+    analyzer = SimpleNamespace(fittings=fittings, fittings_names=list(fittings))
+    monkeypatch.setattr(pykingenie_tools, "PY_KINETICS", analyzer)
+
+
+def test_export_data_labels_traces_and_skips_missing_curves(monkeypatch):
+    """Testing per-trace names, partial fits and non-finite values in exports."""
+    fit = _fake_fitting(
+        names=["First", "Second"],
+        signal_assoc_fit=[np.array([0.1, 0.2]), None],
+        signal_ss_fit=None,
+    )
+    del fit.smax_id
+    _use_fake_fittings(monkeypatch, fit=fit, unfitted=_fake_fitting())
+
+    datasets = export_tools.get_export_data("datasets")
+    assert {row["ID"] for row in datasets if row["Dataset"] == "fit"} == {"First", "Second"}
+    assert {row["ID"] for row in datasets if row["Dataset"] == "unfitted"} == {"Sample"}
+    second_trace = [row["Signal"] for row in datasets
+                    if row["Dataset"] == "fit" and row["Trace"] == 2 and row["Type"] == "Association"]
+    assert second_trace == [0.3, None]
+    assert all(type(row["Time"]) is float for row in datasets)
+
+    curves = export_tools.get_export_data("kinetic-curves")
+    assert {(row["Dataset"], row["Trace"]) for row in curves} == {("fit", 1)}
+
+    assert export_tools.get_export_data("steady-state-curves") == []
+
+
+@pytest.mark.parametrize(
+    ("kind", "changes", "match"),
+    [
+        ("datasets", {"lig_conc_lst": [1.0]}, "Association data has inconsistent trace lengths"),
+        ("datasets", {"smax_id": [0]}, "Trace and Smax group counts do not match"),
+        ("kinetic-curves", {"signal_assoc_fit": [np.array([0.1]), np.array([0.2])]},
+         "Fitted curve time and signal lengths do not match"),
+        ("steady-state-curves", {"signal_ss_fit": [np.array([0.1, 0.2])], "lig_conc_lst_per_id": None},
+         "Steady-state curves have inconsistent group lengths"),
+        ("steady-state-curves", {"signal_ss_fit": [np.array([0.1])]},
+         "Steady-state concentrations and signals do not match"),
+    ],
+)
+def test_export_data_reports_inconsistent_fitting_data(monkeypatch, kind, changes, match):
+    """Testing inconsistent fitting objects are reported instead of misread."""
+    _use_fake_fittings(monkeypatch, fit=_fake_fitting(**changes))
+
+    with pytest.raises(ToolError, match=match):
+        export_tools.get_export_data(kind)
+
+
+def test_initiate_fitting_datasets_rejects_a_column_missing_from_one_row():
+    """Testing a column present in other rows cannot be left out of one row."""
+    df = _load_example_and_selected_fitting()
+    rows = df.to_dict(orient="records")
+    del rows[1]["Replicate"]
+
+    with pytest.raises(ToolError, match="Sample row 2: Replicate is missing from this row"):
+        pykingenie_tools.initiate_fitting_datasets(rows)
+
+
 @pytest.mark.asyncio
 async def test_split_fitting_tools_support_real_two_to_one_model():
     """Testing split fitting tools support PyKinGenie's real two-to-one model."""
