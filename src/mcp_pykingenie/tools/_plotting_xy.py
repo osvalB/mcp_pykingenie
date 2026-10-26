@@ -338,8 +338,8 @@ def update_xy_layout_config(
     """
     Edit the subplot layout of the XY plots with several panels.
 
-    Applies to ``plot_traces_with_all_steps_xy``, ``plot_steady_state_xy``
-    and ``plot_kinetic_traces_xy``. Only the provided parameters are changed.
+    Applies to ``plot_traces_with_all_steps``, ``plot_steady_state``
+    and ``plot_kinetic_traces``. Only the provided parameters are changed.
 
     Parameters
     ----------
@@ -499,7 +499,7 @@ def update_xy_trace_config(
 
 
 @xy_tool()
-def plot_sample_plate_info_xy(experiment_id: str = '1', save_html: bool = False) -> str:
+def plot_sample_plate_info(experiment_id: str = '1', save_html: bool = False) -> str:
     """
     Save an XY sample-plate layout plot for one experiment.
 
@@ -536,7 +536,7 @@ def plot_sample_plate_info_xy(experiment_id: str = '1', save_html: bool = False)
 
 
 @xy_tool()
-async def plot_traces_with_all_steps_xy(
+async def plot_traces_with_all_steps(
     legends_df: list[dict[str, Any]] | str | None = None,
     save_html: bool = False,
 ) -> str:
@@ -583,7 +583,7 @@ async def plot_traces_with_all_steps_xy(
 
 
 @xy_tool()
-async def plot_steady_state_xy(save_html: bool = False) -> str:
+async def plot_steady_state(save_html: bool = False) -> str:
     """
     Save an XY steady-state plot for the generated fitting datasets.
 
@@ -619,7 +619,7 @@ async def plot_steady_state_xy(save_html: bool = False) -> str:
 
 
 @xy_tool()
-async def plot_kinetic_traces_xy(save_html: bool = False) -> str:
+async def plot_kinetic_traces(save_html: bool = False) -> str:
     """
     Save an XY association/dissociation plot for the fitting datasets.
 

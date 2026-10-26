@@ -616,7 +616,7 @@ def test_xy_sample_plate_plot_accepts_experiment_name():
     pykingenie_tools.load_octet_example()
 
     image_path = _saved_path_from_message(
-        plotting_xy_tools.plot_sample_plate_info_xy(
+        plotting_xy_tools.plot_sample_plate_info(
             experiment_id="Example Experiment",
         )
     )
@@ -677,10 +677,10 @@ async def test_xy_plot_tools_save_image_and_html_for_real_octet_data():
     await pykingenie_tools.run_steady_state_fitting()
 
     paths = [
-        _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info_xy(experiment_id="1", save_html=True)),
-        _saved_path_from_message(await plotting_xy_tools.plot_traces_with_all_steps_xy(save_html=True)),
-        _saved_path_from_message(await plotting_xy_tools.plot_steady_state_xy(save_html=True)),
-        _saved_path_from_message(await plotting_xy_tools.plot_kinetic_traces_xy(save_html=True)),
+        _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info(experiment_id="1", save_html=True)),
+        _saved_path_from_message(await plotting_xy_tools.plot_traces_with_all_steps(save_html=True)),
+        _saved_path_from_message(await plotting_xy_tools.plot_steady_state(save_html=True)),
+        _saved_path_from_message(await plotting_xy_tools.plot_kinetic_traces(save_html=True)),
     ]
 
     for image_path in paths:
@@ -700,7 +700,7 @@ async def test_xy_plot_tools_use_shared_config_format_and_legends():
         row["Show"] = False
 
     image_path = _saved_path_from_message(
-        await plotting_xy_tools.plot_traces_with_all_steps_xy(legends_df=json.dumps(legends))
+        await plotting_xy_tools.plot_traces_with_all_steps(legends_df=json.dumps(legends))
     )
 
     assert image_path.suffix == ".svg"
@@ -713,8 +713,8 @@ def test_xy_plots_saved_in_the_same_second_get_unique_names():
     pykingenie_tools.load_octet_example()
 
     with patch.object(pykingenie_tools, "current_hour_min_sec", return_value="12-00-00"):
-        first = _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info_xy(save_html=True))
-        second = _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info_xy(save_html=True))
+        first = _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info(save_html=True))
+        second = _saved_path_from_message(plotting_xy_tools.plot_sample_plate_info(save_html=True))
 
     assert first != second
     assert second.stem == first.stem + "_2"
@@ -728,7 +728,7 @@ def test_xy_sample_plate_plot_reports_missing_experiment():
     pykingenie_tools.load_octet_example()
 
     assert (
-        plotting_xy_tools.plot_sample_plate_info_xy(experiment_id="99")
+        plotting_xy_tools.plot_sample_plate_info(experiment_id="99")
         == "Experiment with index 99 not found in kingenie."
     )
 
@@ -883,7 +883,7 @@ async def test_mcp_server():
         assert set(df["Legend"]) == {"A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"}
 
         result = await client.call_tool(
-            "plot_traces_with_all_steps_xy",
+            "plot_traces_with_all_steps",
             {"legends_df": legends},
         )
 
@@ -943,15 +943,15 @@ async def test_mcp_server():
         assert _result_data(result)["plot_width"] == 800
 
         # The time range does not fit the logarithmic concentration axis.
-        result = await client.call_tool("plot_steady_state_xy", {})
+        result = await client.call_tool("plot_steady_state", {})
         assert result.is_error
         assert "log" in _result_data(result)
 
         result = await client.call_tool("update_xy_plot_config", {"x_range": []})
         assert _result_data(result)["x_range"] is None
 
-        for tool in ("plot_sample_plate_info_xy", "plot_traces_with_all_steps_xy",
-                     "plot_steady_state_xy", "plot_kinetic_traces_xy"):
+        for tool in ("plot_sample_plate_info", "plot_traces_with_all_steps",
+                     "plot_steady_state", "plot_kinetic_traces"):
             result = await client.call_tool(tool, {})
             assert "Plot saved to" in _result_data(result)
 

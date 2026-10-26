@@ -15,10 +15,10 @@ from ._plotting_xy import (
     update_xy_layout_config,
     update_xy_legend_config,
     update_xy_trace_config,
-    plot_sample_plate_info_xy,
-    plot_traces_with_all_steps_xy,
-    plot_steady_state_xy,
-    plot_kinetic_traces_xy,
+    plot_sample_plate_info,
+    plot_traces_with_all_steps,
+    plot_steady_state,
+    plot_kinetic_traces,
 )
 
 __all__ = [
@@ -35,8 +35,8 @@ __all__ = [
     "update_xy_layout_config",
     "update_xy_legend_config",
     "update_xy_trace_config",
-    "plot_sample_plate_info_xy",
-    "plot_traces_with_all_steps_xy",
-    "plot_steady_state_xy",
-    "plot_kinetic_traces_xy",
+    "plot_sample_plate_info",
+    "plot_traces_with_all_steps",
+    "plot_steady_state",
+    "plot_kinetic_traces",
 ]
