@@ -400,7 +400,6 @@ def test_invalid_experiment_selectors_return_not_found_messages():
 
     expected = "Experiment with index 99 not found in kingenie."
 
-    assert pykingenie_tools.plot_sample_plate_info(experiment_id="99") == expected
     assert pykingenie_tools.align_association(experiment_id="99") == expected
     assert pykingenie_tools.subtract_reference(experiment_id="99") == expected
     assert pykingenie_tools.subtract_experiment(experiment_id="99", reference_experiment_id="1") == expected
@@ -612,45 +611,12 @@ def test_subtract_sensor_columns_runs_real_surface_column_subtraction():
     np.testing.assert_allclose(experiment.ys[2][0], [2.0, 3.5])
 
 
-@pytest.mark.asyncio
-async def test_plot_tools_save_html_artifacts_for_real_octet_data():
-    """Testing plot tools produce real image and HTML artifacts."""
-    _load_example_and_selected_fitting()
-
-    all_steps_path = _saved_path_from_message(
-        await pykingenie_tools.plot_traces_with_all_steps(
-            save_html=True,
-        )
-    )
-    steady_state_path = _saved_path_from_message(await pykingenie_tools.plot_steady_state(save_html=True))
-    kinetic_traces_path = _saved_path_from_message(await pykingenie_tools.plot_kinetic_traces(save_html=True))
-
-    for image_path in [all_steps_path, steady_state_path, kinetic_traces_path]:
-        assert image_path.is_file()
-        assert image_path.with_suffix(".html").is_file()
-
-
-def test_sample_plate_plot_saves_image_and_html_for_numeric_experiment_id():
-    """Testing sample plate plotting resolves numeric IDs against real data."""
+def test_xy_sample_plate_plot_accepts_experiment_name():
+    """Testing XY sample plate plotting accepts a real experiment name."""
     pykingenie_tools.load_octet_example()
 
     image_path = _saved_path_from_message(
-        pykingenie_tools.plot_sample_plate_info(
-            experiment_id="1",
-            save_html=True,
-        )
-    )
-
-    assert image_path.is_file()
-    assert image_path.with_suffix(".html").is_file()
-
-
-def test_sample_plate_plot_accepts_experiment_name():
-    """Testing sample plate plotting accepts a real experiment name."""
-    pykingenie_tools.load_octet_example()
-
-    image_path = _saved_path_from_message(
-        pykingenie_tools.plot_sample_plate_info(
+        plotting_xy_tools.plot_sample_plate_info_xy(
             experiment_id="Example Experiment",
         )
     )
@@ -917,7 +883,7 @@ async def test_mcp_server():
         assert set(df["Legend"]) == {"A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"}
 
         result = await client.call_tool(
-            "plot_traces_with_all_steps",
+            "plot_traces_with_all_steps_xy",
             {"legends_df": legends},
         )
 
@@ -972,14 +938,6 @@ async def test_mcp_server():
         )
 
         assert "Fitting datasets generated" in _result_data(result)
-
-        result = await client.call_tool("plot_steady_state", {})
-
-        assert "Plot saved to" in _result_data(result)
-
-        result = await client.call_tool("plot_kinetic_traces", {})
-
-        assert "Plot saved to" in _result_data(result)
 
         result = await client.call_tool("update_xy_plot_config", {"plot_width": 800, "x_range": [0, 500]})
         assert _result_data(result)["plot_width"] == 800

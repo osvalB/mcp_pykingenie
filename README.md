@@ -186,9 +186,9 @@ Once connected through your MCP client, ask your AI assistant to run a flow like
 
 ## XY plots
 
-The `*_xy` plotting tools (`plot_sample_plate_info_xy`,
+All plots are made by the `*_xy` plotting tools (`plot_sample_plate_info_xy`,
 `plot_traces_with_all_steps_xy`, `plot_kinetic_traces_xy`,
-`plot_steady_state_xy`) use PyKinGenie's XY plotting helpers. Their appearance
+`plot_steady_state_xy`), which use PyKinGenie's XY plotting helpers. Their appearance
 is controlled by shared settings that you can change in plain language, for
 example "make the XY plots 800 px wide and save them as SVG". The assistant uses
 `update_xy_plot_config`, `update_xy_axis_config`, `update_xy_layout_config`,

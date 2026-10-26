@@ -5,9 +5,7 @@ from ._pykingenie import (
     import_octet_experiment,
     import_gator_experiment,
     load_octet_example,
-    plot_sample_plate_info,
     get_legends_table,
-    plot_traces_with_all_steps
 )
 from ._plotting_xy import (
     get_xy_plot_configs,
@@ -29,9 +27,7 @@ __all__ = [
     "import_octet_experiment",
     "import_gator_experiment",
     "load_octet_example",
-    "plot_sample_plate_info",
     "get_legends_table",
-    "plot_traces_with_all_steps",
     "get_xy_plot_configs",
     "reset_xy_plot_configs",
     "update_xy_plot_config",
