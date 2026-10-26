@@ -2,12 +2,17 @@ from mcp_pykingenie.mcp import mcp
 
 import os
 import json
+import math
 import pandas as pd
 
 from ..server import PY_KINETICS, DATA_DIR, EXAMPLE_DATA_DIR
 
+from contextlib import contextmanager
+from copy import deepcopy
 from datetime import datetime
 from typing import Any
+
+from mcp.server.mcpserver.exceptions import ToolError
 
 import pykingenie
 
@@ -23,6 +28,14 @@ KINETIC_FITTING_MODEL_REGIONS = {
     "one_to_one_mtl": {"association_dissociation"},
     "one_to_one_if": {"association_dissociation"},
     "two_to_one": {"association_dissociation"},
+}
+
+# Every PyKinGenie fit clears all results of a fitting object, so the results
+# of the other fit type are saved and restored around each fit.
+FIT_RESULT_FIELDS = {
+    "kinetics": ("fit_params_kinetics", "fit_params_kinetics_error",
+                 "signal_assoc_fit", "signal_disso_fit", "k_obs"),
+    "steady_state": ("fit_params_ss", "signal_ss_fit"),
 }
 
 
@@ -47,6 +60,126 @@ def resolve_experiment_name(experiment_id: str) -> str | None:
         return PY_KINETICS.experiment_names[int(experiment_id) - 1]
     except (ValueError, IndexError):
         return None
+
+
+@contextmanager
+def keep_fit_results(family: str):
+    """
+    Restore one fit type's results after running a fit of the other type.
+
+    Parameters
+    ----------
+    family : str
+        Results to keep, ``'kinetics'`` or ``'steady_state'``.
+    """
+    fields = FIT_RESULT_FIELDS[family]
+    snapshots = [
+        (name, fitting, {field: deepcopy(getattr(fitting, field)) for field in fields
+                         if getattr(fitting, field, None) is not None})
+        for name, fitting in PY_KINETICS.fittings.items()
+    ]
+    try:
+        yield
+    finally:
+        for name, fitting, values in snapshots:
+            # Skip fitting objects replaced while the fit was running.
+            if PY_KINETICS.fittings.get(name) is fitting:
+                for field, value in values.items():
+                    setattr(fitting, field, value)
+
+
+def select_sample_rows(sample_info: list[Any]) -> list[dict[str, Any]]:
+    """
+    Check sample metadata and return the selected rows with an experiment each.
+
+    Rows that are not selected or have a zero analyte concentration (reference
+    traces) are left out. Each remaining row is matched to the one loaded
+    experiment that has its association and dissociation data, so the
+    ``Experiment`` column is filled in when it is missing.
+
+    Parameters
+    ----------
+    sample_info : list
+        Records from ``obtain_sample_info_table``, possibly edited.
+
+    Returns
+    -------
+    list of dict
+        Selected rows, each with an ``Experiment`` value.
+
+    Raises
+    ------
+    ValueError
+        If a row is invalid, matches no or several experiments, or no row is
+        selected.
+    """
+    if not isinstance(sample_info, list) or not sample_info:
+        raise ValueError("Provide sample metadata with at least one selected, positive-concentration trace.")
+
+    selected = []
+    for index, original in enumerate(sample_info, 1):
+        prefix = f"Sample row {index}"
+        if not isinstance(original, dict) or type(original.get("Select")) is not bool:
+            raise ValueError(f"{prefix}: Select must be true or false.")
+        if not original["Select"]:
+            continue
+
+        row = original.copy()
+        concentration_keys = [key for key in row if "[Analyte]" in key]
+        concentration = row[concentration_keys[0]] if len(concentration_keys) == 1 else None
+        if type(concentration) not in (int, float) or not math.isfinite(concentration) or concentration < 0:
+            raise ValueError(f"{prefix}: provide one finite, nonnegative analyte concentration in μM.")
+        # PyKinGenie leaves zero-concentration references out of the fit.
+        if concentration == 0:
+            continue
+
+        for key in ("Sensor", "SampleID"):
+            if not isinstance(row.get(key), str) or not row[key].strip():
+                raise ValueError(f"{prefix}: {key} must not be empty.")
+
+        # merge_ligand_conc_df drops columns with a single value, so missing
+        # columns take their default unless another row has them.
+        for key, minimum, default in (("Smax_ID", 0, None), ("Replicate", 1, 1),
+                                      ("Analyte_location", 0, 0), ("Loading_location", 0, 0)):
+            if key not in row and default is not None:
+                if any(isinstance(other, dict) and key in other for other in sample_info):
+                    raise ValueError(f"{prefix}: {key} is missing from this row.")
+                row[key] = default
+            if type(row.get(key)) is not int or row[key] < minimum:
+                raise ValueError(f"{prefix}: {key} must be an integer of at least {minimum}.")
+
+        names = PY_KINETICS.experiment_names
+        if "Experiment" in row:
+            if row["Experiment"] not in names:
+                raise ValueError(f"{prefix}: experiment {row['Experiment']!r} is not loaded.")
+            names = [row["Experiment"]]
+
+        candidates = []
+        for name in names:
+            experiment = PY_KINETICS.experiments[name]
+            try:
+                available = all(len(experiment.get_step_xy(
+                    row["Sensor"], row["Loading_location"], row["Analyte_location"],
+                    step_type=phase, replicate=row["Replicate"], type=axis,
+                )) for phase in ("ASSOC", "DISASSOC") for axis in ("x", "y"))
+            except (ValueError, IndexError, KeyError, TypeError):
+                available = False
+            if available:
+                candidates.append(name)
+
+        if not candidates:
+            raise ValueError(f"{prefix}: no loaded experiment contains sensor {row['Sensor']!r}, analyte location "
+                             f"{row['Analyte_location']}, loading location {row['Loading_location']}, replicate "
+                             f"{row['Replicate']} with association and dissociation data.")
+        if len(candidates) > 1:
+            raise ValueError(f"{prefix}: the trace matches several experiments ({', '.join(candidates)}). "
+                             "Set Experiment in the sample metadata.")
+        row["Experiment"] = candidates[0]
+        selected.append(row)
+
+    if not selected:
+        raise ValueError("Select at least one trace with a positive analyte concentration.")
+    return selected
 
 
 def current_hour_min_sec():
@@ -718,7 +851,9 @@ def obtain_sample_info_table() -> list[dict[str, Any]]:
     This calls ``PY_KINETICS.merge_ligand_conc_df`` across loaded experiments.
     The resulting table can be edited and passed to
     ``initiate_fitting_datasets`` to choose traces, concentrations, sample names,
-    replicates, and Smax grouping.
+    replicates, and Smax grouping. The ``Experiment`` column holds the names
+    the experiments were loaded with, and is kept even when only one
+    experiment is loaded, so a saved table stays tied to its data.
 
     Returns
     -------
@@ -726,8 +861,17 @@ def obtain_sample_info_table() -> list[dict[str, Any]]:
         JSON records for the merged ligand-concentration DataFrame.
     """
 
+    # PyKinGenie fills Experiment with each experiment's internal name, but
+    # generate_fittings looks experiments up by the name they were loaded with.
+    for name, experiment in PY_KINETICS.experiments.items():
+        if getattr(experiment, "ligand_conc_df", None) is not None:
+            experiment.ligand_conc_df["Experiment"] = name
+
     PY_KINETICS.merge_ligand_conc_df()
     df = PY_KINETICS.combined_ligand_conc_df
+    names = PY_KINETICS.experiment_names
+    if "Experiment" not in df.columns and len(names) == 1:
+        df = df.assign(Experiment=names[0])
     return df.to_dict(orient="records")
 
 
@@ -739,13 +883,19 @@ def initiate_fitting_datasets(sample_info: list[dict[str, Any]] | str | None = N
     A template for the JSON representation can be generated using the
     ``obtain_sample_info_table`` tool. The user can edit the JSON string to select
     only the data they want to fit, change analyte concentrations, change sample
-    names, and alter Smax grouping. Existing fitting objects are reset before
-    ``PY_KINETICS.generate_fittings`` is called.
+    names, and alter Smax grouping. Without metadata, every trace in the
+    default table is used.
+
+    The metadata is checked before the existing fitting objects are reset, so
+    invalid or ambiguous rows leave the current fits untouched. Unselected rows
+    and zero-concentration references are left out. Rows without
+    ``Experiment`` are accepted when each trace is found in one loaded
+    experiment only.
 
     Parameters
     ----------
-    json_str : str
-        JSON string representing the DataFrame.
+    sample_info : list[dict] | str | None
+        Sample metadata records, or a JSON string with them.
 
     Returns
     -------
@@ -753,20 +903,23 @@ def initiate_fitting_datasets(sample_info: list[dict[str, Any]] | str | None = N
         A message listing the names of the generated fitting datasets.
     """
 
+    if sample_info is None:
+        sample_info = obtain_sample_info_table()
+
     try:
         if isinstance(sample_info, str):
-            sample_info = json.loads(sample_info)
-        if sample_info is None:
-            raise ValueError("No sample metadata provided.")
-        df = pd.DataFrame(sample_info)
-    except (TypeError, ValueError, json.JSONDecodeError):
-        PY_KINETICS.merge_ligand_conc_df()
-        df = PY_KINETICS.combined_ligand_conc_df
+            try:
+                sample_info = json.loads(sample_info)
+            except json.JSONDecodeError as exc:
+                raise ValueError("Sample metadata is not valid JSON.") from exc
+        selected = select_sample_rows(sample_info)
+    except ValueError as exc:
+        raise ToolError(str(exc)) from None
 
     # Clear all the current fittings in PY_KINETICS
     PY_KINETICS.init_fittings()
 
-    PY_KINETICS.generate_fittings(df)
+    PY_KINETICS.generate_fittings(pd.DataFrame(selected))
 
     # Find the names of the generated fittings
     fitting_names = PY_KINETICS.fittings_names
@@ -787,6 +940,7 @@ async def run_steady_state_fitting(steady_state_model: str = 'one_to_one',
 
     This calls ``PY_KINETICS.submit_steady_state_fitting`` to fit
     concentration-response data independently from kinetic trace fitting.
+    Existing kinetic fitting results are kept.
 
     Parameters
     ----------
@@ -809,10 +963,11 @@ async def run_steady_state_fitting(steady_state_model: str = 'one_to_one',
             f"Valid models: {valid_models}."
         )
 
-    PY_KINETICS.submit_steady_state_fitting(
-        fitting_model=steady_state_model,
-        fit_sigma=fit_sigma,
-    )
+    with keep_fit_results("kinetics"):
+        PY_KINETICS.submit_steady_state_fitting(
+            fitting_model=steady_state_model,
+            fit_sigma=fit_sigma,
+        )
 
     return (f"Steady-state fitting submitted with model: {steady_state_model}, "
             f"fit sigma: {fit_sigma}.")
@@ -830,7 +985,8 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
     calls ``PY_KINETICS.submit_kinetics_fitting`` with the selected kinetic
     model, fitted region, Smax sharing setting, and optional two-site
     cooperativity setting. Use ``run_steady_state_fitting`` separately only
-    when you want a standalone steady-state fit.
+    when you want a standalone steady-state fit. Existing steady-state fitting
+    results are kept.
 
     Parameters
     ----------
@@ -873,15 +1029,17 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
         )
 
     steady_state_model = "two_to_one" if fitting_model == "two_to_one" else "one_to_one"
-    PY_KINETICS.submit_steady_state_fitting(
-        fitting_model=steady_state_model,
-        fit_sigma=fit_sigma,
-    )
+    with keep_fit_results("steady_state"):
+        # The steady-state fit provides the starting values of the kinetic fit.
+        PY_KINETICS.submit_steady_state_fitting(
+            fitting_model=steady_state_model,
+            fit_sigma=fit_sigma,
+        )
 
-    PY_KINETICS.submit_kinetics_fitting(fitting_model=fitting_model,
-                                        fitting_region=fitting_region,
-                                        shared_smax=linked_smax,
-                                        fit_sigma=fit_sigma)
+        PY_KINETICS.submit_kinetics_fitting(fitting_model=fitting_model,
+                                            fitting_region=fitting_region,
+                                            shared_smax=linked_smax,
+                                            fit_sigma=fit_sigma)
 
     return (f"Kinetics fitting submitted with model: {fitting_model}, "
             f"region: {fitting_region}, "
@@ -920,6 +1078,34 @@ def get_kinetics_fitting_results() -> list[dict[str, Any]]:
     PY_KINETICS.get_fitting_results()
     df = PY_KINETICS.fit_params_kinetics_all
     return df.to_dict(orient="records")
+
+
+@mcp.tool()
+def get_fitting_parameters() -> list[dict[str, Any]]:
+    """
+    Return the kinetic and steady-state fitted parameters as JSON records.
+
+    Each record is one row of a dataset's ``fit_params_kinetics`` or
+    ``fit_params_ss`` table, labeled with ``Fit type`` (``'Kinetics'`` or
+    ``'Steady-state'``) and ``Dataset``. Missing numeric values are returned as
+    null. This tool never runs a fit.
+
+    Returns
+    -------
+    list of dict
+        Fitted parameter records, or an empty list before any fit.
+    """
+    rows = []
+    for dataset in PY_KINETICS.fittings_names:
+        fitting = PY_KINETICS.fittings[dataset]
+        for fit_type, attribute in (("Kinetics", "fit_params_kinetics"), ("Steady-state", "fit_params_ss")):
+            table = getattr(fitting, attribute, None)
+            if table is None:
+                continue
+            # The JSON round trip converts NaN to null and NumPy values to Python.
+            for record in json.loads(table.to_json(orient="records", double_precision=15)):
+                rows.append({**record, "Fit type": fit_type, "Dataset": dataset})
+    return rows
 
 
 @mcp.tool()

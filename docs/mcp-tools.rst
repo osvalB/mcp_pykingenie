@@ -80,7 +80,7 @@ Experiment Inspection
    * - ``list_experiment_attributes``
      - List all attributes of a single experiment.
    * - ``obtain_sample_info_table``
-     - Get analyte concentration and sensor metadata as JSON.
+     - Get analyte concentration and sensor metadata as JSON, including the experiment each row belongs to.
 
 Data Processing
 ---------------
@@ -168,12 +168,18 @@ Fitting
    * - Tool
      - Description
    * - ``initiate_fitting_datasets``
-     - Generate fitting datasets from a sample info JSON table.
+     - Generate fitting datasets from a sample info JSON table. The table is checked row by row before the existing fits are reset; unselected rows and zero-concentration references are left out.
    * - ``run_steady_state_fitting``
-     - Run steady-state fitting as an alternative to kinetic fitting. Supports ``one_to_one`` and ``two_to_one``.
+     - Run steady-state fitting as an alternative to kinetic fitting, keeping existing kinetic results. Supports ``one_to_one`` and ``two_to_one``.
    * - ``run_kinetics_fitting``
-     - Run kinetic fitting as an alternative to standalone steady-state fitting. The tool handles PyKinGenie's required starting values internally. ``one_to_one`` supports ``association_dissociation``, ``association``, and ``dissociation``; ``one_to_one_mtl``, ``one_to_one_if``, and ``two_to_one`` support only ``association_dissociation``.
+     - Run kinetic fitting as an alternative to standalone steady-state fitting, keeping existing steady-state results. The tool handles PyKinGenie's required starting values internally. ``one_to_one`` supports ``association_dissociation``, ``association``, and ``dissociation``; ``one_to_one_mtl``, ``one_to_one_if``, and ``two_to_one`` support only ``association_dissociation``.
    * - ``get_kinetics_fitting_results``
      - Retrieve fitting results, including ``Kd``, ``k_off``, ``Smax``, and derived ``k_on``.
+   * - ``get_fitting_parameters``
+     - Retrieve kinetic and steady-state fitted parameters, labeled by fit type and dataset. Returns an empty list before fitting.
    * - ``create_export_df``
      - Export raw or fitted association/dissociation trace points from generated fitting datasets as JSON records.
+   * - ``get_export_availability``
+     - Report whether fitting datasets, fitted kinetic curves, and fitted steady-state curves are available.
+   * - ``get_export_data``
+     - Return ``datasets``, ``kinetic-curves``, or ``steady-state-curves`` as records, without running a fit.
