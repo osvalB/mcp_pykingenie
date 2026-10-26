@@ -2,6 +2,7 @@ from importlib.metadata import version
 import importlib
 import json
 import copy
+import re
 from pathlib import Path
 import runpy
 import shutil
@@ -23,6 +24,7 @@ import mcp_pykingenie.server as server
 import mcp_pykingenie.config as config
 import mcp_pykingenie.tools._pykingenie as pykingenie_tools
 import mcp_pykingenie.tools._plotting_xy as plotting_xy_tools
+import mcp_pykingenie.tools._exports as export_tools
 from mcp_pykingenie.main import run_app
 from mcp_pykingenie.mcp import mcp
 import mcp_pykingenie.main as main_module
@@ -733,14 +735,176 @@ def test_xy_sample_plate_plot_reports_missing_experiment():
     )
 
 
-def test_initiate_fitting_datasets_falls_back_to_default_table_for_invalid_json():
-    """Testing invalid JSON uses the real default sample table."""
+def test_initiate_fitting_datasets_rejects_invalid_json_without_resetting_fits():
+    """Testing invalid JSON is reported and leaves the existing fits in place."""
+    _load_example_and_selected_fitting()
+    fittings = dict(pykingenie_tools.PY_KINETICS.fittings)
+
+    with pytest.raises(ToolError, match="not valid JSON"):
+        pykingenie_tools.initiate_fitting_datasets("not valid json")
+
+    assert pykingenie_tools.PY_KINETICS.fittings == fittings
+
+
+def test_initiate_fitting_datasets_uses_default_table_without_metadata():
+    """Testing missing metadata fits every positive-concentration trace."""
     pykingenie_tools.load_octet_example()
 
-    message = pykingenie_tools.initiate_fitting_datasets("not valid json")
+    message = pykingenie_tools.initiate_fitting_datasets()
 
     assert "Fitting datasets generated with the following names:" in message
     assert pykingenie_tools.PY_KINETICS.fittings_names
+
+
+def test_sample_info_table_keeps_experiment_for_single_experiment():
+    """Testing the sample table names its experiment when only one is loaded."""
+    pykingenie_tools.load_octet_example()
+
+    rows = pykingenie_tools.obtain_sample_info_table()
+
+    assert {row["Experiment"] for row in rows} == {"Example Experiment"}
+
+
+@pytest.mark.parametrize(
+    ("change", "match"),
+    [
+        ({"Select": "yes"}, "Select must be true or false"),
+        ({"[Analyte] (μM)": -1.0}, "nonnegative analyte concentration"),
+        ({"[Analyte] (μM)": float("nan")}, "nonnegative analyte concentration"),
+        ({"Sensor": " "}, "Sensor must not be empty"),
+        ({"Smax_ID": 1.5}, "Smax_ID must be an integer"),
+        ({"Replicate": 0}, "Replicate must be an integer of at least 1"),
+        ({"Experiment": "Missing"}, "experiment 'Missing' is not loaded"),
+        ({"Sensor": "Z9"}, "no loaded experiment contains sensor 'Z9'"),
+    ],
+)
+def test_initiate_fitting_datasets_rejects_invalid_rows_before_resetting_fits(change, match):
+    """Testing invalid sample rows are reported by row and keep existing fits."""
+    df = _load_example_and_selected_fitting()
+    fittings = dict(pykingenie_tools.PY_KINETICS.fittings)
+    rows = df.to_dict(orient="records")
+    rows[0].update(change)
+
+    with pytest.raises(ToolError, match=f"Sample row 1: .*{re.escape(match)}"):
+        pykingenie_tools.initiate_fitting_datasets(rows)
+
+    assert pykingenie_tools.PY_KINETICS.fittings == fittings
+
+
+def test_initiate_fitting_datasets_requires_a_positive_selected_trace():
+    """Testing tables with only references or unselected rows are rejected."""
+    pykingenie_tools.load_octet_example()
+    rows = pykingenie_tools.obtain_sample_info_table()
+    for row in rows:
+        row["Select"] = row["[Analyte] (μM)"] == 0
+
+    with pytest.raises(ToolError, match="Select at least one trace"):
+        pykingenie_tools.initiate_fitting_datasets(rows)
+
+    with pytest.raises(ToolError, match="at least one selected"):
+        pykingenie_tools.initiate_fitting_datasets([])
+
+
+def test_initiate_fitting_datasets_accepts_rows_without_experiment():
+    """Testing rows without Experiment are matched to the one loaded experiment."""
+    df = _load_example_and_selected_fitting()
+    expected = list(pykingenie_tools.PY_KINETICS.fittings_names)
+
+    rows = df.drop(columns=["Experiment", "Replicate"]).to_dict(orient="records")
+    pykingenie_tools.initiate_fitting_datasets(rows)
+
+    assert pykingenie_tools.PY_KINETICS.fittings_names == expected
+
+
+def test_initiate_fitting_datasets_requires_experiment_for_ambiguous_rows():
+    """Testing traces found in several experiments need an Experiment value."""
+    pykingenie_tools.load_octet_example()
+    pykingenie_tools.import_octet_experiment_base(
+        folder=str(Path(server.EXAMPLE_DATA_DIR) / "test_bli_folder"), exp_name="Copy"
+    )
+    rows = [row for row in pykingenie_tools.obtain_sample_info_table()
+            if row["Experiment"] == "Copy" and row["SampleID"] == "wt - imd"]
+
+    pykingenie_tools.initiate_fitting_datasets(rows)
+    assert pykingenie_tools.PY_KINETICS.fittings_names
+    assert pykingenie_tools.initiate_fitting_datasets()
+
+    for row in rows:
+        del row["Experiment"]
+    with pytest.raises(ToolError, match="matches several experiments"):
+        pykingenie_tools.initiate_fitting_datasets(rows)
+
+
+@pytest.mark.asyncio
+async def test_fits_keep_the_results_of_the_other_fit_type():
+    """Testing kinetic and steady-state fits do not erase each other's results."""
+    _load_example_and_selected_fitting()
+    fitting = next(iter(pykingenie_tools.PY_KINETICS.fittings.values()))
+
+    await pykingenie_tools.run_steady_state_fitting(steady_state_model="two_to_one")
+    steady_state_params = fitting.fit_params_ss.copy()
+
+    await pykingenie_tools.run_kinetics_fitting()
+    pd.testing.assert_frame_equal(fitting.fit_params_ss, steady_state_params)
+    assert fitting.signal_ss_fit is not None
+    kinetic_params = fitting.fit_params_kinetics.copy()
+
+    await pykingenie_tools.run_steady_state_fitting()
+    pd.testing.assert_frame_equal(fitting.fit_params_kinetics, kinetic_params)
+    assert fitting.signal_assoc_fit is not None
+
+
+@pytest.mark.asyncio
+async def test_get_fitting_parameters_returns_both_fit_types():
+    """Testing fitted parameters are labeled by fit type and dataset."""
+    assert pykingenie_tools.get_fitting_parameters() == []
+
+    _load_example_and_selected_fitting()
+    assert pykingenie_tools.get_fitting_parameters() == []
+
+    await pykingenie_tools.run_steady_state_fitting()
+    await pykingenie_tools.run_kinetics_fitting()
+    records = pykingenie_tools.get_fitting_parameters()
+
+    assert {record["Fit type"] for record in records} == {"Kinetics", "Steady-state"}
+    assert {record["Dataset"] for record in records} == set(pykingenie_tools.PY_KINETICS.fittings_names)
+    json.dumps(records, allow_nan=False)
+
+
+@pytest.mark.asyncio
+async def test_export_tools_return_datasets_and_fitted_curves():
+    """Testing export tools report and return each kind of fitting data."""
+    assert export_tools.get_export_availability() == {
+        "datasets": False, "kinetic-curves": False, "steady-state-curves": False,
+    }
+    assert export_tools.get_export_data("datasets") == []
+
+    _load_example_and_selected_fitting()
+    assert export_tools.get_export_availability() == {
+        "datasets": True, "kinetic-curves": False, "steady-state-curves": False,
+    }
+    assert export_tools.get_export_data("kinetic-curves") == []
+
+    await pykingenie_tools.run_steady_state_fitting()
+    await pykingenie_tools.run_kinetics_fitting()
+    assert all(export_tools.get_export_availability().values())
+
+    datasets = pd.DataFrame(export_tools.get_export_data("datasets"))
+    curves = pd.DataFrame(export_tools.get_export_data("kinetic-curves"))
+    steady_state = pd.DataFrame(export_tools.get_export_data("steady-state-curves"))
+
+    trace_columns = {"Dataset", "Trace", "ID", "Smax_ID", "Type", "Time", "Signal",
+                     "Analyte_concentration_micromolar"}
+    assert set(datasets.columns) == trace_columns
+    assert set(curves.columns) == trace_columns
+    assert set(datasets["Type"]) == {"Association", "Dissociation"}
+    assert datasets["Trace"].nunique() == 7  # The zero-concentration reference is left out.
+    assert set(steady_state.columns) == {"Dataset", "Smax_ID", "Type", "Signal",
+                                         "Analyte_concentration_micromolar"}
+    assert len(steady_state) > 0
+
+    with pytest.raises(ToolError, match="Unknown data export"):
+        export_tools.get_export_data("plots")
 
 
 @pytest.mark.asyncio
@@ -923,6 +1087,7 @@ async def test_mcp_server():
             "Analyte_location",
             "Loading_location",
             "Replicate",
+            "Experiment",
         }
         assert len(df) == 72
         assert "wt - imd" in set(df["SampleID"])
@@ -984,6 +1149,23 @@ async def test_mcp_server():
         assert df["Name"].unique().tolist() == ["wt - imd"]
 
         np.testing.assert_allclose(df.loc[0, "k_off [1/s]"], 0.00235, rtol=0.01)
+
+        result = await client.call_tool("get_fitting_parameters", {})
+        assert {row["Fit type"] for row in _result_data(result)} == {"Kinetics", "Steady-state"}
+
+        result = await client.call_tool("get_export_availability", {})
+        assert all(_result_data(result).values())
+
+        result = await client.call_tool("get_export_data", {"kind": "steady-state-curves"})
+        assert len(_result_data(result)) > 0
+
+        result = await client.call_tool("get_export_data", {"kind": "plots"})
+        assert result.is_error
+        assert "Unknown data export" in _result_data(result)
+
+        result = await client.call_tool("initiate_fitting_datasets", {"sample_info": "not valid json"})
+        assert result.is_error
+        assert "not valid JSON" in _result_data(result)
 
         result = await client.call_tool("create_export_df", {"export_type": "fitted"})
         export_df = pd.DataFrame(_result_data(result))

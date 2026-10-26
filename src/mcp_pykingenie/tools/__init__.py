@@ -20,6 +20,10 @@ from ._plotting_xy import (
     plot_steady_state,
     plot_kinetic_traces,
 )
+from ._exports import (
+    get_export_availability,
+    get_export_data,
+)
 
 __all__ = [
     "print_data_dir",
@@ -39,4 +43,6 @@ __all__ = [
     "plot_traces_with_all_steps",
     "plot_steady_state",
     "plot_kinetic_traces",
+    "get_export_availability",
+    "get_export_data",
 ]
