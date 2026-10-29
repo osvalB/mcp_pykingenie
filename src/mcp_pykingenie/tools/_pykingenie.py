@@ -4,6 +4,7 @@ import os
 import json
 import math
 import pandas as pd
+import numpy as np
 
 from ..server import PY_KINETICS, DATA_DIR, EXAMPLE_DATA_DIR
 
@@ -565,6 +566,128 @@ def subtract_reference(experiment_id: str = '1', list_of_sensor_names: list[str]
     return (f"Reference sensor '{reference_sensor}' subtracted from sensors: {list_of_sensor_names}. "
             f"New sensor names: {new_sensor_names}.")
 
+
+@mcp.tool()
+def average_sensors(
+    experiment_id: str = '1',
+    list_of_sensor_names: list[str] | None = None,
+    sensor_output_name: str = 'average') -> str:
+
+    """
+    Average signal values of selected sensors from a specific experiment
+
+    Parameters
+    ----------
+    experiment_id : str
+        Name or 1-based index of the experiment to modify. 
+    list_of_sensor_names : list
+        A list of sensor names to subtract the reference from.
+        If no names are provided, all sensors will be used.
+    sensor_output_name : str
+        Name of the new sensor that contains the averaged traces 
+
+    Returns
+    -------
+    str
+        A confirmation message.
+    """
+
+    if experiment_id not in PY_KINETICS.experiment_names:
+        try:
+            experiment_name = PY_KINETICS.experiment_names[int(experiment_id) - 1]
+        except (ValueError, IndexError):
+            return f"Experiment with index {experiment_id} not found in kingenie."
+    else:
+        experiment_name = experiment_id
+
+    # If no sensor names are provided, use all sensors in the experiment, different from the reference sensor
+    sensor_names = PY_KINETICS.experiments[experiment_name].sensor_names
+
+    if not list_of_sensor_names:
+        list_of_sensor_names = [s for s in sensor_names ]
+
+    PY_KINETICS.experiments[experiment_name].average(list_of_sensor_names, sensor_output_name)
+
+    return (
+        f"Successfully averaged {len(list_of_sensor_names)} sensors "
+        f"({', '.join(list_of_sensor_names)}) "
+        f"into the new sensor '{sensor_output_name}'."
+    )
+
+@mcp.tool()
+def delete_sensors(
+    experiment_id: str = "1",
+    list_of_sensor_names: list[str] | None = None) -> str:
+
+    """
+    Delete sensor traces from a given experiment.
+
+    Parameters
+    ----------
+    experiment_id : str
+        Name or 1-based index of the experiment to modify.
+    list_of_sensor_names : list[str] | None
+        Names of sensors to delete.
+        If None, all sensors will be deleted.
+
+    Returns
+    -------
+    str
+        Message describing the result.
+    """
+
+    # Resolve experiment name
+    if experiment_id not in PY_KINETICS.experiment_names:
+        try:
+            index = int(experiment_id) - 1
+            if index < 0:
+                raise IndexError
+            experiment_name = PY_KINETICS.experiment_names[index]
+        except (ValueError, IndexError):
+            return f"Experiment '{experiment_id}' not found in KinGenie."
+    else:
+        experiment_name = experiment_id
+
+    experiment = PY_KINETICS.experiments[experiment_name]
+    sensor_names = experiment.sensor_names
+
+    # Default to all sensors
+    if list_of_sensor_names is None:
+        list_of_sensor_names = list(sensor_names)
+
+    # Validate sensor names
+    invalid_sensors = [
+        s for s in list_of_sensor_names if s not in sensor_names
+    ]
+
+    if invalid_sensors:
+        return (
+            f"Sensors {invalid_sensors} not found in experiment "
+            f"'{experiment_name}'. Available sensors: {list(sensor_names)}."
+        )
+
+    # Find indices and sort descending
+    indexes = sorted(
+        [
+            i for i, name in enumerate(sensor_names)
+            if name in list_of_sensor_names
+        ],
+        reverse=True,
+    )
+
+    # Delete corresponding traces
+    for i in indexes:
+        experiment.xs.pop(i)
+        experiment.ys.pop(i)
+
+    # Update sensor names once
+    experiment.sensor_names = [s for i,s in enumerate(sensor_names) if i not in indexes]
+
+    return (
+        f"Successfully deleted {len(indexes)} sensor(s) "
+        f"({', '.join(list_of_sensor_names)}) "
+        f"from experiment '{experiment_name}'."
+    )
 
 @mcp.tool()
 def subtract_experiment(experiment_id: str = '1',

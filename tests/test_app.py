@@ -1257,3 +1257,42 @@ async def test_mcp_server():
             "ID",
         }
         assert len(export_df) > 0
+
+
+@pytest.mark.asyncio
+async def test_mcp_server_average_and_deletion():
+    """Testing MCP server."""
+    async with Client(mcp) as client:
+
+        result = await client.call_tool("load_octet_example", {})
+        assert "Octet experiment added from" in _result_data(result)
+
+        result = await client.call_tool("average_sensors", {
+            "experiment_id": "Example Experiment",
+            "list_of_sensor_names": ["A1","B1"]
+            })
+
+        assert "average" in _result_data(result)
+
+        result = await client.call_tool("list_experiment_properties", {
+            "variable" : "sensor_names"
+        })  
+
+        n_sensors = _result_data(result)
+
+        assert len(n_sensors[0]) == 9
+
+        result = await client.call_tool("delete_sensors", {
+            "experiment_id": "Example Experiment",
+            "list_of_sensor_names": ["A1","D1"]
+        })
+
+        assert "delete" in _result_data(result)
+
+        result = await client.call_tool("list_experiment_properties", {
+            "variable" : "sensor_names"
+        })  
+
+        n_sensors = _result_data(result)
+
+        assert len(n_sensors[0]) == 7
