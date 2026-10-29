@@ -37,7 +37,7 @@ from mcp_pykingenie.paths import (
 from pykingenie.surface_exp import SurfaceBasedExperiment
 
 
-MIN_PYKINGENIE_VERSION = Version("1.0.0")
+MIN_PYKINGENIE_VERSION = Version("1.0.18")
 TEST_DATA_DIR = Path(__file__).parent / "data"
 
 
@@ -1258,6 +1258,22 @@ async def test_mcp_server():
         }
         assert len(export_df) > 0
 
+        result = await client.call_tool("calc_leave_one_out_errors")
+
+        assert "fits" in _result_data(result)
+        assert "Leave-one-out" in _result_data(result)
+
+        result = await client.call_tool("get_leave_one_out_results")
+
+        results = _result_data(result)
+        
+        df = pd.DataFrame(results)
+        assert isinstance(df, pd.DataFrame)
+        assert {"Kd [\u00b5M]", "k_off [1/s]", "Name"} <= set(df.columns)
+        k_off_mean, k_off_std = map(float, df.loc[0, "k_off [1/s]"].split(" ± "))
+        assert k_off_mean - k_off_std <= 0.00235 <= k_off_mean + k_off_std
+
+        
 
 @pytest.mark.asyncio
 async def test_mcp_server_average_and_deletion():

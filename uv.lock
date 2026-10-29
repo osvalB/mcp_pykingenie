@@ -1570,7 +1570,7 @@ requires-dist = [
     { name = "plotly", specifier = ">=6.6.0" },
     { name = "pre-commit", marker = "extra == 'dev'" },
     { name = "pydantic-settings", specifier = ">=2.15.0" },
-    { name = "pykingenie", specifier = ">=1.0.13" },
+    { name = "pykingenie", specifier = ">=1.0.18" },
     { name = "pytest", marker = "extra == 'test'" },
     { name = "pytest-asyncio", marker = "extra == 'test'" },
     { name = "scipy", specifier = ">=1.17.1" },
@@ -2494,7 +2494,7 @@ crypto = [
 
 [[package]]
 name = "pykingenie"
-version = "1.0.13"
+version = "1.0.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "kaleido" },
@@ -2507,9 +2507,9 @@ dependencies = [
     { name = "scipy", version = "1.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "xy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5c/7d/0d66cedfd90e13058d2e2b92bd4ae1287ac998fbc26bb59c3c14c9588530/pykingenie-1.0.13.tar.gz", hash = "sha256:9f1b77fa083ea605b82cab48cb07608e6addb8bddc57c5ac1a06999093155a6e", size = 129155, upload-time = "2026-10-23T20:38:07.711Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d9/c1/87e48daa236ca6409a0d4d48ff861e5591fd831a2651a24f9e084184a942/pykingenie-1.0.18.tar.gz", hash = "sha256:550af1ab5940074a56b8cffb427973b27c6f9f80c14d41b4c8ee198ea268d03b", size = 152726, upload-time = "2026-10-29T18:26:59.699Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/aa/7d/310201ac35ccf871c7788bcb71e3b79061d54c5dbea1ea9166dd0d791eab/pykingenie-1.0.13-py3-none-any.whl", hash = "sha256:f15131de53a4dcb3be73391f8f45bda8bd80698d20ca3f2d33399aa45b28fdaa", size = 94851, upload-time = "2026-10-23T20:38:06.498Z" },
+    { url = "https://files.pythonhosted.org/packages/92/45/2d150e8b11a62b5caa0baf0e412f1fa8f2bac2474dd8cbf9a49108c5b531/pykingenie-1.0.18-py3-none-any.whl", hash = "sha256:4f401b5d19503dc080b6fa15b96f5391c056cd23c986044566774a6adbfe416f", size = 109080, upload-time = "2026-10-29T18:26:58.476Z" },
 ]
 
 [[package]]

@@ -1111,6 +1111,8 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
     when you want a standalone steady-state fit. Existing steady-state fitting
     results are kept.
 
+    Inmediatly after the fitting, ask the user if they want to calculate erros by applying the leave-one-out method
+    
     Parameters
     ----------
     fitting_model : str
@@ -1136,6 +1138,7 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
     str
         A confirmation message with the kinetic fitting settings used.
     """
+
     valid_regions = KINETIC_FITTING_MODEL_REGIONS.get(fitting_model)
     if valid_regions is None:
         valid_models = ", ".join(sorted(KINETIC_FITTING_MODEL_REGIONS))
@@ -1169,6 +1172,60 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
             f"linked Smax: {linked_smax}, "
             f"fit sigma: {fit_sigma}.")
 
+@mcp.tool()
+async def calc_leave_one_out_errors() -> str:
+    """
+    Calculate the errors of the fitted parameters, e.g., Kd and k_off, using the leave-one-out method.
+    Briefly, for each fitting object (Sample ID), we do n-fits, where n is the total number of curves,
+    leaving one curve out each time. Afterwards, the parameter value plus/minus error is available through
+    get_leave_one_out_results
+    """
+
+    ok_fits, bad_fits = PY_KINETICS.calculate_leave_one_out_errors()
+
+    return (
+        f"Leave-one-out error calculation completed. "
+        f"Successful fits: {ok_fits}. "
+        f"Failed fits: {bad_fits}."
+    )
+
+@mcp.tool()
+def get_leave_one_out_results() -> list[dict[str, Any]]: 
+    
+    """
+    Return PyKinGenie leave-one-out results as JSON records.
+
+    Returns
+    -------
+    str
+        A JSON string representing the fitting results.
+    """
+    if not PY_KINETICS.fittings_names:
+        raise RuntimeError(
+            "No fitting datasets are available. Run initiate_fitting_datasets before retrieving kinetic results."
+        )
+
+    has_kinetic_results = any(
+        getattr(PY_KINETICS.fittings[name], "fit_params_kinetics", None) is not None
+        for name in PY_KINETICS.fittings_names
+    )
+    if not has_kinetic_results:
+        raise RuntimeError(
+            "No kinetic fitting results are available. Run run_kinetics_fitting before retrieving results."
+        )
+
+    dfs = []
+
+    for name in PY_KINETICS.fittings_names:
+        loo_df = PY_KINETICS.fittings[name].df_fit_loo
+        if loo_df is not None:
+            df = loo_df.copy()
+            df['Name'] = name
+            dfs.append(df)
+
+    df = pd.concat(dfs, ignore_index=True)
+
+    return df.to_dict(orient="records")
 
 @mcp.tool()
 def get_kinetics_fitting_results() -> list[dict[str, Any]]:
