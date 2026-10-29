@@ -102,6 +102,10 @@ Data Processing
      - Subtract paired sensor columns within one surface-based experiment.
    * - ``align_and_subtract``
      - Align and subtract a reference sensor in one step.
+   * - ``average_sensors``
+     - Average selected sensors and add the averaged traces to the experiment.
+   * - ``delete_sensors``
+     - Delete selected sensor traces from an experiment.
 
 XY Plotting
 -----------
@@ -173,6 +177,10 @@ Fitting
      - Run steady-state fitting as an alternative to kinetic fitting, keeping existing kinetic results. Supports ``one_to_one`` and ``two_to_one``.
    * - ``run_kinetics_fitting``
      - Run kinetic fitting as an alternative to standalone steady-state fitting, keeping existing steady-state results. The tool handles PyKinGenie's required starting values internally. ``one_to_one`` supports ``association_dissociation``, ``association``, and ``dissociation``; ``one_to_one_mtl``, ``one_to_one_if``, and ``two_to_one`` support only ``association_dissociation``.
+   * - ``calc_leave_one_out_errors``
+     - Calculate leave-one-out errors for fitted kinetic parameters. Run after ``run_kinetics_fitting``.
+   * - ``get_leave_one_out_results``
+     - Retrieve the leave-one-out mean and standard deviation for fitted thermodynamic parameters.
    * - ``get_kinetics_fitting_results``
      - Retrieve fitting results, including ``Kd``, ``k_off``, ``Smax``, and derived ``k_on``.
    * - ``get_fitting_parameters``
