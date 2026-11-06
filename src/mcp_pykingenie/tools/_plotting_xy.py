@@ -338,8 +338,9 @@ def update_xy_layout_config(
     """
     Edit the subplot layout of the XY plots with several panels.
 
-    Applies to ``plot_traces_with_all_steps``, ``plot_steady_state``
-    and ``plot_kinetic_traces``. Only the provided parameters are changed.
+    Applies to ``plot_traces_with_all_steps``, ``plot_steady_state``,
+    ``plot_kinetic_traces``, ``plot_steady_state_residuals`` and
+    ``plot_kinetics_residuals``. Only the provided parameters are changed.
 
     Parameters
     ----------
@@ -362,7 +363,8 @@ def update_xy_layout_config(
     extra_padding_y_label : float | None
         Extra space for the y-axis label in pixels.
     split_by_smax_id : bool | None
-        If True, the kinetic traces plot uses one panel per Smax ID.
+        If True, the kinetic traces and kinetics residuals plots use one
+        panel per Smax ID.
 
     Returns
     -------
@@ -649,3 +651,72 @@ async def plot_kinetic_traces(save_html: bool = False) -> str:
     )
 
     return _save_xy_figure(fig, "kingenie_kinetic_traces_xy", save_html)
+
+
+@xy_tool()
+async def plot_steady_state_residuals(save_html: bool = False) -> str:
+    """
+    Save an XY plot of the steady-state fitting residuals.
+
+    The residuals (observed minus fitted signal) are plotted against the
+    ligand concentration on a logarithmic axis, with one panel per sample and
+    a horizontal line at zero. The plot is produced by
+    :func:`pykingenie.utils.plotting_xy.plot_steady_state_residuals` with the
+    shared XY configurations. Requires ``run_steady_state_fitting``; samples
+    without a steady-state fit are left out.
+
+    Parameters
+    ----------
+    save_html : bool
+        If True, also saves an interactive HTML file.
+
+    Returns
+    -------
+    str
+        Message containing the saved image path.
+    """
+    fig = plotting_xy.plot_steady_state_residuals(
+        kg.PY_KINETICS,
+        plot_config=PLOT_CONFIG,
+        axis_config=AXIS_CONFIG,
+        layout_config=LAYOUT_CONFIG,
+        legend_config=LEGEND_CONFIG,
+        trace_config=TRACE_CONFIG,
+    )
+
+    return _save_xy_figure(fig, "kingenie_steady_state_residuals_xy", save_html)
+
+
+@xy_tool()
+async def plot_kinetics_residuals(save_html: bool = False) -> str:
+    """
+    Save an XY plot of the kinetics (association/dissociation) fitting residuals.
+
+    The residuals (observed minus fitted signal) are plotted over time, colored
+    by ligand concentration, with a horizontal line at zero. Panels and colors
+    match ``plot_kinetic_traces``. The plot is produced by
+    :func:`pykingenie.utils.plotting_xy.plot_association_dissociation_residuals`
+    with the shared XY configurations. Requires ``run_kinetics_fitting``;
+    traces without a fitted curve are left out. Setting ``smooth_curves`` with
+    ``update_xy_trace_config`` median-smooths the residuals.
+
+    Parameters
+    ----------
+    save_html : bool
+        If True, also saves an interactive HTML file.
+
+    Returns
+    -------
+    str
+        Message containing the saved image path.
+    """
+    fig = plotting_xy.plot_association_dissociation_residuals(
+        kg.PY_KINETICS,
+        plot_config=PLOT_CONFIG,
+        axis_config=AXIS_CONFIG,
+        layout_config=LAYOUT_CONFIG,
+        legend_config=LEGEND_CONFIG,
+        trace_config=TRACE_CONFIG,
+    )
+
+    return _save_xy_figure(fig, "kingenie_kinetics_residuals_xy", save_html)

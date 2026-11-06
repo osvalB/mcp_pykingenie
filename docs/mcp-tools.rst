@@ -133,6 +133,10 @@ PyKinGenie Plotly helpers, are kept commented out in
      - Plot association and dissociation traces from fitting datasets, with fitted curves when available.
    * - ``plot_steady_state``
      - Plot steady-state binding data, with fitted curves when available.
+   * - ``plot_kinetics_residuals``
+     - Plot the kinetics fitting residuals (observed minus fitted) over time. Requires ``run_kinetics_fitting``.
+   * - ``plot_steady_state_residuals``
+     - Plot the steady-state fitting residuals (observed minus fitted) against ligand concentration. Requires ``run_steady_state_fitting``.
 
 XY Plot Settings
 ^^^^^^^^^^^^^^^^
