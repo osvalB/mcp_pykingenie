@@ -1343,3 +1343,4 @@ def list_experiment_attributes(experiment_name: str) -> dict[str, Any]:
     attributes = vars(experiment)
 
     return attributes
+

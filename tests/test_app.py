@@ -1378,3 +1378,52 @@ async def test_mcp_server_two_site_fit():
         assert np.isclose(sigma_fit, sigma_true, rtol=0.1)
         assert np.isclose(rmax_pl_fit, rmax_pl_true, rtol=0.1)
         assert np.isclose(rmax_lpl_fit, rmax_lpl_true, rtol=0.1)
+
+"""
+Fake test only to trigger running the heterogeneous
+two-site fitting routine in the MCP server. The actual fitting is tested
+in the pykingenie package.
+"""
+
+@pytest.mark.asyncio
+async def test_mcp_server_two_site_fit_fake():
+    """Testing MCP server."""
+    async with Client(mcp) as client:
+
+        csv_name = "simulation_KinGenie_kon-2_koff-0.1_sigma-2_plRmax-3.5_pl2_Rmax-7.csv"
+        csv_path = Path(server.DATA_DIR) / csv_name
+        shutil.copy2(TEST_DATA_DIR / csv_name, csv_path)
+
+        result = await client.call_tool("import_kingenie_surface_csv", {
+            "csv": csv_name,
+            "exp_name": "CSV Experiment"
+        })
+
+        assert "Experiment added from" in _result_data(result)
+
+        result = await client.call_tool("obtain_sample_info_table", {})
+        sample_info = _result_data(result)
+        for row in sample_info:
+            row["Select"] = True
+
+        result = await client.call_tool("initiate_fitting_datasets", {
+            "sample_info": sample_info
+        })
+        assert "Fitting datasets generated" in _result_data(result)
+
+        result = await client.call_tool("run_steady_state_fitting", {
+            "steady_state_model": "two_to_one_heterogeneous_ligand"
+            })
+
+        assert "Steady-state fitting submitted with model: two_to_one_heterogeneous_ligand." == _result_data(result)
+
+        result = await client.call_tool("run_kinetics_fitting", {
+            "fitting_model": "two_to_one_heterogeneous_ligand",
+            "fitting_region": "association_dissociation",
+            "linked_smax": False,
+            "fit_sigma": True
+        })
+
+        assert "Kinetics fitting submitted with model: "
+        "two_to_one_heterogeneous_ligand, region: association_dissociation, "
+        "linked Smax: False, Kd1_values: None, Kd2_values: None." == _result_data(result)
