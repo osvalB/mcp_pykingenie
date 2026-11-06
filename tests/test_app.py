@@ -1421,7 +1421,8 @@ async def test_mcp_server_two_site_fit_fake():
             "fitting_model": "two_to_one_heterogeneous_ligand",
             "fitting_region": "association_dissociation",
             "linked_smax": False,
-            "fit_sigma": True
+            "Kd1_values": None,
+            "Kd2_values": None
         })
 
         assert "Kinetics fitting submitted with model: "
