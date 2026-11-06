@@ -408,8 +408,6 @@ def test_invalid_experiment_selectors_return_not_found_messages():
     assert pykingenie_tools.subtract_experiment(experiment_id="1", reference_experiment_id="99") == expected
     assert pykingenie_tools.subtract_sensor_columns(experiment_id="99") == expected
     assert pykingenie_tools.align_dissociation(experiment_id="99") == expected
-    assert pykingenie_tools.align_and_subtract(experiment_id="99") == expected
-
     with pytest.raises(KeyError, match=expected):
         pykingenie_tools.list_experiment_attributes("99")
 
@@ -422,10 +420,9 @@ def test_invalid_reference_selectors_return_not_found_messages():
         pykingenie_tools.subtract_reference(experiment_id="Example Experiment", reference_sensor="99")
         == "Reference sensor '99' not found in the list of sensors for experiment 'Example Experiment'."
     )
-    assert (
-        pykingenie_tools.align_and_subtract(experiment_id="Example Experiment", reference_sensor="missing")
-        == "Reference sensor 'missing' not found in the list of sensors for experiment 'Example Experiment'."
-    )
+    assert pykingenie_tools.subtract_reference(
+        experiment_id="Example Experiment", reference_sensor="missing"
+    ) == "Reference sensor 'missing' not found in the list of sensors for experiment 'Example Experiment'."
 
 
 def test_experiment_properties_and_attributes_reflect_loaded_data():
@@ -442,19 +439,18 @@ def test_experiment_properties_and_attributes_reflect_loaded_data():
     assert "sensor_names_unique" in attributes
 
 
-def test_align_and_subtract_runs_real_combined_workflow():
-    """Testing combined alignment/subtraction mutates the real experiment."""
+def test_align_then_subtract_reference_runs_real_workflow():
+    """Testing separate alignment and subtraction calls mutate the experiment."""
     pykingenie_tools.load_octet_example()
 
-    message = pykingenie_tools.align_and_subtract(
-        experiment_id="Example Experiment",
-        reference_sensor="H1",
-        align_dissociation=True,
+    alignment_message = pykingenie_tools.align_association(experiment_id="Example Experiment")
+    subtraction_message = pykingenie_tools.subtract_reference(
+        experiment_id="Example Experiment", reference_sensor="H1"
     )
 
     sensor_names = server.PY_KINETICS.experiments["Example Experiment"].sensor_names
-    assert "Association phase aligned and reference sensor 'H1' subtracted" in message
-    assert "Dissociation phase aligned" in message
+    assert "Association phase aligned for experiment: Example Experiment" in alignment_message
+    assert "Reference sensor 'H1' subtracted" in subtraction_message
     assert "G1 - H1" in sensor_names
     assert "H1" in sensor_names
 
@@ -997,8 +993,7 @@ async def test_split_fitting_tools_support_real_two_to_one_model():
         fit_sigma=False,
     )
     assert (
-        "Steady-state fitting submitted with model: two_to_one, "
-        "fit sigma: False."
+        "Steady-state fitting submitted with model: two_to_one."
     ) == steady_state_message
 
     _load_example_and_selected_fitting()
@@ -1009,8 +1004,7 @@ async def test_split_fitting_tools_support_real_two_to_one_model():
 
     assert (
         "Kinetics fitting submitted with model: two_to_one, "
-        "region: association_dissociation, linked Smax: False, "
-        "fit sigma: False."
+        "region: association_dissociation, linked Smax: False."
     ) == kinetics_message
 
 
@@ -1202,15 +1196,13 @@ async def test_mcp_server():
 
         result = await client.call_tool("run_steady_state_fitting", {})
         assert (
-            "Steady-state fitting submitted with model: one_to_one, "
-            "fit sigma: False."
+            "Steady-state fitting submitted with model: one_to_one."
         ) == _result_data(result)
 
         result = await client.call_tool("run_kinetics_fitting", {})
         assert (
             "Kinetics fitting submitted with model: one_to_one, "
-            "region: association_dissociation, linked Smax: False, "
-            "fit sigma: False."
+            "region: association_dissociation, linked Smax: False."
         ) == _result_data(result)
 
         result = await client.call_tool("get_kinetics_fitting_results", {})
