@@ -19,6 +19,8 @@ from ._plotting_xy import (
     plot_traces_with_all_steps,
     plot_steady_state,
     plot_kinetic_traces,
+    plot_steady_state_residuals,
+    plot_kinetics_residuals,
 )
 from ._exports import (
     get_export_availability,
@@ -43,6 +45,8 @@ __all__ = [
     "plot_traces_with_all_steps",
     "plot_steady_state",
     "plot_kinetic_traces",
+    "plot_steady_state_residuals",
+    "plot_kinetics_residuals",
     "get_export_availability",
     "get_export_data",
 ]
