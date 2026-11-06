@@ -408,8 +408,6 @@ def test_invalid_experiment_selectors_return_not_found_messages():
     assert pykingenie_tools.subtract_experiment(experiment_id="1", reference_experiment_id="99") == expected
     assert pykingenie_tools.subtract_sensor_columns(experiment_id="99") == expected
     assert pykingenie_tools.align_dissociation(experiment_id="99") == expected
-    assert pykingenie_tools.align_and_subtract(experiment_id="99") == expected
-
     with pytest.raises(KeyError, match=expected):
         pykingenie_tools.list_experiment_attributes("99")
 
@@ -422,10 +420,9 @@ def test_invalid_reference_selectors_return_not_found_messages():
         pykingenie_tools.subtract_reference(experiment_id="Example Experiment", reference_sensor="99")
         == "Reference sensor '99' not found in the list of sensors for experiment 'Example Experiment'."
     )
-    assert (
-        pykingenie_tools.align_and_subtract(experiment_id="Example Experiment", reference_sensor="missing")
-        == "Reference sensor 'missing' not found in the list of sensors for experiment 'Example Experiment'."
-    )
+    assert pykingenie_tools.subtract_reference(
+        experiment_id="Example Experiment", reference_sensor="missing"
+    ) == "Reference sensor 'missing' not found in the list of sensors for experiment 'Example Experiment'."
 
 
 def test_experiment_properties_and_attributes_reflect_loaded_data():
@@ -442,19 +439,18 @@ def test_experiment_properties_and_attributes_reflect_loaded_data():
     assert "sensor_names_unique" in attributes
 
 
-def test_align_and_subtract_runs_real_combined_workflow():
-    """Testing combined alignment/subtraction mutates the real experiment."""
+def test_align_then_subtract_reference_runs_real_workflow():
+    """Testing separate alignment and subtraction calls mutate the experiment."""
     pykingenie_tools.load_octet_example()
 
-    message = pykingenie_tools.align_and_subtract(
-        experiment_id="Example Experiment",
-        reference_sensor="H1",
-        align_dissociation=True,
+    alignment_message = pykingenie_tools.align_association(experiment_id="Example Experiment")
+    subtraction_message = pykingenie_tools.subtract_reference(
+        experiment_id="Example Experiment", reference_sensor="H1"
     )
 
     sensor_names = server.PY_KINETICS.experiments["Example Experiment"].sensor_names
-    assert "Association phase aligned and reference sensor 'H1' subtracted" in message
-    assert "Dissociation phase aligned" in message
+    assert "Association phase aligned for experiment: Example Experiment" in alignment_message
+    assert "Reference sensor 'H1' subtracted" in subtraction_message
     assert "G1 - H1" in sensor_names
     assert "H1" in sensor_names
 
@@ -997,8 +993,7 @@ async def test_split_fitting_tools_support_real_two_to_one_model():
         fit_sigma=False,
     )
     assert (
-        "Steady-state fitting submitted with model: two_to_one, "
-        "fit sigma: False."
+        "Steady-state fitting submitted with model: two_to_one, fit sigma: False."
     ) == steady_state_message
 
     _load_example_and_selected_fitting()
@@ -1009,8 +1004,7 @@ async def test_split_fitting_tools_support_real_two_to_one_model():
 
     assert (
         "Kinetics fitting submitted with model: two_to_one, "
-        "region: association_dissociation, linked Smax: False, "
-        "fit sigma: False."
+        "region: association_dissociation, linked Smax: False, fit sigma: False."
     ) == kinetics_message
 
 
@@ -1202,15 +1196,13 @@ async def test_mcp_server():
 
         result = await client.call_tool("run_steady_state_fitting", {})
         assert (
-            "Steady-state fitting submitted with model: one_to_one, "
-            "fit sigma: False."
+            "Steady-state fitting submitted with model: one_to_one."
         ) == _result_data(result)
 
         result = await client.call_tool("run_kinetics_fitting", {})
         assert (
             "Kinetics fitting submitted with model: one_to_one, "
-            "region: association_dissociation, linked Smax: False, "
-            "fit sigma: False."
+            "region: association_dissociation, linked Smax: False."
         ) == _result_data(result)
 
         result = await client.call_tool("get_kinetics_fitting_results", {})
@@ -1312,3 +1304,127 @@ async def test_mcp_server_average_and_deletion():
         n_sensors = _result_data(result)
 
         assert len(n_sensors[0]) == 7
+
+@pytest.mark.asyncio
+async def test_mcp_server_two_site_fit():
+
+    """Testing MCP server."""
+    async with Client(mcp) as client:
+
+        csv_name = "simulation_KinGenie_kon-2_koff-0.1_sigma-2_plRmax-3.5_pl2_Rmax-7.csv"
+        csv_path = Path(server.DATA_DIR) / csv_name
+        shutil.copy2(TEST_DATA_DIR / csv_name, csv_path)
+
+        result = await client.call_tool("import_kingenie_surface_csv", {
+            "csv": csv_name,
+            "exp_name": "CSV Experiment"
+        })
+
+        assert "Experiment added from" in _result_data(result)
+
+        result = await client.call_tool("obtain_sample_info_table", {})
+        sample_info = _result_data(result)
+        for row in sample_info:
+            row["Select"] = True
+
+        result = await client.call_tool("initiate_fitting_datasets", {
+            "sample_info": sample_info
+        })
+        assert "Fitting datasets generated" in _result_data(result)
+
+        result = await client.call_tool("run_steady_state_fitting", {
+            "steady_state_model": "two_to_one",
+            "fit_sigma": True
+            })
+
+        assert "Steady-state fitting submitted with model: two_to_one, fit sigma: True." == _result_data(result)
+
+        result = await client.call_tool("run_kinetics_fitting", {
+            "fitting_model": "two_to_one",
+            "fitting_region": "association_dissociation",
+            "linked_smax": False,
+            "fit_sigma": True
+        })
+
+        # verify params
+
+        fitting = next(iter(server.PY_KINETICS.fittings.values()))
+        df_fit = fitting.fit_params_kinetics
+
+        assert isinstance(df_fit, pd.DataFrame)
+
+        # verify fitted values
+        kon_true = 2.0
+        koff_true = 0.1
+        sigma_true = 2.0
+        kd_true = koff_true / kon_true
+        rmax_pl_true = 3.5
+        rmax_lpl_true = 5.0
+
+        for col in ["Kd [µM]", "k_off [1/s]", "Rmax_PL", "Rmax_LPL", "sigma", "(Derived) k_on [1/µM/s]"]:
+            assert col in df_fit.columns
+
+        kd_fit = float(df_fit["Kd [µM]"].iloc[0])
+        koff_fit = float(df_fit["k_off [1/s]"].iloc[0])
+        kon_fit = float(df_fit["(Derived) k_on [1/µM/s]"].iloc[0])
+        sigma_fit = float(df_fit["sigma"].iloc[0])
+        rmax_pl_fit = float(df_fit["Rmax_PL"].iloc[0])
+        rmax_lpl_fit = float(df_fit["Rmax_LPL"].iloc[0])
+
+        # Tolerances are moderate for this nonlinear global two-site fit.
+        assert np.isclose(kd_fit, kd_true, rtol=0.1)
+        assert np.isclose(koff_fit, koff_true, rtol=0.1)
+        assert np.isclose(kon_fit, kon_true, rtol=0.1)
+        assert np.isclose(sigma_fit, sigma_true, rtol=0.1)
+        assert np.isclose(rmax_pl_fit, rmax_pl_true, rtol=0.1)
+        assert np.isclose(rmax_lpl_fit, rmax_lpl_true, rtol=0.1)
+
+"""
+Fake test only to trigger running the heterogeneous
+two-site fitting routine in the MCP server. The actual fitting is tested
+in the pykingenie package.
+"""
+
+@pytest.mark.asyncio
+async def test_mcp_server_two_site_fit_fake():
+    """Testing MCP server."""
+    async with Client(mcp) as client:
+
+        csv_name = "simulation_KinGenie_kon-2_koff-0.1_sigma-2_plRmax-3.5_pl2_Rmax-7.csv"
+        csv_path = Path(server.DATA_DIR) / csv_name
+        shutil.copy2(TEST_DATA_DIR / csv_name, csv_path)
+
+        result = await client.call_tool("import_kingenie_surface_csv", {
+            "csv": csv_name,
+            "exp_name": "CSV Experiment"
+        })
+
+        assert "Experiment added from" in _result_data(result)
+
+        result = await client.call_tool("obtain_sample_info_table", {})
+        sample_info = _result_data(result)
+        for row in sample_info:
+            row["Select"] = True
+
+        result = await client.call_tool("initiate_fitting_datasets", {
+            "sample_info": sample_info
+        })
+        assert "Fitting datasets generated" in _result_data(result)
+
+        result = await client.call_tool("run_steady_state_fitting", {
+            "steady_state_model": "two_to_one_heterogeneous_ligand"
+            })
+
+        assert "Steady-state fitting submitted with model: two_to_one_heterogeneous_ligand." == _result_data(result)
+
+        result = await client.call_tool("run_kinetics_fitting", {
+            "fitting_model": "two_to_one_heterogeneous_ligand",
+            "fitting_region": "association_dissociation",
+            "linked_smax": False,
+            "Kd1_values": None,
+            "Kd2_values": None
+        })
+
+        assert "Kinetics fitting submitted with model: "
+        "two_to_one_heterogeneous_ligand, region: association_dissociation, "
+        "linked Smax: False, Kd1_values: None, Kd2_values: None." == _result_data(result)

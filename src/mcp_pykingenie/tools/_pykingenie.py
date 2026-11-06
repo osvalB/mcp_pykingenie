@@ -18,7 +18,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 import pykingenie
 
 
-STEADY_STATE_FITTING_MODELS = {"one_to_one", "two_to_one"}
+STEADY_STATE_FITTING_MODELS = {"one_to_one", "two_to_one", "two_to_one_heterogeneous_ligand"}
 
 KINETIC_FITTING_MODEL_REGIONS = {
     "one_to_one": {
@@ -29,6 +29,7 @@ KINETIC_FITTING_MODEL_REGIONS = {
     "one_to_one_mtl": {"association_dissociation"},
     "one_to_one_if": {"association_dissociation"},
     "two_to_one": {"association_dissociation"},
+    "two_to_one_heterogeneous_ligand": {"association_dissociation"}
 }
 
 # Every PyKinGenie fit clears all results of a fitting object, so the results
@@ -900,73 +901,6 @@ def align_dissociation(experiment_id: str = '1',
 
 
 @mcp.tool()
-def align_and_subtract(experiment_id: str = '1',
-                       reference_sensor: str = '1',
-                       align_dissociation: bool = False) -> str:
-    """
-    Align traces and subtract a reference sensor in one PyKinGenie workflow.
-
-    The selected experiment is association-aligned in place, optionally
-    dissociation-aligned in place, and then all non-reference sensors are
-    reference-subtracted in place.
-
-    Parameters
-    ----------
-    experiment_id : str
-        The name of the experiment. If a number is provided, it will be used to
-        select the experiment by its index.
-    reference_sensor : str
-        The name of the reference sensor to subtract. If a number is provided, it
-        will be used to select the sensor by its index.
-    align_dissociation : bool
-        If True, aligns the dissociation phase of the sensors after subtraction.
-
-    Returns
-    -------
-    str
-        A confirmation message.
-    """
-
-    if experiment_id not in PY_KINETICS.experiment_names:
-        try:
-            experiment_name = PY_KINETICS.experiment_names[int(experiment_id) - 1]
-        except (ValueError, IndexError):
-            return f"Experiment with index {experiment_id} not found in kingenie."
-    else:
-        experiment_name = experiment_id
-
-    # If the reference sensor is not in the list of sensor names, try to select it by index
-    sensor_names = PY_KINETICS.experiments[experiment_name].sensor_names
-
-    if reference_sensor not in sensor_names:
-        try:
-            reference_sensor = sensor_names[int(reference_sensor) - 1]
-        except (ValueError, IndexError):
-            return f"Reference sensor '{reference_sensor}' not found in the list of sensors for experiment '{experiment_name}'."
-
-    # Align the association phase of the sensors
-    PY_KINETICS.experiments[experiment_name].align_association(sensor_names, inplace=True, new_names=False)
-
-    # If align_dissociation is True, align the dissociation phase of the sensors
-    if align_dissociation:
-        PY_KINETICS.experiments[experiment_name].align_dissociation(sensor_names, inplace=True, new_names=False)
-
-    # Remove the reference sensor from the list of sensors to be subtracted
-    sensor_names = [s for s in sensor_names if s != reference_sensor]
-
-    # Subtract the reference sensor from all other sensors
-    PY_KINETICS.experiments[experiment_name].subtraction(sensor_names, reference_sensor, inplace=True)
-
-    # Obtain the new names of the sensors after alignment and subtraction
-    new_sensor_names = PY_KINETICS.experiments[experiment_name].sensor_names
-
-    return (
-        f"Association phase aligned and reference sensor '{reference_sensor}' subtracted from sensors: {sensor_names}. "
-        f"New sensor names: {new_sensor_names}.\n"
-        f"Dissociation phase {'aligned' if align_dissociation else 'not aligned'}.")
-
-
-@mcp.tool()
 def obtain_sample_info_table() -> list[dict[str, Any]]:
     """
     Return merged PyKinGenie sample metadata as JSON records.
@@ -1068,8 +1002,8 @@ async def run_steady_state_fitting(steady_state_model: str = 'one_to_one',
     Parameters
     ----------
     steady_state_model : str
-        Steady-state model to fit. PyKinGenie accepts ``'one_to_one'`` and
-        ``'two_to_one'``.
+        Steady-state model to fit. PyKinGenie accepts ``'one_to_one'``,
+        ``'two_to_one'`` and ``'two_to_one_heterogeneous_ligand'``
     fit_sigma : bool
         If True with ``'two_to_one'`` steady-state fitting, fit the shared
         cooperativity factor sigma.
@@ -1092,15 +1026,19 @@ async def run_steady_state_fitting(steady_state_model: str = 'one_to_one',
             fit_sigma=fit_sigma,
         )
 
-    return (f"Steady-state fitting submitted with model: {steady_state_model}, "
-            f"fit sigma: {fit_sigma}.")
+    message = f"Steady-state fitting submitted with model: {steady_state_model}"
+    if steady_state_model == "two_to_one":
+        message += ", fit sigma: {}".format(fit_sigma)
+    return message + "."
 
 
 @mcp.tool()
 async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
                                fitting_region: str = 'association_dissociation',
                                linked_smax: bool = False,
-                               fit_sigma: bool = False) -> str:
+                               fit_sigma: bool = False,
+                               Kd1_values : list = None,
+                               Kd2_values : list = None) -> str:
     """
     Run PyKinGenie kinetic fitting for generated fitting datasets.
 
@@ -1118,7 +1056,8 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
     fitting_model : str
         Kinetic model to fit. PyKinGenie accepts ``'one_to_one'``,
         ``'one_to_one_mtl'`` (mass transport limitation),
-        ``'one_to_one_if'`` (induced fit), and ``'two_to_one'``. Only
+        ``'one_to_one_if'`` (induced fit), 
+        ``'two_to_one'`` and ``'two_to_one_heterogeneous_ligand'``. Only
         ``'one_to_one'`` supports every fitting region; the other kinetic
         models support only ``'association_dissociation'``.
     fitting_region : str
@@ -1132,6 +1071,10 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
     fit_sigma : bool
         If True with ``'two_to_one'`` kinetic fitting, fit the shared
         cooperativity factor sigma.
+    Kd1_values : list, optional
+        Candidate Kd1 values for the heterogeneous ligand grid search.
+    Kd2_values : list, optional
+        Candidate Kd2 values for the heterogeneous ligand grid search.
 
     Returns
     -------
@@ -1162,15 +1105,27 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
             fit_sigma=fit_sigma,
         )
 
-        PY_KINETICS.submit_kinetics_fitting(fitting_model=fitting_model,
-                                            fitting_region=fitting_region,
-                                            shared_smax=linked_smax,
-                                            fit_sigma=fit_sigma)
+        PY_KINETICS.submit_kinetics_fitting(
+            fitting_model=fitting_model,
+            fitting_region=fitting_region,
+            shared_smax=linked_smax,
+            fit_sigma=fit_sigma,
+            Kd1_values=Kd1_values,
+            Kd2_values=Kd2_values
+        )
 
-    return (f"Kinetics fitting submitted with model: {fitting_model}, "
-            f"region: {fitting_region}, "
-            f"linked Smax: {linked_smax}, "
-            f"fit sigma: {fit_sigma}.")
+    # create output message, sigma only for two_to_one model, Kd1 and Kd2 only for two_to_one_heterogeneous_ligand model
+
+    base_message = (f"Kinetics fitting submitted with model: {fitting_model}, "
+                    f"region: {fitting_region}, "
+                    f"linked Smax: {linked_smax}")
+
+    if fitting_model == "two_to_one":
+        base_message += ", fit sigma: {}".format(fit_sigma)
+    if fitting_model == "two_to_one_heterogeneous_ligand":
+        base_message += f", Kd1 values: {Kd1_values}, Kd2 values: {Kd2_values}"
+
+    return base_message.strip() + "."
 
 @mcp.tool()
 async def calc_leave_one_out_errors() -> str:
@@ -1388,3 +1343,4 @@ def list_experiment_attributes(experiment_name: str) -> dict[str, Any]:
     attributes = vars(experiment)
 
     return attributes
+
