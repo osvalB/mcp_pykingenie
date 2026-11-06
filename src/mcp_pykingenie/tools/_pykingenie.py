@@ -1027,8 +1027,8 @@ async def run_steady_state_fitting(steady_state_model: str = 'one_to_one',
         )
 
     message = f"Steady-state fitting submitted with model: {steady_state_model}"
-    if steady_state_model == "two_to_one" and fit_sigma:
-        message += ", fit sigma: True"
+    if steady_state_model == "two_to_one":
+        message += ", fit sigma: {}".format(fit_sigma)
     return message + "."
 
 
@@ -1120,8 +1120,8 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
                     f"region: {fitting_region}, "
                     f"linked Smax: {linked_smax}")
 
-    if fitting_model == "two_to_one" and fit_sigma:
-        base_message += ", fit sigma: True"
+    if fitting_model == "two_to_one":
+        base_message += ", fit sigma: {}".format(fit_sigma)
     if fitting_model == "two_to_one_heterogeneous_ligand":
         base_message += f", Kd1 values: {Kd1_values}, Kd2 values: {Kd2_values}"
 
