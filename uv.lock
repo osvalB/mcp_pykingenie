@@ -1509,7 +1509,7 @@ cli = [
 
 [[package]]
 name = "mcp-pykingenie"
-version = "1.1.6"
+version = "1.1.8"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -2494,7 +2494,7 @@ crypto = [
 
 [[package]]
 name = "pykingenie"
-version = "1.0.18"
+version = "1.0.19"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "kaleido" },
@@ -2507,9 +2507,9 @@ dependencies = [
     { name = "scipy", version = "1.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "xy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d9/c1/87e48daa236ca6409a0d4d48ff861e5591fd831a2651a24f9e084184a942/pykingenie-1.0.18.tar.gz", hash = "sha256:550af1ab5940074a56b8cffb427973b27c6f9f80c14d41b4c8ee198ea268d03b", size = 152726, upload-time = "2026-10-29T18:26:59.699Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7e/c3/28d4efa3b908fb03d970e4693a73ed7cccd185256941b0b7a21d6e02534d/pykingenie-1.0.19.tar.gz", hash = "sha256:981de9d832500ba25589700ff05a008530f63eb12768fdc6be514f775d7bd2fb", size = 175135, upload-time = "2026-11-10T16:53:23.433Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/92/45/2d150e8b11a62b5caa0baf0e412f1fa8f2bac2474dd8cbf9a49108c5b531/pykingenie-1.0.18-py3-none-any.whl", hash = "sha256:4f401b5d19503dc080b6fa15b96f5391c056cd23c986044566774a6adbfe416f", size = 109080, upload-time = "2026-10-29T18:26:58.476Z" },
+    { url = "https://files.pythonhosted.org/packages/f0/8a/5b5aad3c0d581671f288fda4ebd0852de02fc3c55e60882bfd615b9081dc/pykingenie-1.0.19-py3-none-any.whl", hash = "sha256:8b5ef93dad5b499fb5d385e7e6b39b14996e4c389a72e543e6732098540435a3", size = 115247, upload-time = "2026-11-10T16:53:22.121Z" },
 ]
 
 [[package]]

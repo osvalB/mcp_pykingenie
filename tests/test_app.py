@@ -1210,13 +1210,14 @@ async def test_mcp_server():
         results = _result_data(result)
         df = pd.DataFrame(results)
         assert isinstance(df, pd.DataFrame)
-        assert set(df.columns) == {
+        # pykingenie >= 1.0.19 also adds a 'Concentration [\u00b5M]' column for per-trace fits.
+        assert {
             "Kd [\u00b5M]",
             "k_off [1/s]",
             "Smax",
             "(Derived) k_on [1/\u00b5M/s]",
             "Name",
-        }
+        } <= set(df.columns)
         assert len(df) == 7
         assert df["Name"].unique().tolist() == ["wt - imd"]
 
