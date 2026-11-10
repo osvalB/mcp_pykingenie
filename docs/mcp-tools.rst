@@ -189,6 +189,8 @@ Fitting
      - Retrieve fitting results, including ``Kd``, ``k_off``, ``Smax``, and derived ``k_on``.
    * - ``get_fitting_parameters``
      - Retrieve kinetic and steady-state fitted parameters, labeled by fit type and dataset. Returns an empty list before fitting.
+   * - ``get_correlation_matrices``
+     - Retrieve the correlation matrix of the fitted parameters for each fitting dataset, for the latest ``kinetics`` (default) or ``steady_state`` fit. Correlations near ±1 mean two parameters trade off and cannot be determined separately.
    * - ``create_export_df``
      - Export raw or fitted association/dissociation trace points from generated fitting datasets as JSON records.
    * - ``get_export_availability``
