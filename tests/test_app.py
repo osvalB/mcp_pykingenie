@@ -37,7 +37,7 @@ from mcp_pykingenie.paths import (
 from pykingenie.surface_exp import SurfaceBasedExperiment
 
 
-MIN_PYKINGENIE_VERSION = Version("1.0.18")
+MIN_PYKINGENIE_VERSION = Version("1.0.19")
 TEST_DATA_DIR = Path(__file__).parent / "data"
 
 
@@ -865,6 +865,33 @@ async def test_get_fitting_parameters_returns_both_fit_types():
     assert {record["Fit type"] for record in records} == {"Kinetics", "Steady-state"}
     assert {record["Dataset"] for record in records} == set(pykingenie_tools.PY_KINETICS.fittings_names)
     json.dumps(records, allow_nan=False)
+
+
+@pytest.mark.asyncio
+async def test_get_correlation_matrices_returns_both_fit_types():
+    """Testing correlation matrices are returned per dataset and kept across fit types."""
+    with pytest.raises(ValueError, match="kind must be"):
+        pykingenie_tools.get_correlation_matrices("equilibrium")
+    with pytest.raises(RuntimeError, match="initiate_fitting_datasets"):
+        pykingenie_tools.get_correlation_matrices()
+
+    _load_example_and_selected_fitting()
+    with pytest.raises(RuntimeError, match="run_kinetics_fitting"):
+        pykingenie_tools.get_correlation_matrices()
+
+    await pykingenie_tools.run_kinetics_fitting()
+    await pykingenie_tools.run_steady_state_fitting()
+
+    for kind, first_params in (("kinetics", ["Kd [µM]", "k_off [1/s]"]), ("steady_state", ["Kd [µM]"])):
+        matrices = pykingenie_tools.get_correlation_matrices(kind)
+        assert set(matrices) == set(pykingenie_tools.PY_KINETICS.fittings_names)
+        for result in matrices.values():
+            params, matrix = result["parameters"], np.array(result["matrix"], dtype=float)
+            assert params[:len(first_params)] == first_params
+            assert matrix.shape == (len(params), len(params))
+            np.testing.assert_allclose(matrix, matrix.T)
+            np.testing.assert_allclose(np.diag(matrix), 1.0)
+        json.dumps(matrices, allow_nan=False)
 
 
 @pytest.mark.asyncio

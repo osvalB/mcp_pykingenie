@@ -36,9 +36,12 @@ KINETIC_FITTING_MODEL_REGIONS = {
 # of the other fit type are saved and restored around each fit.
 FIT_RESULT_FIELDS = {
     "kinetics": ("fit_params_kinetics", "fit_params_kinetics_error",
+                 "fit_params_kinetics_correlation",
                  "signal_assoc_fit", "signal_disso_fit", "k_obs"),
-    "steady_state": ("fit_params_ss", "signal_ss_fit"),
+    "steady_state": ("fit_params_ss", "fit_params_ss_correlation", "signal_ss_fit"),
 }
+
+CORRELATION_KINDS = {"kinetics", "steady_state"}
 
 
 def resolve_experiment_name(experiment_id: str) -> str | None:
@@ -1241,6 +1244,54 @@ def get_fitting_parameters() -> list[dict[str, Any]]:
             for record in json.loads(table.to_json(orient="records", double_precision=15)):
                 rows.append({**record, "Fit type": fit_type, "Dataset": dataset})
     return rows
+
+
+@mcp.tool()
+def get_correlation_matrices(kind: str = "kinetics") -> dict[str, dict[str, Any]]:
+    """
+    Return the correlation matrices of the fitted parameters, one per fitting dataset.
+
+    Correlations range from -1 to 1. Values near +/-1 mean two parameters trade
+    off against each other: the data determine a combination of them, not each
+    one separately, so their individual values should not be trusted. This tool
+    never runs a fit.
+
+    Parameters
+    ----------
+    kind : str
+        ``'kinetics'`` (default) for the latest kinetic fit, or ``'steady_state'``
+        for the latest steady-state fit.
+
+    Returns
+    -------
+    dict
+        Keyed by dataset name. Each value has ``parameters`` (the parameter
+        labels, e.g. ``'Kd [µM]'``, ``'k_off [1/s]'``, ``'Smax 1'`` or, for
+        per-trace amplitudes, ``'Smax (0.13 µM)'``) and
+        ``matrix`` (rows of correlations in the same order). Entries are null
+        when a parameter's variance could not be estimated.
+    """
+    if kind not in CORRELATION_KINDS:
+        raise ValueError(f"kind must be 'kinetics' or 'steady_state', got {kind!r}.")
+
+    if not PY_KINETICS.fittings_names:
+        raise RuntimeError(
+            "No fitting datasets are available. Run initiate_fitting_datasets before retrieving correlation matrices."
+        )
+
+    matrices = PY_KINETICS.get_correlation_matrices(kind=kind)
+    if not matrices:
+        fit_tool = "run_kinetics_fitting" if kind == "kinetics" else "run_steady_state_fitting"
+        raise RuntimeError(
+            f"No {kind.replace('_', '-')} correlation matrices are available. Run {fit_tool} first."
+        )
+
+    results = {}
+    for dataset, corr in matrices.items():
+        # The JSON round trip converts NaN to null and NumPy values to Python.
+        split = json.loads(corr.to_json(orient="split", double_precision=15))
+        results[dataset] = {"parameters": split["columns"], "matrix": split["data"]}
+    return results
 
 
 @mcp.tool()
