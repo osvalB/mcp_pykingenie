@@ -185,6 +185,7 @@ def update_xy_plot_config(
     title: str | None = None,
     x_range: list[float] | None = None,
     y_range: list[float] | None = None,
+    palette: str | None = None,
 ) -> dict[str, Any]:
     """
     Edit the general settings of the XY plots.
@@ -212,6 +213,11 @@ def update_xy_plot_config(
         logarithmic concentration axis of the steady-state plot).
     y_range : list[float] | None
         Initial y-axis range in data units. Pass ``[]`` to remove it.
+    palette : str | None
+        Palette used to color traces by ligand concentration in
+        ``plot_kinetic_traces`` and ``plot_kinetics_residuals``:
+        ``'viridis'`` (default) or ``'blues'``, where the highest
+        concentration takes the darkest blue.
 
     Returns
     -------
@@ -230,6 +236,7 @@ def update_xy_plot_config(
         title=title,
         x_range=x_range,
         y_range=y_range,
+        palette=palette,
     )
 
 
@@ -628,8 +635,9 @@ async def plot_kinetic_traces(save_html: bool = False) -> str:
     The plot is produced by
     :func:`pykingenie.utils.plotting_xy.plot_association_dissociation` with the
     shared XY configurations. Requires ``initiate_fitting_datasets``. Traces are
-    colored by ligand concentration, and fitted curves are included when
-    fitting results are present.
+    colored by ligand concentration (Viridis by default, or Blues with
+    ``update_xy_plot_config(palette='blues')``), and fitted curves are
+    included when fitting results are present.
 
     Parameters
     ----------

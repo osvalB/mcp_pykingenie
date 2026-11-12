@@ -633,6 +633,10 @@ def test_xy_config_tools_update_only_provided_fields():
     assert plot_config["plot_width"] == 700
     assert plot_config["plot_type"] == "svg"
 
+    plot_config = plotting_xy_tools.update_xy_plot_config(palette="Blues")
+    assert plot_config["palette"] == "blues"
+    assert plot_config["plot_width"] == 700
+
     axis_config = plotting_xy_tools.update_xy_axis_config(x_bounds="data", y_label="Shift (nm)")
     assert axis_config["x_bounds"] == "data"
     assert axis_config["y_label"] == "Shift (nm)"
@@ -650,6 +654,7 @@ def test_xy_config_tools_update_only_provided_fields():
     plotting_xy_tools.reset_xy_plot_configs()
     configs = plotting_xy_tools.get_xy_plot_configs()
     assert configs["plot_config"]["plot_width"] is None
+    assert configs["plot_config"]["palette"] is None
     assert configs["trace_config"]["show_fit"] is None
 
 
@@ -661,6 +666,8 @@ def test_xy_config_tools_reject_invalid_values_without_changing_config():
         plotting_xy_tools.update_xy_plot_config(plot_width=0)
     with pytest.raises(ToolError, match="plot_type"):
         plotting_xy_tools.update_xy_plot_config(plot_type="gif")
+    with pytest.raises(ToolError, match="palette"):
+        plotting_xy_tools.update_xy_plot_config(palette="magma")
     with pytest.raises(ToolError, match="opacity"):
         plotting_xy_tools.update_xy_trace_config(opacity=2)
 

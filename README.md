@@ -191,7 +191,8 @@ The plotting tools (`plot_sample_plate_info`, `plot_traces_with_all_steps`,
 `plot_steady_state_residuals`) use PyKinGenie's XY plotting
 helpers. Their appearance
 is controlled by shared settings that you can change in plain language, for
-example "make the XY plots 800 px wide and save them as SVG". The assistant uses
+example "make the XY plots 800 px wide and save them as SVG" or "color the
+kinetic traces with the blue palette". The assistant uses
 `update_xy_plot_config`, `update_xy_axis_config`, `update_xy_layout_config`,
 `update_xy_legend_config` and `update_xy_trace_config`; `get_xy_plot_configs`
 shows the current settings and `reset_xy_plot_configs` restores the defaults.
