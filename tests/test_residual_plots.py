@@ -124,6 +124,23 @@ async def test_residual_plots_follow_shared_xy_configs():
 
 
 @pytest.mark.asyncio
+async def test_kinetics_plots_use_blues_palette():
+    """Testing the kinetics plots color concentrations with the Blues palette."""
+    _load_example_and_selected_fitting()
+    await pykingenie_tools.run_kinetics_fitting()
+
+    plotting_xy_tools.update_xy_plot_config(plot_type="svg", palette="blues")
+
+    for tool in (plotting_xy_tools.plot_kinetic_traces,
+                 plotting_xy_tools.plot_kinetics_residuals):
+        image_path = _saved_path_from_message(await tool())
+        svg = image_path.read_text().lower()
+        # The highest concentration takes the darkest Blues color.
+        assert "#08306b" in svg or "rgb(8,48,107)" in svg.replace(" ", "")
+        assert "#fde725" not in svg  # brightest Viridis color
+
+
+@pytest.mark.asyncio
 async def test_steady_state_residuals_requires_steady_state_fit():
     """Testing steady-state residuals report a missing steady-state fit."""
     _load_example_and_selected_fitting()

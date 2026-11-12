@@ -153,7 +153,7 @@ and bounds fields are cleared by passing an empty list.
    * - Tool
      - Description
    * - ``update_xy_plot_config``
-     - Plot size in pixels, image format, font size, title, and initial x/y ranges (``PlotConfig``).
+     - Plot size in pixels, image format, font size, title, initial x/y ranges, and the concentration palette (``viridis`` or ``blues``) of the kinetics plots (``PlotConfig``).
    * - ``update_xy_axis_config``
      - Grid lines, ticks, line widths, labels, scales, axis reversal, and navigation bounds (``AxisConfig``).
    * - ``update_xy_layout_config``
