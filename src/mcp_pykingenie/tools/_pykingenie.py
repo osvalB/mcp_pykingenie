@@ -3,6 +3,7 @@ from mcp_pykingenie.mcp import mcp
 import os
 import json
 import math
+import warnings
 import pandas as pd
 import numpy as np
 
@@ -29,7 +30,8 @@ KINETIC_FITTING_MODEL_REGIONS = {
     "one_to_one_mtl": {"association_dissociation"},
     "one_to_one_if": {"association_dissociation"},
     "two_to_one": {"association_dissociation"},
-    "two_to_one_heterogeneous_ligand": {"association_dissociation"}
+    "two_to_one_heterogeneous_ligand": {"association_dissociation"},
+    "bivalent_analyte": {"association_dissociation"},
 }
 
 # Every PyKinGenie fit clears all results of a fitting object, so the results
@@ -62,9 +64,13 @@ def resolve_experiment_name(experiment_id: str) -> str | None:
         return experiment_id
 
     try:
-        return PY_KINETICS.experiment_names[int(experiment_id) - 1]
-    except (ValueError, IndexError):
+        index = int(experiment_id) - 1
+    except ValueError:
         return None
+    # Negative indices would silently select from the end of the list.
+    if 0 <= index < len(PY_KINETICS.experiment_names):
+        return PY_KINETICS.experiment_names[index]
+    return None
 
 
 @contextmanager
@@ -325,6 +331,243 @@ def import_kingenie_surface_csv(csv: str, exp_name: str = 'Experiment') -> str:
     return f"Experiment added from {csv}."
 
 
+def resolve_data_path(path: str) -> str:
+    """Return ``path`` unchanged if absolute, else joined to ``DATA_DIR``."""
+    path = os.path.expanduser(path)
+    return path if os.path.isabs(path) else os.path.join(DATA_DIR, path)
+
+
+def file_format(path: str) -> str:
+    """Return the PyKinGenie format of one file (``.fmf`` plate files included)."""
+    if path.lower().endswith(".fmf"):
+        return "octet_fmf"
+    return pykingenie.detect_file_format(path)
+
+
+def expand_paths(paths: str | list[str]) -> list[tuple[str, str]]:
+    """
+    Turn files and folders into ``(file, format)`` pairs.
+
+    Files are kept as given. Folders are expanded to their visible files, and
+    files of unknown format (images, logs, ...) inside them are left out.
+    """
+    if isinstance(paths, str):
+        paths = [paths]
+    pairs = []
+    for path in paths:
+        path = resolve_data_path(path)
+        if os.path.isdir(path):
+            for name in sorted(os.listdir(path)):
+                file = os.path.join(path, name)
+                if name.startswith(".") or not os.path.isfile(file):
+                    continue
+                kind = file_format(file)
+                if kind != "unknown":
+                    pairs.append((file, kind))
+        elif os.path.isfile(path):
+            pairs.append((path, file_format(path)))
+        else:
+            raise ToolError(f"'{path}' is not a file or folder.")
+    return pairs
+
+
+@mcp.tool()
+def detect_data_format(paths: list[str] | str) -> list[dict[str, str]]:
+    """
+    Report the binding-data format of each file, without importing anything.
+
+    Call this before ``import_binding_data`` on unfamiliar files, to know which
+    import settings are needed. Formats: ``octet_frd``/``octet_fmf`` (Octet
+    BLI), ``gator_zip``/``gator_steps``/``gator_settings``/``gator_csv``
+    (Gator BLI), ``biacore_blr`` (Biacore result file), ``spr_text``
+    (paired ``_X``/``_Y`` column SPR export, e.g. Biacore or Reichert text),
+    ``carterra_csv`` (Carterra ``Label, X1, Y1, ...`` export),
+    ``surface_csv_steps``/``surface_csv_traces`` (generic steps table plus
+    traces table), ``kingenie_surface``/``kingenie_solution`` (KinGenie CSV),
+    or ``unknown``.
+
+    Parameters
+    ----------
+    paths : list[str] | str
+        Files or folders, absolute or relative to the data directory. Folders
+        list only their files of a known format.
+
+    Returns
+    -------
+    list of dict
+        One ``{"file", "format"}`` record per file.
+    """
+    return [{"file": file, "format": kind} for file, kind in expand_paths(paths)]
+
+
+@mcp.tool()
+def read_info_sheet(path: str) -> list[dict[str, Any]]:
+    """
+    Read an info sheet (``.xlsx``, CSV or TSV).
+
+    The sheet describes SPR runs: baseline, association and dissociation
+    durations, analyte, ligand and molar concentrations, one row per sensor
+    position. Pass its path as ``info_sheet`` to ``import_binding_data`` (and
+    ``info_sheet_row`` when rows differ) to fill the timing and concentrations
+    that SPR text and Carterra exports lack. ``Association_skip_s`` is a good
+    ``trim_time`` for ``initiate_fitting_datasets``.
+
+    Parameters
+    ----------
+    path : str
+        Absolute path or data-directory-relative path of the sheet.
+
+    Returns
+    -------
+    list of dict
+        One record per row; times in seconds and concentrations in µM.
+    """
+    try:
+        table = pykingenie.read_info_sheet(resolve_data_path(path))
+    except (OSError, ValueError) as exc:
+        raise ToolError(str(exc)) from None
+    return json.loads(table.to_json(orient="records", double_precision=15))
+
+
+@mcp.tool()
+def import_binding_data(
+    paths: list[str] | str,
+    exp_name: str | None = None,
+    association_start: float | list[float] | dict[str, float] | None = None,
+    association_end: float | list[float] | dict[str, float] | None = None,
+    concentrations: list[float] | dict[str, float | list[float]] | None = None,
+    concentration_unit: str | None = None,
+    sample_id: str | list[str] | dict[str, str] | None = None,
+    time_unit: str | None = None,
+    single_cycle: bool | None = None,
+    cycle_duration: float | None = None,
+    top_concentration: float | None = None,
+    dilution_factor: float | None = None,
+    highest_last: bool | None = None,
+    info_sheet: str | None = None,
+    info_sheet_row: int | None = None,
+) -> str:
+    """
+    Import one surface-based binding experiment, detecting its file format.
+
+    Supports Octet (folder of ``.frd`` files), Gator (folder or ``.zip``),
+    Biacore result files (``.blr``), paired-column SPR text exports, Carterra
+    CSV exports, a generic steps file plus traces file, and KinGenie CSVs. Use
+    ``detect_data_format`` first if unsure. All files must belong to one
+    experiment; folders are reduced to their files of a known format.
+
+    Octet, Gator, Biacore and KinGenie files carry their own timing and
+    concentrations: pass only ``paths`` and ``exp_name``. The other formats need
+    settings the files lack, given here or through ``info_sheet``:
+
+    - SPR text and Carterra: ``association_end`` (and ``association_start`` if
+      not 0 s), in seconds on the exported time axis; ``concentrations`` (one
+      per curve) and ``sample_id`` to fit. Carterra dilution series can use
+      ``top_concentration`` and ``dilution_factor`` instead of
+      ``concentrations``. Single-cycle data: ``single_cycle=True`` with one
+      start, end and concentration per injection (and ``cycle_duration`` for
+      Carterra).
+    - Generic steps + traces files: optional ``concentrations`` (one per
+      association step, or a sensor -> list mapping) and ``sample_id``.
+
+    Missing concentrations import as NaN with a warning; they can be filled
+    later by editing the table from ``obtain_sample_info_table``. Reference
+    subtraction and alignment are not done on import.
+
+    Parameters
+    ----------
+    paths : list[str] | str
+        Files and/or folders, absolute or relative to the data directory.
+    exp_name : str, optional
+        Experiment name. By default the run or file name, numbered if taken.
+        An existing experiment with this exact name is replaced.
+    association_start, association_end : float, list or dict, optional
+        Injection boundaries in seconds: one value for all curves, a list with
+        one per curve (or per injection when single-cycle), or curve -> value.
+    concentrations : list or dict, optional
+        Analyte concentrations, in µM unless ``concentration_unit`` is set.
+    concentration_unit : str, optional
+        ``'M'``, ``'mM'``, ``'uM'``, ``'nM'`` or ``'pM'``.
+    sample_id : str, list or dict, optional
+        Analyte name(s); curves with the same name are fitted together.
+    time_unit : str, optional
+        ``'s'`` (default) or ``'min'``, the time unit of the file.
+    single_cycle : bool, optional
+        Each curve holds several injections without regeneration.
+    cycle_duration : float, optional
+        Carterra single-cycle only: seconds between injection starts.
+    top_concentration, dilution_factor : float, optional
+        Carterra only: dilution series instead of ``concentrations``.
+    highest_last : bool, optional
+        Carterra dilution series: the last row has the highest concentration
+        (default True).
+    info_sheet : str, optional
+        Info sheet supplying timing, concentrations and analyte (SPR text
+        and Carterra). Explicit settings take precedence.
+    info_sheet_row : int, optional
+        0-based row of the info sheet to use when its rows differ.
+
+    Returns
+    -------
+    str
+        The experiment name and format, its sensors, steps and any warnings.
+    """
+    pairs = expand_paths(paths)
+    if not pairs:
+        raise ToolError("No files of a known binding-data format were found.")
+
+    options = {
+        "association_start": association_start,
+        "association_end": association_end,
+        "concentrations": concentrations,
+        "concentration_unit": concentration_unit,
+        "sample_id": sample_id,
+        "time_unit": time_unit,
+        "single_cycle": single_cycle,
+        "cycle_duration": cycle_duration,
+        "top_concentration": top_concentration,
+        "dilution_factor": dilution_factor,
+        "highest_last": highest_last,
+    }
+    options = {key: value for key, value in options.items() if value is not None}
+    if info_sheet is not None:
+        info = resolve_data_path(info_sheet)
+        if info_sheet_row is not None:
+            try:
+                info = pykingenie.read_info_sheet(info).iloc[info_sheet_row]
+            except (OSError, ValueError, IndexError) as exc:
+                raise ToolError(f"Info sheet: {exc}") from None
+        options["info"] = info
+    elif info_sheet_row is not None:
+        raise ToolError("info_sheet_row requires info_sheet.")
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        try:
+            experiment = PY_KINETICS.load([file for file, _ in pairs], name=exp_name, **options)
+        except (TypeError, ValueError, KeyError, OSError) as exc:
+            formats = ", ".join(sorted({kind for _, kind in pairs}))
+            raise ToolError(f"Import failed ({formats}): {exc}") from None
+
+    formats = ", ".join(sorted({kind for _, kind in pairs}))
+    lines = [
+        f"Experiment '{experiment.name}' imported ({formats}) from {len(pairs)} file(s).",
+        f"Sensors ({len(experiment.sensor_names)}): {', '.join(map(str, experiment.sensor_names))}.",
+    ]
+    steps = getattr(experiment, "df_steps", None)
+    if steps is not None and "Type" in steps:
+        lines.append("Step types: " + ", ".join(f"{k} x{v}" for k, v in steps["Type"].value_counts().items()) + ".")
+    conc = getattr(experiment, "ligand_conc_df", None)
+    if conc is not None:
+        column = next((c for c in conc.columns if "Concentration" in c or "[Analyte]" in c), None)
+        missing = int(conc[column].isna().sum()) if column else 0
+        lines.append(f"Association traces: {len(conc)}" + (f", {missing} without concentration." if missing else "."))
+    messages = list(dict.fromkeys(str(w.message) for w in caught))
+    if messages:
+        lines.append("Warnings:\n- " + "\n- ".join(messages))
+    return "\n".join(lines)
+
+
 @mcp.tool()
 def import_octet_experiment(folder: str = '.', exp_name: str = 'Experiment') -> str:
     """
@@ -460,6 +703,48 @@ def list_experiment_names() -> list[str]:
         A list of experiment names.
     """
     return PY_KINETICS.experiment_names
+
+
+@mcp.tool()
+def delete_experiment(experiment_ids: list[str] | str) -> str:
+    """
+    Remove loaded experiments from the analyzer, e.g. a wrong import.
+
+    All selectors are checked before anything is removed. Fitting datasets are
+    built from the loaded experiments, so if any exist they are cleared too;
+    run ``initiate_fitting_datasets`` again afterwards.
+
+    Parameters
+    ----------
+    experiment_ids : list[str] | str
+        Experiment names or 1-based indices, as in ``list_experiment_names``.
+
+    Returns
+    -------
+    str
+        The removed experiments and the ones still loaded.
+    """
+    if isinstance(experiment_ids, str):
+        experiment_ids = [experiment_ids]
+    if not experiment_ids:
+        raise ToolError("Name at least one experiment to delete.")
+
+    names = []
+    for experiment_id in experiment_ids:
+        name = resolve_experiment_name(str(experiment_id))
+        if name is None:
+            raise ToolError(f"Experiment '{experiment_id}' not found. Loaded: {PY_KINETICS.experiment_names}.")
+        if name not in names:
+            names.append(name)
+
+    PY_KINETICS.delete_experiment(names)
+
+    message = f"Deleted experiment(s): {', '.join(names)}."
+    if PY_KINETICS.fittings_names:
+        PY_KINETICS.init_fittings()
+        message += " Fitting datasets were cleared; run initiate_fitting_datasets again."
+    remaining = PY_KINETICS.experiment_names
+    return message + (f" Still loaded: {', '.join(remaining)}." if remaining else " No experiments are loaded.")
 
 
 @mcp.tool()
@@ -936,7 +1221,8 @@ def obtain_sample_info_table() -> list[dict[str, Any]]:
 
 
 @mcp.tool()
-def initiate_fitting_datasets(sample_info: list[dict[str, Any]] | str | None = None) -> str:
+def initiate_fitting_datasets(sample_info: list[dict[str, Any]] | str | None = None,
+                              trim_time: float = 0) -> str:
     """
     Generate PyKinGenie fitting objects from sample metadata JSON.
 
@@ -956,12 +1242,20 @@ def initiate_fitting_datasets(sample_info: list[dict[str, Any]] | str | None = N
     ----------
     sample_info : list[dict] | str | None
         Sample metadata records, or a JSON string with them.
+    trim_time : float
+        Seconds left out of the kinetic fits at the start of each association
+        and each dissociation, e.g. 1-5 s to skip the SPR bulk refractive
+        index spike. The points are still plotted and the models still start
+        at each step start, so rates are not shifted. Default 0.
 
     Returns
     -------
     str
         A message listing the names of the generated fitting datasets.
     """
+
+    if trim_time < 0:
+        raise ToolError("trim_time must be zero or positive.")
 
     if sample_info is None:
         sample_info = obtain_sample_info_table()
@@ -979,7 +1273,7 @@ def initiate_fitting_datasets(sample_info: list[dict[str, Any]] | str | None = N
     # Clear all the current fittings in PY_KINETICS
     PY_KINETICS.init_fittings()
 
-    PY_KINETICS.generate_fittings(pd.DataFrame(selected))
+    PY_KINETICS.generate_fittings(pd.DataFrame(selected), trim_time=trim_time)
 
     # Find the names of the generated fittings
     fitting_names = PY_KINETICS.fittings_names
@@ -1041,7 +1335,9 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
                                linked_smax: bool = False,
                                fit_sigma: bool = False,
                                Kd1_values : list = None,
-                               Kd2_values : list = None) -> str:
+                               Kd2_values : list = None,
+                               fit_signal_ratio: bool = False,
+                               compute_k_obs: bool = True) -> str:
     """
     Run PyKinGenie kinetic fitting for generated fitting datasets.
 
@@ -1060,7 +1356,8 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
         Kinetic model to fit. PyKinGenie accepts ``'one_to_one'``,
         ``'one_to_one_mtl'`` (mass transport limitation),
         ``'one_to_one_if'`` (induced fit), 
-        ``'two_to_one'`` and ``'two_to_one_heterogeneous_ligand'``. Only
+        ``'two_to_one'``, ``'two_to_one_heterogeneous_ligand'`` and
+        ``'bivalent_analyte'`` (avidity: the analyte binds two ligands). Only
         ``'one_to_one'`` supports every fitting region; the other kinetic
         models support only ``'association_dissociation'``.
     fitting_region : str
@@ -1078,6 +1375,12 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
         Candidate Kd1 values for the heterogeneous ligand grid search.
     Kd2_values : list, optional
         Candidate Kd2 values for the heterogeneous ligand grid search.
+    fit_signal_ratio : bool
+        ``'one_to_one_if'`` only: fit a different signal for the induced
+        complex than for the intermediate complex.
+    compute_k_obs : bool
+        ``'one_to_one'`` only: also fit single exponentials to each association
+        to report observed rates (k_obs). False makes the fit faster.
 
     Returns
     -------
@@ -1114,7 +1417,9 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
             shared_smax=linked_smax,
             fit_sigma=fit_sigma,
             Kd1_values=Kd1_values,
-            Kd2_values=Kd2_values
+            Kd2_values=Kd2_values,
+            fit_signal_ratio=fit_signal_ratio,
+            compute_k_obs=compute_k_obs,
         )
 
     # create output message, sigma only for two_to_one model, Kd1 and Kd2 only for two_to_one_heterogeneous_ligand model
@@ -1127,6 +1432,8 @@ async def run_kinetics_fitting(fitting_model: str = 'one_to_one',
         base_message += ", fit sigma: {}".format(fit_sigma)
     if fitting_model == "two_to_one_heterogeneous_ligand":
         base_message += f", Kd1 values: {Kd1_values}, Kd2 values: {Kd2_values}"
+    if fitting_model == "one_to_one_if":
+        base_message += f", fit signal ratio: {fit_signal_ratio}"
 
     return base_message.strip() + "."
 
@@ -1141,10 +1448,15 @@ async def calc_leave_one_out_errors() -> str:
 
     ok_fits, bad_fits = PY_KINETICS.calculate_leave_one_out_errors()
 
+    # PyKinGenie returns the fitter objects; report their dataset names.
+    def names(fits):
+        found = [name for name, fit in PY_KINETICS.fittings.items() if any(fit is f for f in fits)]
+        return ", ".join(found) if found else "none"
+
     return (
         f"Leave-one-out error calculation completed. "
-        f"Successful fits: {ok_fits}. "
-        f"Failed fits: {bad_fits}."
+        f"Successful fits: {names(ok_fits)}. "
+        f"Failed fits: {names(bad_fits)}."
     )
 
 @mcp.tool()
