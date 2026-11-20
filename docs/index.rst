@@ -13,6 +13,8 @@ surface-based binding data, such as Octet and Gator BLI experiments.
    usage
    description
    mcp-tools
+   agentic-analysis
+   service-extraction
    local-testing
    modules
 

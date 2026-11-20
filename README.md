@@ -184,6 +184,11 @@ Once connected through your MCP client, ask your AI assistant to run a flow like
 9. plot the fitted curves
 ```
 
+For the proposed "analyse this data" experience, see the
+[agentic analysis design](docs/agentic-analysis.rst). It describes run isolation,
+automatic workflow decisions, fit diagnostics, and an implementation plan;
+the proposed workflow tools are not implemented yet.
+
 ## XY plots
 
 The plotting tools (`plot_sample_plate_info`, `plot_traces_with_all_steps`,
