@@ -225,3 +225,42 @@ def test_delete_experiment_clears_fitting_datasets():
     assert not tools.PY_KINETICS.fittings_names
     # The remaining experiment can be fitted again.
     assert "Fitting datasets generated" in tools.initiate_fitting_datasets()
+
+
+def test_read_info_sheet_reports_invalid_sheets(tmp_path):
+    sheet = tmp_path / "info.csv"
+    sheet.write_text("Analyte,Baseline\nmAb1,10\n")
+    with pytest.raises(ToolError):
+        tools.read_info_sheet(str(sheet))
+
+
+def test_import_binding_data_requires_files_of_a_known_format(tmp_path):
+    (tmp_path / "notes.log").write_text("not data")
+    with pytest.raises(ToolError, match="No files of a known"):
+        tools.import_binding_data(str(tmp_path))
+
+
+def test_import_binding_data_reports_a_missing_info_sheet_row(tmp_path, spr_text):
+    sheet = tmp_path / "info.csv"
+    sheet.write_text(
+        "Analyte,Baseline,Association,Dissociation,All Concentrations\n"
+        f"mAb1,{T_START:g},{T_END - T_START:g},{T_STOP - T_END:g},1e-8 2e-8 4e-8 8e-8 1.6e-7\n"
+    )
+    with pytest.raises(ToolError, match="Info sheet"):
+        tools.import_binding_data(str(spr_text), info_sheet=str(sheet), info_sheet_row=5)
+
+
+def test_delete_experiment_requires_a_selector():
+    with pytest.raises(ToolError, match="at least one"):
+        tools.delete_experiment([])
+
+
+@pytest.mark.asyncio
+async def test_induced_fit_reports_the_signal_ratio_setting(spr_text):
+    tools.import_binding_data(
+        str(spr_text), association_start=T_START, association_end=T_END,
+        concentrations=CONCS, sample_id="analyte",
+    )
+    tools.initiate_fitting_datasets()
+    message = await tools.run_kinetics_fitting(fitting_model="one_to_one_if", fit_signal_ratio=True)
+    assert "fit signal ratio: True" in message
