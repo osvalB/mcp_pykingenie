@@ -264,3 +264,23 @@ async def test_induced_fit_reports_the_signal_ratio_setting(spr_text):
     tools.initiate_fitting_datasets()
     message = await tools.run_kinetics_fitting(fitting_model="one_to_one_if", fit_signal_ratio=True)
     assert "fit signal ratio: True" in message
+
+
+@pytest.mark.asyncio
+async def test_leave_one_out_message_names_the_datasets(spr_text, monkeypatch):
+    for name in ("first", "second"):
+        tools.import_binding_data(
+            str(spr_text), exp_name=name, association_start=T_START, association_end=T_END,
+            concentrations=CONCS, sample_id=f"analyte {name}",
+        )
+    tools.initiate_fitting_datasets()
+    await tools.run_kinetics_fitting(compute_k_obs=False)
+
+    def fail():
+        raise RuntimeError("no convergence")
+
+    monkeypatch.setattr(tools.PY_KINETICS.fittings["analyte second"], "calc_leave_one_out_errors", fail)
+    message = await tools.calc_leave_one_out_errors()
+    assert "Successful fits: analyte first." in message
+    assert "Failed fits: analyte second." in message
+    assert "object at" not in message

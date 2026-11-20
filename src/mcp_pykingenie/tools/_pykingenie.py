@@ -1448,10 +1448,15 @@ async def calc_leave_one_out_errors() -> str:
 
     ok_fits, bad_fits = PY_KINETICS.calculate_leave_one_out_errors()
 
+    # PyKinGenie returns the fitter objects; report their dataset names.
+    def names(fits):
+        found = [name for name, fit in PY_KINETICS.fittings.items() if any(fit is f for f in fits)]
+        return ", ".join(found) if found else "none"
+
     return (
         f"Leave-one-out error calculation completed. "
-        f"Successful fits: {ok_fits}. "
-        f"Failed fits: {bad_fits}."
+        f"Successful fits: {names(ok_fits)}. "
+        f"Failed fits: {names(bad_fits)}."
     )
 
 @mcp.tool()
