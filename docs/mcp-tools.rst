@@ -2,8 +2,9 @@ MCP Tools Reference
 ===================
 
 ``mcp_pykingenie`` exposes the following tools to your AI assistant. These
-tools are intended only for surface-based binding data, such as Octet and Gator
-BLI experiments.
+tools are intended only for surface-based binding data: Octet and Gator BLI
+experiments, Biacore result files, SPR text exports, Carterra CSV exports and
+generic steps/traces tables.
 
 Data Import
 -----------
@@ -17,6 +18,12 @@ for the current MCP session and can be checked with ``list_experiment_names``.
 
    * - Tool
      - Description
+   * - ``detect_data_format``
+     - Report the format of each file (or of each file in a folder) without importing it.
+   * - ``import_binding_data``
+     - Import one experiment of any supported format, detected from file content: Octet, Gator, Biacore ``.blr``, paired-column SPR text, Carterra CSV, generic steps + traces files, KinGenie CSV.
+   * - ``read_info_sheet``
+     - Read an info sheet (``.xlsx``, CSV or TSV) with SPR timing and concentrations.
    * - ``load_octet_example``
      - Load the bundled Octet BLI example dataset.
    * - ``import_octet_experiment``
@@ -28,6 +35,17 @@ for the current MCP session and can be checked with ``list_experiment_names``.
 
 Import Notes
 ^^^^^^^^^^^^
+
+``import_binding_data``
+   Pass files and/or folders of one experiment; folders are reduced to their
+   files of a known format. Octet, Gator, Biacore and KinGenie files carry their
+   own timing and concentrations. SPR text and Carterra exports need
+   ``association_start``/``association_end`` (seconds), ``concentrations`` (or,
+   for Carterra, ``top_concentration`` and ``dilution_factor``) and
+   ``sample_id``, or an ``info_sheet`` that supplies them. Set
+   ``single_cycle=True`` for single-cycle kinetics. Missing concentrations
+   import as NaN with a warning and can be set later in the
+   ``obtain_sample_info_table`` table.
 
 ``import_octet_experiment``
    Pass a folder path. The folder should contain the Octet ``.frd`` files and
@@ -75,6 +93,8 @@ Experiment Inspection
      - Description
    * - ``list_experiment_names``
      - List all loaded experiment names.
+   * - ``delete_experiment``
+     - Remove loaded experiments by name or 1-based index, e.g. after a wrong import. Existing fitting datasets are cleared.
    * - ``list_experiment_properties``
      - Get a property, such as ``sensor_names``, across experiments.
    * - ``list_experiment_attributes``
@@ -176,11 +196,11 @@ Fitting
    * - Tool
      - Description
    * - ``initiate_fitting_datasets``
-     - Generate fitting datasets from a sample info JSON table. The table is checked row by row before the existing fits are reset; unselected rows and zero-concentration references are left out.
+     - Generate fitting datasets from a sample info JSON table. The table is checked row by row before the existing fits are reset; unselected rows and zero-concentration references are left out. ``trim_time`` leaves the first seconds of each association and dissociation out of the kinetic fits (e.g. the SPR bulk spike).
    * - ``run_steady_state_fitting``
      - Run steady-state fitting as an alternative to kinetic fitting, keeping existing kinetic results. Supports ``one_to_one`` and ``two_to_one``.
    * - ``run_kinetics_fitting``
-     - Run kinetic fitting as an alternative to standalone steady-state fitting, keeping existing steady-state results. The tool handles PyKinGenie's required starting values internally. ``one_to_one`` supports ``association_dissociation``, ``association``, and ``dissociation``; ``one_to_one_mtl``, ``one_to_one_if``, and ``two_to_one`` support only ``association_dissociation``.
+     - Run kinetic fitting as an alternative to standalone steady-state fitting, keeping existing steady-state results. The tool handles PyKinGenie's required starting values internally. ``one_to_one`` supports ``association_dissociation``, ``association``, and ``dissociation``; ``one_to_one_mtl``, ``one_to_one_if``, ``two_to_one``, ``two_to_one_heterogeneous_ligand`` and ``bivalent_analyte`` support only ``association_dissociation``. ``fit_signal_ratio`` lets ``one_to_one_if`` fit a separate signal for the induced complex; ``compute_k_obs=False`` skips the per-curve observed rates of ``one_to_one`` for a faster fit.
    * - ``calc_leave_one_out_errors``
      - Calculate leave-one-out errors for fitted kinetic parameters. Run after ``run_kinetics_fitting``.
    * - ``get_leave_one_out_results``

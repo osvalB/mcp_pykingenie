@@ -27,7 +27,9 @@ def build_server_instructions(data_dir: str) -> str:
     return (
         "This server provides tools for analysing surface-based binding kinetics "
         "data only.\n"
-        "You can import Octet and Gator experiments, align sensorgrams, subtract "
+        "You can import Octet and Gator BLI experiments, Biacore .blr files, SPR "
+        "text exports, Carterra CSVs and generic steps/traces files "
+        "(import_binding_data detects the format), align sensorgrams, subtract "
         "reference sensors, prepare fitting datasets, run either steady-state or "
         "kinetic fits, and plot results.\n"
         f"Plots and generated files for this session are saved in: {data_dir}"
